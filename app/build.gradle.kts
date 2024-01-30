@@ -1,8 +1,9 @@
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
+    kotlin("plugin.serialization")
+    //id("org.jetbrains.kotlin.plugin.serialization") version "1.8.10"
+    //id("com.google.devtools.ksp")
 }
 
 android {
@@ -61,6 +62,7 @@ dependencies {
     implementation("androidx.compose.ui:ui-graphics")
     implementation("androidx.compose.ui:ui-tooling-preview")
     implementation("androidx.compose.material3:material3")
+    implementation("com.google.devtools.ksp:symbol-processing-gradle-plugin:1.9.22-1.0.17")
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
@@ -68,4 +70,18 @@ dependencies {
     androidTestImplementation("androidx.compose.ui:ui-test-junit4")
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
+
+
+    // Kotlin Coroutines
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.4")
+
+    // Retrofit
+    //implementation("com.squareup.retrofit2:retrofit:2.9.0")
+
+    implementation("org.jetbrains.kotlin:kotlin-serialization-json:1.6.0")
+    implementation("com.jakewharton.retrofit:retrofit2-kotlinx-serialization-converter:1.0.0")
+
+    //KSP for annotation processing
+    //ksp("androidx.room:room-compiler:2.6.1")
 }
