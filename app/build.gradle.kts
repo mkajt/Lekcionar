@@ -43,7 +43,7 @@ android {
         compose = true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.4.3"
+        kotlinCompilerExtensionVersion = "1.5.8"
     }
     packaging {
         resources {
@@ -79,7 +79,7 @@ dependencies {
     // Retrofit
     //implementation("com.squareup.retrofit2:retrofit:2.9.0")
 
-    implementation("org.jetbrains.kotlin:kotlin-serialization-json:1.6.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.2")
     implementation("com.jakewharton.retrofit:retrofit2-kotlinx-serialization-converter:1.0.0")
 
     //KSP for annotation processing

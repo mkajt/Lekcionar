@@ -1,9 +1,9 @@
 package mkajt.hozana.lekcionar.model.dto
 
-import com.squareup.moshi.JsonClass
+import kotlinx.serialization.Serializable
 import java.sql.Timestamp
 
-@JsonClass(generateAdapter = true)
+@Serializable
 data class PodatkiDTO(
     val id: String,
     val opis: String,
