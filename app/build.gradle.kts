@@ -1,19 +1,18 @@
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
+    id("com.google.devtools.ksp")
     kotlin("plugin.serialization")
-    //id("org.jetbrains.kotlin.plugin.serialization") version "1.8.10"
-    //id("com.google.devtools.ksp")
 }
 
 android {
     namespace = "mkajt.hozana.lekcionar"
-    compileSdk = 33
+    compileSdk = 34
 
     defaultConfig {
         applicationId = "mkajt.hozana.lekcionar"
         minSdk = 24
-        targetSdk = 33
+        targetSdk = 34
         versionCode = 1
         versionName = "1.0"
 
@@ -84,6 +83,8 @@ dependencies {
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
     implementation("com.jakewharton.retrofit:retrofit2-kotlinx-serialization-converter:1.0.0")
 
-    //KSP for annotation processing
-    //ksp("androidx.room:room-compiler:2.6.1")
+    // Room
+    val roomVersion = "2.6.1"
+    implementation("androidx.room:room-runtime:$roomVersion")
+    ksp("androidx.room:room-compiler:$roomVersion")
 }
