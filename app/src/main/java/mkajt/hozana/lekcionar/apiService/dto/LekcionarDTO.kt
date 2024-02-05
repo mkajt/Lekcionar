@@ -1,6 +1,8 @@
 package mkajt.hozana.lekcionar.apiService.dto
 
-@Serialiizable
+import kotlinx.serialization.Serializable
+
+@Serializable
 data class LekcionarDTO(
         val map: List<MapDTO>, //JsonOBject
         val data: List<PodatkiDTO>, //JsonObject
