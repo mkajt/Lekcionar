@@ -1,4 +1,4 @@
-package mkajt.hozana.lekcionar.model.dto
+package mkajt.hozana.lekcionar.apiService.dto
 
 import kotlinx.serialization.Serializable
 import java.sql.Timestamp
