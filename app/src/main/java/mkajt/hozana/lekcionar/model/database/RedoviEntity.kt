@@ -1,6 +1,6 @@
-package mkajt.hozana.lekcionar.model
+package mkajt.hozana.lekcionar.model.database
 
-data class Redovi(
+data class RedoviEntity(
     val kapucini: String,
     val franciskani: String,
     val minoriti: String,

@@ -28,6 +28,8 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -35,12 +37,14 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import mkajt.hozana.lekcionar.ui.theme.LekcionarRed
 import mkajt.hozana.lekcionar.ui.theme.White
+import mkajt.hozana.lekcionar.viewModel.LekcionarViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Preview(showBackground = true)
 @Composable
-fun UserInterface() {
+fun UserInterface(viewModel: LekcionarViewModel) {
     val context = LocalContext.current.applicationContext
+    val data by viewModel.state.collectAsState()
     Scaffold(
         topBar = {
             TopAppBar(
@@ -81,6 +85,7 @@ fun UserInterface() {
         },
         content = { innerPadding ->
             Greeting(name = "Android", modifier = Modifier.padding(innerPadding))
+            Text(text = data.toString())
         },
         bottomBar = {
             Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
@@ -110,7 +115,9 @@ fun UserInterface() {
                         Icon(
                             imageVector = Icons.Rounded.DateRange,
                             contentDescription = "Callendar",
-                            modifier = Modifier.size(450.dp).padding(horizontal = 5.dp)
+                            modifier = Modifier
+                                .size(450.dp)
+                                .padding(horizontal = 5.dp)
                         )
                     }
                     IconButton(onClick = { Toast.makeText(context, "Bottom", Toast.LENGTH_SHORT).show() }) {

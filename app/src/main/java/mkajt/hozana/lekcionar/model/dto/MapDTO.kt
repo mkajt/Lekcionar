@@ -1,4 +1,4 @@
-package mkajt.hozana.lekcionar.apiService.dto
+package mkajt.hozana.lekcionar.model.dto
 
 import kotlinx.serialization.Serializable
 

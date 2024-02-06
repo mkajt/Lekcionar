@@ -1,11 +1,13 @@
-package mkajt.hozana.lekcionar.model
+package mkajt.hozana.lekcionar.model.dto
 
+import kotlinx.serialization.Serializable
 import java.sql.Timestamp
 
-data class Podatki(
+@Serializable
+data class PodatkiDTO(
     val id: String,
     val opis: String,
-    val timestamp: Timestamp, //check myb just Long
+    val timestamp: Long, //check myb just Long
     val datum: String,
     val mp3: String,
 

@@ -1,7 +1,7 @@
-package mkajt.hozana.lekcionar.model
+package mkajt.hozana.lekcionar.model.database
 
 
-data class Skofije(
+data class SkofijeEntity(
     val slovenija: String,
     val ljubljana: String,
     val celje: String,
