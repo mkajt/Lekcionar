@@ -5,6 +5,7 @@ import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 
 class ApiClient {
+    //TODO !not in use! delete when API works, let it be just in case...
     companion object {
         fun <T> create(service: Class<T>): T {
             val client = OkHttpClient.Builder()

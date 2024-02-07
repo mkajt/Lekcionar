@@ -22,15 +22,6 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        /*
-        val contentType = "application/json".toMediaType()
-        val retrofit = Retrofit.Builder()
-            // TODO: popravi key v secret
-            .baseUrl(Constants.ENDPOINT_URL).client()
-            .addConverterFactory(Json.asConverterFactory(contentType))
-            .build()
-        */
-
         lekcionarViewModel = ViewModelProvider(this)[LekcionarViewModel::class.java]
 
         setContent {

@@ -5,24 +5,36 @@ import kotlinx.serialization.json.Json
 import mkajt.hozana.lekcionar.Constants
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
+import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
+import retrofit2.create
+
+private var json = Json {
+    isLenient = true
+    ignoreUnknownKeys = true
+}
+
 
 object RetrofitManager {
-    val lekcionarApi: LekcionarApi
+    var retrofitService: Retrofit? = null
+    var lekcionarApi: LekcionarApi? = null
 
     init {
         val contentType = "application/json".toMediaType()
 
+        val loggingInterceptor = HttpLoggingInterceptor().apply {
+            this.level = HttpLoggingInterceptor.Level.BODY
+        }
         val client = OkHttpClient.Builder()
-            .addInterceptor(CustomInterceptor())
+            .addInterceptor(loggingInterceptor)
             .build()
 
-        lekcionarApi = Retrofit.Builder()
+        retrofitService = Retrofit.Builder()
             .baseUrl(Constants.ENDPOINT_URL)
-            .addConverterFactory(Json.asConverterFactory(contentType))
+            .addConverterFactory(json.asConverterFactory(contentType))
             .client(client)
             .build()
-            .create(LekcionarApi::class.java)
-    }
 
+        lekcionarApi = retrofitService!!.create(LekcionarApi::class.java)
+    }
 }

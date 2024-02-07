@@ -11,10 +11,16 @@ import java.net.SocketTimeoutException
 import java.net.UnknownHostException
 
 class LekcionarRepository {
+    companion object {
+        val TAG = LekcionarRepository::class.java.simpleName
+    }
+
     private val lekcionarApi = RetrofitManager.lekcionarApi
+
     val lekcionarData = MutableLiveData<LekcionarDTO>()
 
-    suspend fun getLekcionarData() {
+    //TODO do I use LiveData (not MutableLiveData, because no changes will be applied) or not?
+    /*suspend fun getLekcionarData() {
         try {
             val response = lekcionarApi.getLekcionarData(Constants.BASE, Constants.KEY)
             Log.d(TAG, "$response")
@@ -36,9 +42,10 @@ class LekcionarRepository {
             //generic handling
             e.message?.let { Log.e(TAG, it) }
         }
+    }*/
+
+    suspend fun getLekcionarData(): LekcionarDTO? {
+        return lekcionarApi?.getLekcionarData(Constants.BASE, Constants.KEY)
     }
 
-    companion object {
-        val TAG = LekcionarRepository::class.java.simpleName
-    }
 }

@@ -7,8 +7,9 @@ import retrofit2.http.Query
 
 interface LekcionarApi {
 
-    @GET()
+    //TODO ali naj vrne Response<LekcionarDTO> ali samo LekcionarDTO?
+    @GET("api.php")
     suspend fun getLekcionarData(@Query("kaj") base: String,
-                                 @Query("kljuc") key: String): Response<LekcionarDTO>
+                                 @Query("kljuc") key: String): LekcionarDTO
 
 }
