@@ -1,6 +1,9 @@
 package mkajt.hozana.lekcionar.model.database
 
+import androidx.room.Entity
 
+
+@Entity(tableName = "skofije")
 data class SkofijeEntity(
     val slovenija: String,
     val ljubljana: String,

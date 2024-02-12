@@ -1,5 +1,8 @@
 package mkajt.hozana.lekcionar.model.database
 
+import androidx.room.Entity
+
+@Entity(tableName = "redovi")
 data class RedoviEntity(
     val kapucini: String,
     val franciskani: String,
