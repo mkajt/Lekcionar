@@ -1,21 +1,22 @@
 package mkajt.hozana.lekcionar.viewModel
 
-import androidx.lifecycle.ViewModel
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import mkajt.hozana.lekcionar.model.LekcionarRepository
-import mkajt.hozana.lekcionar.model.dto.LekcionarDTO
+import mkajt.hozana.lekcionar.model.dto.MapDTO
+import mkajt.hozana.lekcionar.model.dto.PodatkiDTO
+import mkajt.hozana.lekcionar.model.dto.RedDTO
+import mkajt.hozana.lekcionar.model.dto.SkofijaDTO
 
-class LekcionarViewModel: ViewModel() {
-    private val lekcionarRepository = LekcionarRepository()
-    private val _state = MutableStateFlow<LekcionarDTO?>(null)
-    val state: StateFlow<LekcionarDTO?>
-        get() = _state.asStateFlow()
+class LekcionarViewModel(application: Application?): AndroidViewModel(application!!) {
 
-    //val lekcionarData = lekcionarRepository.lekcionarData
+    private val lekcionarRepository: LekcionarRepository
+    var redovi: List<RedDTO>? = null
+    var skofije: List<SkofijaDTO>? = null
+    var map: List<MapDTO>? = null
+    var podatki: List<PodatkiDTO>? = null
 
     /*fun getLekcionarData() {
         // coroutine viewmodel scope to call suspend fun of repo
@@ -23,9 +24,9 @@ class LekcionarViewModel: ViewModel() {
     }*/
 
     init {
+        lekcionarRepository = LekcionarRepository(application)
         viewModelScope.launch {
-            val data = lekcionarRepository.getLekcionarData()
-            _state.value = data
+            lekcionarRepository.getLekcionarData()
         }
     }
 }

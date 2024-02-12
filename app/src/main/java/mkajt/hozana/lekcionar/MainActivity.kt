@@ -9,6 +9,7 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
 import kotlinx.serialization.json.Json
+import mkajt.hozana.lekcionar.model.LekcionarRepository
 import mkajt.hozana.lekcionar.ui.components.UserInterface
 import mkajt.hozana.lekcionar.ui.theme.LekcionarTheme
 import mkajt.hozana.lekcionar.viewModel.LekcionarViewModel
@@ -19,6 +20,8 @@ import retrofit2.Retrofit
 class MainActivity : ComponentActivity() {
 
     private lateinit var lekcionarViewModel: LekcionarViewModel
+    private lateinit var lekcionarRepository: LekcionarRepository
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 

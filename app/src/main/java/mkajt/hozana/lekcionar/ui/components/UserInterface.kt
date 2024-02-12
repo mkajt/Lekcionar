@@ -44,7 +44,6 @@ import mkajt.hozana.lekcionar.viewModel.LekcionarViewModel
 @Composable
 fun UserInterface(viewModel: LekcionarViewModel) {
     val context = LocalContext.current.applicationContext
-    val data by viewModel.state.collectAsState()
     Scaffold(
         topBar = {
             TopAppBar(
@@ -85,7 +84,6 @@ fun UserInterface(viewModel: LekcionarViewModel) {
         },
         content = { innerPadding ->
             Greeting(name = "Android", modifier = Modifier.padding(innerPadding))
-            Text(text = data.toString())
         },
         bottomBar = {
             Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
