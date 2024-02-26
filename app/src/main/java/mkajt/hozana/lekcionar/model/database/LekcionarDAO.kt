@@ -1,35 +1,35 @@
 package mkajt.hozana.lekcionar.model.database
 
 import androidx.room.Dao
-import androidx.room.Delete
 import androidx.room.Insert
+import androidx.room.OnConflictStrategy
 import androidx.room.Query
 
 @Dao
 interface LekcionarDAO {
 
-    @Insert
-    suspend fun addMap(vararg mapEntity: MapEntity)
+    @Insert(onConflict = OnConflictStrategy.IGNORE) //TODO did this because of the error in logs
+    suspend fun insertMap(mapEntities: List<MapEntity>)
 
     @Insert
-    suspend fun addPodatki(vararg podatkiEntity: PodatkiEntity)
+    suspend fun insertPodatki(podatkiEntities: List<PodatkiEntity>)
 
     @Insert
-    suspend fun addRedovi(vararg redoviEntity: RedoviEntity)
+    suspend fun insertRed(redEntities: List<RedEntity>)
 
     @Insert
-    suspend fun addSkofije(vararg skofijeEntity: SkofijeEntity)
+    suspend fun insertSkofija(skofijeEntities: List<SkofijaEntity>)
 
     @Query("DELETE FROM map")
-    suspend fun deleteMap()
+    suspend fun deleteAllFromMap()
 
     @Query("DELETE FROM podatki")
-    suspend fun deletePodatki()
+    suspend fun deleteAllFromPodatki()
 
-    @Query("DELETE FROM redovi")
-    suspend fun deleteRedovi()
+    @Query("DELETE FROM red")
+    suspend fun deleteAllFromRed()
 
-    @Query("DELETE FROM skofije")
-    suspend fun deleteSkofije()
+    @Query("DELETE FROM skofija")
+    suspend fun deleteAllFromSkofija()
 
 }

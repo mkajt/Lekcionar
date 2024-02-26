@@ -3,12 +3,12 @@ package mkajt.hozana.lekcionar.model.database
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
-@Entity(tableName = "map")
-data class MapEntity(
+@Entity(tableName = "red")
+data class RedEntity(
 
     @PrimaryKey
-    val izbira: String,
+    val id: String,
 
-    val id_podatek: String
+    val red: String
 
 )

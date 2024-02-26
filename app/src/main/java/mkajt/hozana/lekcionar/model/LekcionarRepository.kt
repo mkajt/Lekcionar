@@ -1,83 +1,92 @@
 package mkajt.hozana.lekcionar.model
 
-import android.app.Application
-import android.content.ContentValues.TAG
 import android.content.Context
 import android.util.Log
+
 import android.widget.Toast
-import androidx.lifecycle.MutableLiveData
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import mkajt.hozana.lekcionar.Constants
 import mkajt.hozana.lekcionar.model.apiService.RetrofitManager
+import mkajt.hozana.lekcionar.model.database.LekcionarDB
 import mkajt.hozana.lekcionar.model.dto.LekcionarDTO
 import mkajt.hozana.lekcionar.model.dto.MapDTO
+import mkajt.hozana.lekcionar.model.dto.Mapper
 import mkajt.hozana.lekcionar.model.dto.PodatkiDTO
 import mkajt.hozana.lekcionar.model.dto.RedDTO
 import mkajt.hozana.lekcionar.model.dto.SkofijaDTO
 import retrofit2.Call
 import retrofit2.Callback
+import retrofit2.HttpException
 import retrofit2.Response
-import java.lang.Exception
-import java.net.SocketTimeoutException
-import java.net.UnknownHostException
+import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
+import kotlin.coroutines.suspendCoroutine
 
-class LekcionarRepository(application: Application?) {
+class LekcionarRepository(
+    mContext: Context,
+    private val lekcionarDB: LekcionarDB,
+    private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO) {
     companion object {
         val TAG = LekcionarRepository::class.java.simpleName
     }
 
     private val lekcionarApi = RetrofitManager.lekcionarApi
 
-    var lekcionarData: LekcionarDTO? = null
-    var redovi: List<RedDTO>? = null
-    var skofije: List<SkofijaDTO>? = null
-    var map: List<MapDTO>? = null
-    var podatki: List<PodatkiDTO>? = null
+    //var redoviDTO: List<RedDTO>? = null
+    //var skofijeDTO: List<SkofijaDTO>? = null
+    //var mapDTO: List<MapDTO>? = null
+    //var podatkiDTO: List<PodatkiDTO>? = null
+
     private var context: Context? = null
 
-    //TODO do I use LiveData (not MutableLiveData, because no changes will be applied) or not?
-    /*suspend fun getLekcionarData() {
-        try {
-            val response = lekcionarApi.getLekcionarData(Constants.BASE, Constants.KEY)
-            Log.d(TAG, "$response")
-            if (response.isSuccessful) {
-                Log.d(TAG, "SUCCESS")
-                Log.d(TAG, "${response.body()}")
-                lekcionarData.postValue(response.body())
-            } else {
-                Log.d(TAG, "FAILURE")
-                Log.d(TAG, "${response.body()}")
-            }
-        } catch (e: UnknownHostException) {
-            //when there is no internet connection or host is unavailable
-            e.message?.let { Log.e(TAG, it) }
-        } catch (e: SocketTimeoutException) {
-            //when timeout
-            e.message?.let { Log.e(TAG, it) }
-        } catch (e: Exception) {
-            //generic handling
-            e.message?.let { Log.e(TAG, it) }
-        }
-    }*/
-
     init {
-        context = application?.applicationContext
+        context = mContext
     }
 
-    suspend fun getLekcionarData() {
-        lekcionarApi?.getLekcionarData(Constants.BASE, Constants.KEY)?.enqueue(object: Callback<LekcionarDTO?> {
-            override fun onResponse(call: Call<LekcionarDTO?>, response: Response<LekcionarDTO?>) {
-                redovi = response.body()?.redovi
-                skofije = response.body()?.skofije
-                map = response.body()?.map
-                podatki = response.body()?.data
-                Toast.makeText(context, "Loading.", Toast.LENGTH_SHORT).show()
+    suspend fun getLekcionarDataFromApi() {
+        try {
+            val lekcionarDTO = withContext(ioDispatcher) {
+                lekcionarApi?.getLekcionarData(Constants.BASE, Constants.KEY)
             }
-
-            override fun onFailure(call: Call<LekcionarDTO?>, t: Throwable) {
-                Toast.makeText(context, "Cannot connect to API. No internet connection.", Toast.LENGTH_SHORT).show()
-            }
-
-        })
+            insertDataIntoDB(lekcionarDTO!!)
+            Log.d(TAG,"Data Loaded!")
+        } catch (e: HttpException) {
+            Log.d(TAG, "Failed to fetch data from API: ${e.message()}")
+        } catch (e: Exception) {
+            Log.d(TAG, "An error occurred: ${e.message}")
+        } finally {
+            Log.d(TAG, "Successfully loaded data from API and inserted into DB")
+        }
     }
 
+    private suspend fun insertDataIntoDB(lekcionarDTO: LekcionarDTO) {
+        withContext(ioDispatcher) {
+            insertMapToDB(lekcionarDTO.map)
+            insertPodatkiToDB(lekcionarDTO.data)
+            insertRedToDB(lekcionarDTO.redovi)
+            insertSkofijaToDB(lekcionarDTO.skofije)
+        }
+    }
+
+    private suspend fun insertMapToDB(mapDTO: List<MapDTO>) {
+        val mapEntities = Mapper.mapMapDtoToEntity(mapDTO)
+        lekcionarDB.lekcionarDao().insertMap(mapEntities)
+    }
+
+    private suspend fun insertPodatkiToDB(podatkiDTO: List<PodatkiDTO>) {
+        val podatkiEntities = Mapper.mapPodatkiDtoToEntity(podatkiDTO)
+        lekcionarDB.lekcionarDao().insertPodatki(podatkiEntities)
+    }
+
+    private suspend fun insertRedToDB(redDTO: List<RedDTO>) {
+        val redEntities = Mapper.mapRedDtoToEntity(redDTO)
+        lekcionarDB.lekcionarDao().insertRed(redEntities)
+    }
+
+    private suspend fun insertSkofijaToDB(skofijaDTO: List<SkofijaDTO>) {
+        val skofijaEntities = Mapper.mapSkofijaDtoToEntity(skofijaDTO)
+        lekcionarDB.lekcionarDao().insertSkofija(skofijaEntities)
+    }
 }

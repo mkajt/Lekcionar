@@ -26,7 +26,7 @@ object RetrofitManager {
             this.level = HttpLoggingInterceptor.Level.BODY
         }
         val client = OkHttpClient.Builder()
-            .addInterceptor(loggingInterceptor)
+            //.addInterceptor(loggingInterceptor)
             .build()
 
         retrofitService = Retrofit.Builder()

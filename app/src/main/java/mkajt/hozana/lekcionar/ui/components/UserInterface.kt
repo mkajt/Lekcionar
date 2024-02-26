@@ -1,5 +1,6 @@
 package mkajt.hozana.lekcionar.ui.components
 
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -38,11 +39,17 @@ import androidx.compose.ui.unit.dp
 import mkajt.hozana.lekcionar.ui.theme.LekcionarRed
 import mkajt.hozana.lekcionar.ui.theme.White
 import mkajt.hozana.lekcionar.viewModel.LekcionarViewModel
+import mkajt.hozana.lekcionar.viewModel.LekcionarViewState
+import kotlin.math.log
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Preview(showBackground = true)
 @Composable
 fun UserInterface(viewModel: LekcionarViewModel) {
+    val dataState by viewModel.dataState.collectAsState()
+    // TODO Failed to deliver inset control state change to
+    //  w=Window{4002b8d u0 mkajt.hozana.lekcionar/mkajt.hozana.lekcionar.MainActivity EXITING}
+    //  android.os.DeadObjectException
     val context = LocalContext.current.applicationContext
     Scaffold(
         topBar = {
@@ -83,7 +90,18 @@ fun UserInterface(viewModel: LekcionarViewModel) {
             )
         },
         content = { innerPadding ->
-            Greeting(name = "Android", modifier = Modifier.padding(innerPadding))
+            if (dataState.equals(LekcionarViewState.Loading)) {
+                Greeting(name = "Loading", modifier = Modifier.padding(innerPadding))
+                Log.d("UI", "Loading")
+            } else if (dataState.equals(LekcionarViewState.Start)){
+                Greeting(name = "Start", modifier = Modifier.padding(innerPadding))
+                Log.d("UI", "Start")
+                Toast.makeText(context, "Start", Toast.LENGTH_SHORT).show()
+            } else {
+                Greeting(name = "Loaded", modifier = Modifier.padding(innerPadding))
+                Log.d("UI", "Loaded")
+                Toast.makeText(context, "Loaded", Toast.LENGTH_SHORT).show()
+            }
         },
         bottomBar = {
             Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
