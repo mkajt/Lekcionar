@@ -10,6 +10,7 @@ import kotlinx.coroutines.withContext
 import mkajt.hozana.lekcionar.Constants
 import mkajt.hozana.lekcionar.model.apiService.RetrofitManager
 import mkajt.hozana.lekcionar.model.database.LekcionarDB
+import mkajt.hozana.lekcionar.model.database.PodatkiEntity
 import mkajt.hozana.lekcionar.model.dto.LekcionarDTO
 import mkajt.hozana.lekcionar.model.dto.MapDTO
 import mkajt.hozana.lekcionar.model.dto.Mapper
@@ -61,6 +62,17 @@ class LekcionarRepository(
         }
     }
 
+    suspend fun getIdPodatekFromMap(selektor: String): String {
+        return withContext(ioDispatcher) {
+            lekcionarDB.lekcionarDao().getIdPodatekFromMap(selektor)
+        }
+    }
+
+    suspend fun getPodatki(id_podatek: String): PodatkiEntity {
+        return withContext(ioDispatcher) {
+            lekcionarDB.lekcionarDao().getPodatki(id_podatek)
+        }
+    }
     private suspend fun insertDataIntoDB(lekcionarDTO: LekcionarDTO) {
         withContext(ioDispatcher) {
             insertMapToDB(lekcionarDTO.map)

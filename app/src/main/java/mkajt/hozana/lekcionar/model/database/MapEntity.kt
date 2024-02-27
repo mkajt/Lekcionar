@@ -7,7 +7,7 @@ import androidx.room.PrimaryKey
 data class MapEntity(
 
     @PrimaryKey
-    val izbira: String,
+    val selektor: String,
 
     val id_podatek: String
 

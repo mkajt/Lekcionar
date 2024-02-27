@@ -4,6 +4,7 @@ import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -36,21 +37,26 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.coroutineScope
 import mkajt.hozana.lekcionar.ui.theme.LekcionarRed
 import mkajt.hozana.lekcionar.ui.theme.White
 import mkajt.hozana.lekcionar.viewModel.LekcionarViewModel
 import mkajt.hozana.lekcionar.viewModel.LekcionarViewState
+import java.text.SimpleDateFormat
 import kotlin.math.log
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Preview(showBackground = true)
 @Composable
 fun UserInterface(viewModel: LekcionarViewModel) {
-    val dataState by viewModel.dataState.collectAsState()
-    // TODO Failed to deliver inset control state change to
-    //  w=Window{4002b8d u0 mkajt.hozana.lekcionar/mkajt.hozana.lekcionar.MainActivity EXITING}
-    //  android.os.DeadObjectException
     val context = LocalContext.current.applicationContext
+
+    val formatter = SimpleDateFormat("yyyy-MM-dd")
+    val formattedDate = formatter.format(System.currentTimeMillis())
+    createSelektor(formattedDate.toString(), viewModel)
+
+    viewModel.getPodatkiBySelektor()
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -90,18 +96,7 @@ fun UserInterface(viewModel: LekcionarViewModel) {
             )
         },
         content = { innerPadding ->
-            if (dataState.equals(LekcionarViewState.Loading)) {
-                Greeting(name = "Loading", modifier = Modifier.padding(innerPadding))
-                Log.d("UI", "Loading")
-            } else if (dataState.equals(LekcionarViewState.Start)){
-                Greeting(name = "Start", modifier = Modifier.padding(innerPadding))
-                Log.d("UI", "Start")
-                Toast.makeText(context, "Start", Toast.LENGTH_SHORT).show()
-            } else {
-                Greeting(name = "Loaded", modifier = Modifier.padding(innerPadding))
-                Log.d("UI", "Loaded")
-                Toast.makeText(context, "Loaded", Toast.LENGTH_SHORT).show()
-            }
+            ContentSectionUI(innerPadding = innerPadding, viewModel = viewModel)
         },
         bottomBar = {
             Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
@@ -149,5 +144,31 @@ fun UserInterface(viewModel: LekcionarViewModel) {
 
 
     )
+}
 
+@Preview(showBackground = true)
+@Composable
+fun ContentSectionUI(innerPadding: PaddingValues, viewModel: LekcionarViewModel) {
+
+    val dataState by viewModel.dataState.collectAsState()
+    val idPodatek by viewModel.idPodatek.collectAsState()
+
+    if (dataState.equals(LekcionarViewState.Loading)) {
+        //Greeting(name = "Loading", modifier = Modifier.padding(innerPadding))
+        Greeting(name = idPodatek, modifier = Modifier.padding(innerPadding))
+        Log.d("UI", "Loading")
+    } else if (dataState.equals(LekcionarViewState.Start)){
+        //Greeting(name = "Start", modifier = Modifier.padding(innerPadding))
+        Greeting(name = idPodatek, modifier = Modifier.padding(innerPadding))
+        Log.d("UI", "Start")
+    } else {
+        //Greeting(name = "Loaded", modifier = Modifier.padding(innerPadding))
+        Greeting(name = idPodatek, modifier = Modifier.padding(innerPadding))
+        Log.d("UI", "Loaded")
+    }
+}
+
+private fun createSelektor(date: String, viewModel: LekcionarViewModel) {
+    val selektor = "$date-slovenija-kapucini"
+    viewModel.updateSelektor(selektor)
 }

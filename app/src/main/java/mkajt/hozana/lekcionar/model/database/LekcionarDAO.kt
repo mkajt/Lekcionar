@@ -20,6 +20,12 @@ interface LekcionarDAO {
     @Insert
     suspend fun insertSkofija(skofijeEntities: List<SkofijaEntity>)
 
+    @Query("SELECT id_podatek FROM map WHERE selektor = :selektor")
+    suspend fun getIdPodatekFromMap(selektor: String): String
+
+    @Query("SELECT * FROM podatki WHERE id = :id_podatek")
+    suspend fun getPodatki(id_podatek: String): PodatkiEntity
+
     @Query("DELETE FROM map")
     suspend fun deleteAllFromMap()
 

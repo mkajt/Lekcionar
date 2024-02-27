@@ -1,21 +1,15 @@
 package mkajt.hozana.lekcionar.viewModel
 
 import android.app.Application
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.mutableStateOf
+import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import mkajt.hozana.lekcionar.model.LekcionarRepository
-import mkajt.hozana.lekcionar.model.dto.LekcionarDTO
-import mkajt.hozana.lekcionar.model.dto.MapDTO
-import mkajt.hozana.lekcionar.model.dto.PodatkiDTO
-import mkajt.hozana.lekcionar.model.dto.RedDTO
-import mkajt.hozana.lekcionar.model.dto.SkofijaDTO
+import mkajt.hozana.lekcionar.model.database.PodatkiEntity
 
 class LekcionarViewModel(
     application: Application?,
@@ -26,17 +20,31 @@ class LekcionarViewModel(
     private val _dataState = MutableStateFlow<LekcionarViewState>(LekcionarViewState.Start)
     val dataState: StateFlow<LekcionarViewState> = _dataState.asStateFlow()
 
-    var redovi: List<RedDTO>? = null
-    var skofije: List<SkofijaDTO>? = null
-    var map: List<MapDTO>? = null
-    var podatki: List<PodatkiDTO>? = null
-
+    private val _selektor = MutableStateFlow("")
+    private val _idPodatek = MutableStateFlow("")
+    val idPodatek = _idPodatek.asStateFlow()
+    private val _podatki = MutableStateFlow<PodatkiEntity?>(null)
+    val podatki = _podatki.asStateFlow()
 
     fun fetchDataFromApi() {
         viewModelScope.launch {
             _dataState.value =  LekcionarViewState.Loading
             lekcionarRepository.getLekcionarDataFromApi()
             _dataState.value = LekcionarViewState.Loaded
+        }
+    }
+
+    fun updateSelektor(newSelektor: String) {
+        _selektor.value = newSelektor
+    }
+
+    fun getPodatkiBySelektor() {
+        if (_selektor.value != "") {
+            viewModelScope.launch {
+                _idPodatek.value = lekcionarRepository.getIdPodatekFromMap(_selektor.value)
+                _podatki.value = lekcionarRepository.getPodatki(_idPodatek.value)
+                Log.d("LVM", "Podatki: ${_podatki.value}")
+            }
         }
     }
 }
