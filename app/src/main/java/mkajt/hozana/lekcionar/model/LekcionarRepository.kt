@@ -73,6 +73,13 @@ class LekcionarRepository(
             lekcionarDB.lekcionarDao().getPodatki(id_podatek)
         }
     }
+
+    /*suspend fun countPodatki(): Int? {
+        return withContext(ioDispatcher) {
+            lekcionarDB.lekcionarDao().countPodatki()
+        }
+    }*/
+
     private suspend fun insertDataIntoDB(lekcionarDTO: LekcionarDTO) {
         withContext(ioDispatcher) {
             insertMapToDB(lekcionarDTO.map)

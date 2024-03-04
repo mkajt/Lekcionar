@@ -4,6 +4,7 @@ import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
@@ -108,21 +109,29 @@ fun UserInterface(viewModel: LekcionarViewModel) {
                 contentPadding = BottomAppBarDefaults.ContentPadding,
                 modifier = Modifier
                     .height(80.dp)
-                    /*.clip(
-                        RoundedCornerShape(
-                            topStart = 24.dp, topEnd = 24.dp
-                        )
-                    )*/
-            ){
-                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) {
-                    IconButton(onClick = { Toast.makeText(context, "Bottom", Toast.LENGTH_SHORT).show() }) {
+                /*.clip(
+                    RoundedCornerShape(
+                        topStart = 24.dp, topEnd = 24.dp
+                    )
+                )*/
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    IconButton(onClick = {
+                        Toast.makeText(context, "Bottom", Toast.LENGTH_SHORT).show()
+                    }) {
                         Icon(
                             imageVector = Icons.Rounded.KeyboardArrowLeft,
                             contentDescription = "Previous Date",
                             modifier = Modifier.size(450.dp)
                         )
                     }
-                    IconButton(onClick = { Toast.makeText(context, "Bottom", Toast.LENGTH_SHORT).show() }) {
+                    IconButton(onClick = {
+                        Toast.makeText(context, "Bottom", Toast.LENGTH_SHORT).show()
+                    }) {
                         Icon(
                             imageVector = Icons.Rounded.DateRange,
                             contentDescription = "Callendar",
@@ -131,7 +140,9 @@ fun UserInterface(viewModel: LekcionarViewModel) {
                                 .padding(horizontal = 5.dp)
                         )
                     }
-                    IconButton(onClick = { Toast.makeText(context, "Bottom", Toast.LENGTH_SHORT).show() }) {
+                    IconButton(onClick = {
+                        Toast.makeText(context, "Bottom", Toast.LENGTH_SHORT).show()
+                    }) {
                         Icon(
                             imageVector = Icons.Rounded.KeyboardArrowRight,
                             contentDescription = "Next Date",
@@ -152,20 +163,27 @@ fun ContentSectionUI(innerPadding: PaddingValues, viewModel: LekcionarViewModel)
 
     val dataState by viewModel.dataState.collectAsState()
     val idPodatek by viewModel.idPodatek.collectAsState()
+    val podatki by viewModel.podatki.collectAsState()
 
     if (dataState.equals(LekcionarViewState.Loading)) {
-        //Greeting(name = "Loading", modifier = Modifier.padding(innerPadding))
         Greeting(name = idPodatek, modifier = Modifier.padding(innerPadding))
         Log.d("UI", "Loading")
-    } else if (dataState.equals(LekcionarViewState.Start)){
-        //Greeting(name = "Start", modifier = Modifier.padding(innerPadding))
+    } else if (dataState.equals(LekcionarViewState.Start)) {
         Greeting(name = idPodatek, modifier = Modifier.padding(innerPadding))
         Log.d("UI", "Start")
     } else {
-        //Greeting(name = "Loaded", modifier = Modifier.padding(innerPadding))
-        Greeting(name = idPodatek, modifier = Modifier.padding(innerPadding))
-        Log.d("UI", "Loaded")
+        /*podatki?.let{
+            Column(modifier = Modifier.padding(innerPadding),
+                horizontalAlignment = Alignment.CenterHorizontally) {
+                Row (horizontalArrangement = Arrangement.Center) {
+                    Text(text = it.datum)
+                }
+            }
+        }*/
+
     }
+
+
 }
 
 private fun createSelektor(date: String, viewModel: LekcionarViewModel) {

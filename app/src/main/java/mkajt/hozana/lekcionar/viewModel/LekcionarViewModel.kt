@@ -28,9 +28,12 @@ class LekcionarViewModel(
 
     fun fetchDataFromApi() {
         viewModelScope.launch {
-            _dataState.value =  LekcionarViewState.Loading
-            lekcionarRepository.getLekcionarDataFromApi()
-            _dataState.value = LekcionarViewState.Loaded
+            //val countPodatki = lekcionarRepository.countPodatki()
+            //if (countPodatki == null || countPodatki == 0) {
+                _dataState.value =  LekcionarViewState.Loading
+                lekcionarRepository.getLekcionarDataFromApi()
+                _dataState.value = LekcionarViewState.Loaded
+            //}
         }
     }
 
