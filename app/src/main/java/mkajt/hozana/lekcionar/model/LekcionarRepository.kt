@@ -74,11 +74,11 @@ class LekcionarRepository(
         }
     }
 
-    /*suspend fun countPodatki(): Int? {
+    suspend fun countPodatki(): Int {
         return withContext(ioDispatcher) {
             lekcionarDB.lekcionarDao().countPodatki()
         }
-    }*/
+    }
 
     private suspend fun insertDataIntoDB(lekcionarDTO: LekcionarDTO) {
         withContext(ioDispatcher) {

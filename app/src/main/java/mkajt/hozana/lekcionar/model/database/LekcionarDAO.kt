@@ -26,8 +26,9 @@ interface LekcionarDAO {
     @Query("SELECT * FROM podatki WHERE id = :id_podatek")
     suspend fun getPodatki(id_podatek: String): PodatkiEntity
 
-    //@Query("SELECT COUNT(*) FROM podatki")
-    //suspend fun countPodatki(): Int?
+    @Query("SELECT COUNT(*) FROM podatki")
+    suspend fun countPodatki(): Int
+
     @Query("DELETE FROM map")
     suspend fun deleteAllFromMap()
 

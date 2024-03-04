@@ -13,6 +13,10 @@ sealed class LekcionarViewState {
 
     object Start : LekcionarViewState()
 
+    object AlreadyInDb : LekcionarViewState()
+
+    data class Error(val errorMessage: String) : LekcionarViewState()
+
     data class Data(
         var redovi: List<RedDTO>? = null,
         var skofije: List<SkofijaDTO>? = null,

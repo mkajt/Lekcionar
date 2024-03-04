@@ -39,6 +39,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.coroutineScope
+import mkajt.hozana.lekcionar.model.database.PodatkiEntity
 import mkajt.hozana.lekcionar.ui.theme.LekcionarRed
 import mkajt.hozana.lekcionar.ui.theme.White
 import mkajt.hozana.lekcionar.viewModel.LekcionarViewModel
@@ -165,22 +166,40 @@ fun ContentSectionUI(innerPadding: PaddingValues, viewModel: LekcionarViewModel)
     val idPodatek by viewModel.idPodatek.collectAsState()
     val podatki by viewModel.podatki.collectAsState()
 
-    if (dataState.equals(LekcionarViewState.Loading)) {
-        Greeting(name = "Loading", modifier = Modifier.padding(innerPadding))
-        //Greeting(name = idPodatek, modifier = Modifier.padding(innerPadding))
-        Log.d("UI", "Loading")
-    } else if (podatki != null) {
-        Greeting(name = podatki.toString(), modifier = Modifier.padding(innerPadding))
-    } else if (dataState.equals(LekcionarViewState.Start)){
-        Greeting(name = "Start", modifier = Modifier.padding(innerPadding))
-        //Greeting(name = idPodatek, modifier = Modifier.padding(innerPadding))
-        Log.d("UI", "Start")
-    } else if (dataState.equals(LekcionarViewState.Loaded)){
-        Greeting(name = "Loaded", modifier = Modifier.padding(innerPadding))
-        //Greeting(name = idPodatek, modifier = Modifier.padding(innerPadding))
-        Log.d("UI", "Loaded")
+    val errorMessage = when (dataState) {
+        is LekcionarViewState.Error -> (dataState as LekcionarViewState.Error).errorMessage
+        else -> null
+    }
+    if (errorMessage == null) {
+        if (dataState.equals(LekcionarViewState.Loading)) {
+            Greeting(name = "Loading", modifier = Modifier.padding(innerPadding))
+            Log.d("UI", "Loading")
+        } else if (dataState.equals(LekcionarViewState.AlreadyInDb)) {
+            Greeting(name = "AlreadyInDb", modifier = Modifier.padding(innerPadding))
+            podatki?.let { DisplayData(podatki = it) }
+            Log.d("UI", "AlreadyInDb")
+        } else if (idPodatek != "") {
+            Greeting(name = idPodatek, modifier = Modifier.padding(innerPadding))
+        } else if (dataState.equals(LekcionarViewState.Start)){
+            Greeting(name = "Start", modifier = Modifier.padding(innerPadding))
+            Log.d("UI", "Start")
+        } else if (dataState.equals(LekcionarViewState.Loaded)){
+            Greeting(name = "Loaded", modifier = Modifier.padding(innerPadding))
+            Log.d("UI", "Loaded")
+        }
+    } else {
+        Text(
+            text = errorMessage,
+            modifier = Modifier.padding(innerPadding),
+            color = LekcionarRed
+        )
     }
 
+}
+
+@Preview(showBackground = true)
+@Composable
+fun DisplayData(podatki: PodatkiEntity) {
 }
 
 private fun createSelektor(date: String, viewModel: LekcionarViewModel) {

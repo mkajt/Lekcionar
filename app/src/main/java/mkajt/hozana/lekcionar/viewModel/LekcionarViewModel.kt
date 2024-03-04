@@ -4,6 +4,7 @@ import android.app.Application
 import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -26,14 +27,20 @@ class LekcionarViewModel(
     private val _podatki = MutableStateFlow<PodatkiEntity?>(null)
     val podatki = _podatki.asStateFlow()
 
-    fun fetchDataFromApi() {
+    fun checkDbAndfetchDataFromApi() {
         viewModelScope.launch {
-            //val countPodatki = lekcionarRepository.countPodatki()
-            //if (countPodatki == null || countPodatki == 0) {
-                _dataState.value =  LekcionarViewState.Loading
-                lekcionarRepository.getLekcionarDataFromApi()
-                _dataState.value = LekcionarViewState.Loaded
-            //}
+            try {
+                val count = lekcionarRepository.countPodatki()
+                if (count == 0) {
+                    _dataState.value = LekcionarViewState.Loading
+                    lekcionarRepository.getLekcionarDataFromApi()
+                    _dataState.value = LekcionarViewState.Loaded
+                } else {
+                    _dataState.value = LekcionarViewState.AlreadyInDb
+                }
+            } catch (e: Exception) {
+                _dataState.value = LekcionarViewState.Error(e.message ?: "Unknown error")
+            }
         }
     }
 
@@ -44,8 +51,10 @@ class LekcionarViewModel(
     fun getPodatkiBySelektor() {
         if (_selektor.value != "") {
             viewModelScope.launch {
-                _idPodatek.value = lekcionarRepository.getIdPodatekFromMap(_selektor.value)
-                _podatki.value = lekcionarRepository.getPodatki(_idPodatek.value)
+                val id = async { lekcionarRepository.getIdPodatekFromMap(_selektor.value) }
+                _idPodatek.value = id.await()
+                val podatki = async { lekcionarRepository.getPodatki(_idPodatek.value) }
+                _podatki.value = podatki.await()
                 Log.d("LVM", "Podatki: ${_podatki.value}")
             }
         }
