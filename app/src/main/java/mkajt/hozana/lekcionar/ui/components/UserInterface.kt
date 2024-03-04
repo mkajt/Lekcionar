@@ -166,23 +166,20 @@ fun ContentSectionUI(innerPadding: PaddingValues, viewModel: LekcionarViewModel)
     val podatki by viewModel.podatki.collectAsState()
 
     if (dataState.equals(LekcionarViewState.Loading)) {
-        Greeting(name = idPodatek, modifier = Modifier.padding(innerPadding))
+        Greeting(name = "Loading", modifier = Modifier.padding(innerPadding))
+        //Greeting(name = idPodatek, modifier = Modifier.padding(innerPadding))
         Log.d("UI", "Loading")
-    } else if (dataState.equals(LekcionarViewState.Start)) {
-        Greeting(name = idPodatek, modifier = Modifier.padding(innerPadding))
+    } else if (podatki != null) {
+        Greeting(name = podatki.toString(), modifier = Modifier.padding(innerPadding))
+    } else if (dataState.equals(LekcionarViewState.Start)){
+        Greeting(name = "Start", modifier = Modifier.padding(innerPadding))
+        //Greeting(name = idPodatek, modifier = Modifier.padding(innerPadding))
         Log.d("UI", "Start")
-    } else {
-        /*podatki?.let{
-            Column(modifier = Modifier.padding(innerPadding),
-                horizontalAlignment = Alignment.CenterHorizontally) {
-                Row (horizontalArrangement = Arrangement.Center) {
-                    Text(text = it.datum)
-                }
-            }
-        }*/
-
+    } else if (dataState.equals(LekcionarViewState.Loaded)){
+        Greeting(name = "Loaded", modifier = Modifier.padding(innerPadding))
+        //Greeting(name = idPodatek, modifier = Modifier.padding(innerPadding))
+        Log.d("UI", "Loaded")
     }
-
 
 }
 
