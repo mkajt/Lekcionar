@@ -269,10 +269,10 @@ fun DisplayData(podatki: PodatkiEntity, viewModel: LekcionarViewModel) {
     if (podatki.mp3.isNotEmpty()) {
         Row(modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.Center) {
-            TimeBar(currentPosition = mediaPlayerState.currentPosition,
-                duration = mediaPlayerState.duration,
+            TimeBar(
                 modifier = Modifier.fillMaxWidth(),
-                viewModel = viewModel)
+                viewModel = viewModel
+            )
         }
 
         Row (modifier = Modifier.fillMaxWidth(),
@@ -293,9 +293,7 @@ fun DisplayData(podatki: PodatkiEntity, viewModel: LekcionarViewModel) {
 }
 
 @Composable
-private fun TimeBar(currentPosition: Int,
-                    duration: Int,
-                    modifier: Modifier,
+private fun TimeBar(modifier: Modifier,
                     viewModel: LekcionarViewModel) {
 
     val mediaPlayerState by viewModel.mediaPlayerState.collectAsState(Dispatchers.IO)
@@ -307,7 +305,7 @@ private fun TimeBar(currentPosition: Int,
         }
     }*/
     Log.d("TimeBar", mediaPlayerState.currentPosition.toString())
-    if (duration != 0) {
+    if (mediaPlayerState.duration != 0) {
         Row(
             modifier = modifier,
             verticalAlignment = Alignment.CenterVertically,
@@ -319,7 +317,7 @@ private fun TimeBar(currentPosition: Int,
                 .fillMaxWidth(0.8f),
                 value = mediaPlayerState.currentPosition.toFloat(),
                 onValueChange = { position -> viewModel.onMediaPlayerEvent(event = MediaPlayerEvent.Seek(position)) },
-                valueRange =  0f..duration.toFloat())
+                valueRange =  0f..mediaPlayerState.duration.toFloat())
             Text(text = millisecondsToTimeString(mediaPlayerState.duration), style = MaterialTheme.typography.bodyMedium, color = LekcionarRed)
         }
     } else {
