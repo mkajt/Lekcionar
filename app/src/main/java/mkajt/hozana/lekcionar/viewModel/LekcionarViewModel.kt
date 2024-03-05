@@ -1,9 +1,15 @@
 package mkajt.hozana.lekcionar.viewModel
 
 import android.app.Application
+import android.content.Context
+import android.media.MediaPlayer
+import android.net.Uri
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -22,10 +28,15 @@ class LekcionarViewModel(
     val dataState: StateFlow<LekcionarViewState> = _dataState.asStateFlow()
 
     private val _selektor = MutableStateFlow("")
-    private val _idPodatek = MutableStateFlow("")
+    private val _idPodatek = MutableStateFlow<List<String>?>(null)
     val idPodatek = _idPodatek.asStateFlow()
-    private val _podatki = MutableStateFlow<PodatkiEntity?>(null)
+    private val _podatki = MutableStateFlow<List<PodatkiEntity>?>(null)
     val podatki = _podatki.asStateFlow()
+
+    private var _player: MediaPlayer? = null
+    private var _mediaPlayerState = MutableStateFlow(MediaPlayerState())
+    val mediaPlayerState = _mediaPlayerState.asStateFlow()
+    private val _handler = Handler(Looper.getMainLooper())
 
     fun checkDbAndfetchDataFromApi() {
         viewModelScope.launch {
@@ -51,12 +62,74 @@ class LekcionarViewModel(
     fun getPodatkiBySelektor() {
         if (_selektor.value != "") {
             viewModelScope.launch {
-                val id = async { lekcionarRepository.getIdPodatekFromMap(_selektor.value) }
-                _idPodatek.value = id.await()
-                val podatki = async { lekcionarRepository.getPodatki(_idPodatek.value) }
+                val ids = async { lekcionarRepository.getIdPodatekFromMap(_selektor.value) }
+                _idPodatek.value = ids.await()
+                val podatki = async { lekcionarRepository.getPodatki(_idPodatek.value!!) }
                 _podatki.value = podatki.await()
                 Log.d("LVM", "Podatki: ${_podatki.value}")
             }
         }
     }
+
+    fun onMediaPlayerEvent(event: MediaPlayerEvent) {
+        when (event) {
+            is MediaPlayerEvent.Initialize -> initPlayer(event.uri, event.context)
+            is MediaPlayerEvent.Seek -> seek(event.position)
+            is MediaPlayerEvent.Play -> play()
+            is MediaPlayerEvent.Pause -> pause()
+            is MediaPlayerEvent.Stop -> stop()
+        }
+    }
+    private fun initPlayer(uri: Uri, context: Context) {
+        if (_player == null) {
+            viewModelScope.launch {
+                _player = MediaPlayer().apply {
+                    setDataSource(context, uri)
+                    prepare()
+                }
+                play()
+            }
+        } else {
+            play()
+        }
+    }
+    private fun play() {
+        _mediaPlayerState.value = _mediaPlayerState.value.copy(isPlaying = true)
+        _mediaPlayerState.value = _mediaPlayerState.value.copy(duration = _player?.duration!!)
+
+        //Log.d("LVM", _mediaPlayerState.value.duration.toString())
+
+        _player?.seekTo(_mediaPlayerState.value.currentPosition)
+        _player?.start()
+        _handler.postDelayed(object : Runnable {
+            override fun run() {
+                try {
+                    _mediaPlayerState.value.currentPosition = _player!!.currentPosition
+                    _handler.postDelayed(this, 1000)
+                    //Log.d("HANDLER", _mediaPlayerState.value.currentPosition.toString())
+                } catch (e: Exception) {
+                    _mediaPlayerState.value.currentPosition = 0
+                    e.printStackTrace()
+                }
+            }
+        }, 0)
+
+    }
+    private fun pause() {
+        _mediaPlayerState.value.isPlaying = false
+        _mediaPlayerState.value.currentPosition = _player?.currentPosition ?: 0
+        _player?.pause()
+        _handler.removeMessages(0)
+    }
+    private fun stop() {
+        _mediaPlayerState.value = MediaPlayerState(false, 0, 0)
+        _player?.stop()
+        _player?.reset()
+        _player?.release()
+        _player = null
+    }
+    private fun seek(position: Float){
+        _player?.seekTo(position.toInt())
+    }
+
 }

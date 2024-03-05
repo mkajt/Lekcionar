@@ -4,8 +4,12 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import androidx.room.TypeConverter
+import androidx.room.TypeConverters
 import mkajt.hozana.lekcionar.Constants
+import mkajt.hozana.lekcionar.util.ListStringConverter
 
+@TypeConverters(ListStringConverter::class)
 @Database(entities = [PodatkiEntity::class, MapEntity::class, RedEntity::class, SkofijaEntity::class],
     version = 1, exportSchema = false)
 abstract class LekcionarDB : RoomDatabase() {

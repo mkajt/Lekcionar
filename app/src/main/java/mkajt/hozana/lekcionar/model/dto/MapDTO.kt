@@ -5,9 +5,6 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class MapDTO(
-
-    @PrimaryKey
     val selektor: String,
-
-    val data_id: String
+    val data_ids: List<String>
 )

@@ -1,5 +1,6 @@
 package mkajt.hozana.lekcionar.ui.components
 
+import android.net.Uri
 import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
@@ -7,45 +8,52 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.KeyboardArrowLeft
-import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.rounded.DateRange
 import androidx.compose.material.icons.rounded.KeyboardArrowLeft
 import androidx.compose.material.icons.rounded.KeyboardArrowRight
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.BottomAppBarDefaults
+import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Slider
+import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.Dispatchers
+import mkajt.hozana.lekcionar.util.millisecondsToTimeString
 import mkajt.hozana.lekcionar.model.database.PodatkiEntity
 import mkajt.hozana.lekcionar.ui.theme.LekcionarRed
 import mkajt.hozana.lekcionar.ui.theme.White
 import mkajt.hozana.lekcionar.viewModel.LekcionarViewModel
 import mkajt.hozana.lekcionar.viewModel.LekcionarViewState
+import mkajt.hozana.lekcionar.viewModel.MediaPlayerEvent
 import java.text.SimpleDateFormat
-import kotlin.math.log
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Preview(showBackground = true)
@@ -174,19 +182,29 @@ fun ContentSectionUI(innerPadding: PaddingValues, viewModel: LekcionarViewModel)
         if (dataState.equals(LekcionarViewState.Loading)) {
             Greeting(name = "Loading", modifier = Modifier.padding(innerPadding))
             Log.d("UI", "Loading")
-        } else if (dataState.equals(LekcionarViewState.AlreadyInDb)) {
-            Greeting(name = "AlreadyInDb", modifier = Modifier.padding(innerPadding))
-            podatki?.let { DisplayData(podatki = it) }
-            Log.d("UI", "AlreadyInDb")
-        } else if (idPodatek != "") {
-            Greeting(name = idPodatek, modifier = Modifier.padding(innerPadding))
-        } else if (dataState.equals(LekcionarViewState.Start)){
+        } else if (dataState.equals(LekcionarViewState.AlreadyInDb) || dataState.equals(LekcionarViewState.Loaded)) {
+            //Greeting(name = "AlreadyInDb", modifier = Modifier.padding(innerPadding))
+            podatki?.let {
+                for (podatek in podatki!!) {
+                    Column(modifier = Modifier
+                        .padding(innerPadding)
+                        .fillMaxWidth(),
+                        horizontalAlignment = Alignment.CenterHorizontally) {
+                        DisplayData(podatki = podatek, viewModel = viewModel)
+                    }
+                }
+            }
+            Log.d("UI", "AlreadyInDb or Loaded")
+        } /*else if (!idPodatek.isNullOrEmpty()) {
+            Greeting(name = idPodatek!![0], modifier = Modifier.padding(innerPadding))
+        } */
+        else if (dataState.equals(LekcionarViewState.Start)){
             Greeting(name = "Start", modifier = Modifier.padding(innerPadding))
             Log.d("UI", "Start")
-        } else if (dataState.equals(LekcionarViewState.Loaded)){
+        } /*else if (dataState.equals(LekcionarViewState.Loaded)){
             Greeting(name = "Loaded", modifier = Modifier.padding(innerPadding))
             Log.d("UI", "Loaded")
-        }
+        }*/
     } else {
         Text(
             text = errorMessage,
@@ -199,7 +217,125 @@ fun ContentSectionUI(innerPadding: PaddingValues, viewModel: LekcionarViewModel)
 
 @Preview(showBackground = true)
 @Composable
-fun DisplayData(podatki: PodatkiEntity) {
+fun DisplayData(podatki: PodatkiEntity, viewModel: LekcionarViewModel) {
+    var isButtonClicked by remember { mutableStateOf(false) }
+    val context = LocalContext.current.applicationContext
+
+    val mediaPlayerState by viewModel.mediaPlayerState.collectAsState(Dispatchers.IO)
+    //val mediaPlayerState = viewModel.mediaPlayerState
+    Text(text = podatki.datum, Modifier.padding(top = 10.dp))
+
+    OutlinedButton(
+        onClick = {
+            isButtonClicked = !isButtonClicked
+            Log.d("DisplayData", isButtonClicked.toString())},
+        modifier = Modifier.padding(top = 10.dp, end = 10.dp)) {
+        Text(text = podatki.opis)
+    }
+    /*(Row(horizontalArrangement = Arrangement.Center,
+        modifier = Modifier.fillMaxWidth()){
+        Box(modifier = Modifier.weight(1f).padding(horizontal = 8.dp),
+            contentAlignment = Alignment.Center){
+            Text(text = podatki.vrstica, textAlign = TextAlign.Center)
+        }
+    }*/
+    /*Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.Center
+    ) {
+        Spacer(modifier = Modifier.weight(5f))
+        Text(
+            text = podatki.vrstica,
+            textAlign = TextAlign.Center,
+            modifier = Modifier
+                .padding(horizontal = 8.dp)
+                .width(IntrinsicSize.Max)
+        )
+        Spacer(modifier = Modifier.weight(5f))
+    }*/
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.Center
+    ) {
+        Text(
+            text = podatki.vrstica,
+            textAlign = TextAlign.Center,
+            modifier = Modifier
+                .padding(horizontal = 8.dp)
+                .fillMaxWidth(0.75f)
+        )
+    }
+
+    if (podatki.mp3.isNotEmpty()) {
+        Row(modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.Center) {
+            TimeBar(currentPosition = mediaPlayerState.currentPosition,
+                duration = mediaPlayerState.duration,
+                modifier = Modifier.fillMaxWidth(),
+                viewModel = viewModel)
+        }
+
+        Row (modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.Center){
+            Button(onClick = {
+                viewModel.onMediaPlayerEvent(event = MediaPlayerEvent.Initialize(Uri.parse(podatki.mp3), context))
+            }) {
+                Text(text = "Play")
+            }
+            Button(onClick = {
+                viewModel.onMediaPlayerEvent(event = MediaPlayerEvent.Pause)
+            }) {
+                Text(text = "Pause")
+            }
+        }
+    }
+
+}
+
+@Composable
+private fun TimeBar(currentPosition: Int,
+                    duration: Int,
+                    modifier: Modifier,
+                    viewModel: LekcionarViewModel) {
+
+    val mediaPlayerState by viewModel.mediaPlayerState.collectAsState(Dispatchers.IO)
+    /*val mediaPlayerState = remember { mutableStateOf(viewModel.mediaPlayerState.value) }
+
+    LaunchedEffect(Unit) {
+        viewModel.mediaPlayerState.collect { newState ->
+            mediaPlayerState.value = newState
+        }
+    }*/
+    Log.d("TimeBar", mediaPlayerState.currentPosition.toString())
+    if (duration != 0) {
+        Row(
+            modifier = modifier,
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center
+        ) {
+            Text(text = millisecondsToTimeString(mediaPlayerState.currentPosition), style = MaterialTheme.typography.bodyMedium, color = LekcionarRed)
+            Slider(modifier = Modifier
+                .padding(start = 8.dp, end = 8.dp)
+                .fillMaxWidth(0.8f),
+                value = mediaPlayerState.currentPosition.toFloat(),
+                onValueChange = { position -> viewModel.onMediaPlayerEvent(event = MediaPlayerEvent.Seek(position)) },
+                valueRange =  0f..duration.toFloat())
+            Text(text = millisecondsToTimeString(mediaPlayerState.duration), style = MaterialTheme.typography.bodyMedium, color = LekcionarRed)
+        }
+    } else {
+        Row(
+            modifier = modifier,
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center
+        ) {
+            Slider(modifier = Modifier
+                .padding(start = 8.dp, end = 8.dp)
+                .fillMaxWidth(0.9f),
+                value = mediaPlayerState.currentPosition.toFloat(),
+                onValueChange = {},
+                valueRange =  0f..1f)
+            }
+    }
 }
 
 private fun createSelektor(date: String, viewModel: LekcionarViewModel) {

@@ -48,11 +48,13 @@ class LekcionarRepository(
 
     suspend fun getLekcionarDataFromApi() {
         try {
-            val lekcionarDTO = withContext(ioDispatcher) {
+            val lekcionarDTO: LekcionarDTO? = withContext(ioDispatcher) {
                 lekcionarApi?.getLekcionarData(Constants.BASE, Constants.KEY)
             }
-            insertDataIntoDB(lekcionarDTO!!)
-            Log.d(TAG,"Data Loaded!")
+            if (lekcionarDTO != null) {
+                insertDataIntoDB(lekcionarDTO)
+                Log.d(TAG,"Data Loaded!")
+            }
         } catch (e: HttpException) {
             Log.d(TAG, "Failed to fetch data from API: ${e.message()}")
         } catch (e: Exception) {
@@ -62,15 +64,22 @@ class LekcionarRepository(
         }
     }
 
-    suspend fun getIdPodatekFromMap(selektor: String): String {
+    suspend fun getIdPodatekFromMap(selektor: String): List<String> {
         return withContext(ioDispatcher) {
             lekcionarDB.lekcionarDao().getIdPodatekFromMap(selektor)
         }
     }
 
-    suspend fun getPodatki(id_podatek: String): PodatkiEntity {
+    suspend fun getPodatki(id_podatek: List<String>): List<PodatkiEntity> {
         return withContext(ioDispatcher) {
-            lekcionarDB.lekcionarDao().getPodatki(id_podatek)
+            val podatki = mutableListOf<PodatkiEntity>()
+            for (id in id_podatek) {
+                val podatek = lekcionarDB.lekcionarDao().getPodatki(id)
+                if (podatek != null) {
+                    podatki.add(podatek)
+                }
+            }
+            return@withContext podatki
         }
     }
 

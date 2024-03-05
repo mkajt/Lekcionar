@@ -59,7 +59,7 @@ object Mapper {
     fun mapMapDtoToEntity(mapDTO: List<MapDTO>) : List<MapEntity> {
         var mapEntities = ArrayList<MapEntity>()
         mapDTO.forEach { map ->
-            var mEntity = MapEntity(map.selektor, map.data_id)
+            var mEntity = MapEntity(map.selektor, map.data_ids)
             mapEntities.add(mEntity)
         }
         return mapEntities

@@ -9,7 +9,7 @@ data class PodatkiDTO(
     val opis: String,
     val timestamp: Long, //check myb just Long
     val datum: String,
-    val mp3: String,
+    val mp3: String = "",
 
     val berilo1: String,
     val berilo1_naslov: String,
@@ -19,9 +19,9 @@ data class PodatkiDTO(
     val psalm: String,
     val psalm_vsebina: String,
 
-    val berilo2: String,
-    val berilo2_naslov: String,
-    val berilo2_vsebina: String,
+    val berilo2: String = "",
+    val berilo2_naslov: String = "",
+    val berilo2_vsebina: String = "",
 
     val aleluja: String,
     val evangelij: String,
