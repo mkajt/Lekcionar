@@ -14,6 +14,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import mkajt.hozana.lekcionar.model.LekcionarRepository
 import mkajt.hozana.lekcionar.model.database.PodatkiEntity
@@ -94,8 +95,11 @@ class LekcionarViewModel(
         }
     }
     private fun play() {
-        _mediaPlayerState.value = _mediaPlayerState.value.copy(isPlaying = true)
-        _mediaPlayerState.value = _mediaPlayerState.value.copy(duration = _player?.duration!!)
+        _mediaPlayerState.update {
+            it.copy(
+                isPlaying = true,
+                duration = _player?.duration!!)
+        }
 
         //Log.d("LVM", _mediaPlayerState.value.duration.toString())
 
@@ -104,11 +108,15 @@ class LekcionarViewModel(
         _handler.postDelayed(object : Runnable {
             override fun run() {
                 try {
-                    _mediaPlayerState.value.currentPosition = _player!!.currentPosition
+                    _mediaPlayerState.update {
+                        it.copy(currentPosition = _player?.currentPosition!!)
+                    }
                     _handler.postDelayed(this, 1000)
                     //Log.d("HANDLER", _mediaPlayerState.value.currentPosition.toString())
                 } catch (e: Exception) {
-                    _mediaPlayerState.value.currentPosition = 0
+                    _mediaPlayerState.update {
+                        it.copy(currentPosition = 0)
+                    }
                     e.printStackTrace()
                 }
             }
@@ -116,13 +124,22 @@ class LekcionarViewModel(
 
     }
     private fun pause() {
-        _mediaPlayerState.value.isPlaying = false
-        _mediaPlayerState.value.currentPosition = _player?.currentPosition ?: 0
+        _mediaPlayerState.update {
+            it.copy(
+                isPlaying = false,
+                currentPosition = _player?.currentPosition ?: 0)
+        }
         _player?.pause()
         _handler.removeMessages(0)
     }
     private fun stop() {
-        _mediaPlayerState.value = MediaPlayerState(false, 0, 0)
+        _mediaPlayerState.update {
+            it.copy(
+                isPlaying = false,
+                currentPosition = 0,
+                duration = 0
+            )
+        }
         _player?.stop()
         _player?.reset()
         _player?.release()
