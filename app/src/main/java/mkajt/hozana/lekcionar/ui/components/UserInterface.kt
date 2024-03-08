@@ -1,5 +1,6 @@
 package mkajt.hozana.lekcionar.ui.components
 
+import android.content.Context
 import android.net.Uri
 import android.util.Log
 import android.widget.Toast
@@ -14,6 +15,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Pause
+import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.rounded.DateRange
 import androidx.compose.material.icons.rounded.KeyboardArrowLeft
@@ -41,6 +44,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -182,14 +186,19 @@ fun ContentSectionUI(innerPadding: PaddingValues, viewModel: LekcionarViewModel)
         if (dataState.equals(LekcionarViewState.Loading)) {
             Greeting(name = "Loading", modifier = Modifier.padding(innerPadding))
             Log.d("UI", "Loading")
-        } else if (dataState.equals(LekcionarViewState.AlreadyInDb) || dataState.equals(LekcionarViewState.Loaded)) {
+        } else if (dataState.equals(LekcionarViewState.AlreadyInDb) || dataState.equals(
+                LekcionarViewState.Loaded
+            )
+        ) {
             //Greeting(name = "AlreadyInDb", modifier = Modifier.padding(innerPadding))
             podatki?.let {
                 for (podatek in podatki!!) {
-                    Column(modifier = Modifier
-                        .padding(innerPadding)
-                        .fillMaxWidth(),
-                        horizontalAlignment = Alignment.CenterHorizontally) {
+                    Column(
+                        modifier = Modifier
+                            .padding(innerPadding)
+                            .fillMaxWidth(),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
                         DisplayData(podatki = podatek, viewModel = viewModel)
                     }
                 }
@@ -198,7 +207,7 @@ fun ContentSectionUI(innerPadding: PaddingValues, viewModel: LekcionarViewModel)
         } /*else if (!idPodatek.isNullOrEmpty()) {
             Greeting(name = idPodatek!![0], modifier = Modifier.padding(innerPadding))
         } */
-        else if (dataState.equals(LekcionarViewState.Start)){
+        else if (dataState.equals(LekcionarViewState.Start)) {
             Greeting(name = "Start", modifier = Modifier.padding(innerPadding))
             Log.d("UI", "Start")
         } /*else if (dataState.equals(LekcionarViewState.Loaded)){
@@ -228,8 +237,10 @@ fun DisplayData(podatki: PodatkiEntity, viewModel: LekcionarViewModel) {
     OutlinedButton(
         onClick = {
             isButtonClicked = !isButtonClicked
-            Log.d("DisplayData", isButtonClicked.toString())},
-        modifier = Modifier.padding(top = 10.dp, end = 10.dp)) {
+            Log.d("DisplayData", isButtonClicked.toString())
+        },
+        modifier = Modifier.padding(top = 10.dp, end = 10.dp)
+    ) {
         Text(text = podatki.opis)
     }
     /*(Row(horizontalArrangement = Arrangement.Center,
@@ -267,18 +278,29 @@ fun DisplayData(podatki: PodatkiEntity, viewModel: LekcionarViewModel) {
     }
 
     if (podatki.mp3.isNotEmpty()) {
-        Row(modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.Center) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.Center
+        ) {
             TimeBar(
                 modifier = Modifier.fillMaxWidth(),
-                viewModel = viewModel
+                viewModel = viewModel,
+                podatki.mp3,
+                context
             )
         }
 
-        Row (modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.Center){
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.Center
+        ) {
             Button(onClick = {
-                viewModel.onMediaPlayerEvent(event = MediaPlayerEvent.Initialize(Uri.parse(podatki.mp3), context))
+                viewModel.onMediaPlayerEvent(
+                    event = MediaPlayerEvent.Initialize(
+                        Uri.parse(podatki.mp3),
+                        context
+                    )
+                )
             }) {
                 Text(text = "Play")
             }
@@ -293,8 +315,12 @@ fun DisplayData(podatki: PodatkiEntity, viewModel: LekcionarViewModel) {
 }
 
 @Composable
-private fun TimeBar(modifier: Modifier,
-                    viewModel: LekcionarViewModel) {
+private fun TimeBar(
+    modifier: Modifier,
+    viewModel: LekcionarViewModel,
+    uri: String,
+    context: Context
+) {
 
     val mediaPlayerState by viewModel.mediaPlayerState.collectAsState(Dispatchers.IO)
     /*val mediaPlayerState = remember { mutableStateOf(viewModel.mediaPlayerState.value) }
@@ -311,14 +337,60 @@ private fun TimeBar(modifier: Modifier,
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Center
         ) {
-            Text(text = millisecondsToTimeString(mediaPlayerState.currentPosition), style = MaterialTheme.typography.bodyMedium, color = LekcionarRed)
-            Slider(modifier = Modifier
-                .padding(start = 8.dp, end = 8.dp)
-                .fillMaxWidth(0.8f),
+            Text(
+                text = millisecondsToTimeString(mediaPlayerState.currentPosition),
+                style = MaterialTheme.typography.bodyMedium,
+                color = LekcionarRed
+            )
+            Slider(
+                modifier = Modifier
+                    .padding(start = 8.dp, end = 8.dp)
+                    .fillMaxWidth(0.8f),
                 value = mediaPlayerState.currentPosition.toFloat(),
-                onValueChange = { position -> viewModel.onMediaPlayerEvent(event = MediaPlayerEvent.Seek(position)) },
-                valueRange =  0f..mediaPlayerState.duration.toFloat())
-            Text(text = millisecondsToTimeString(mediaPlayerState.duration), style = MaterialTheme.typography.bodyMedium, color = LekcionarRed)
+                onValueChange = { position ->
+                    viewModel.onMediaPlayerEvent(
+                        event = MediaPlayerEvent.Seek(
+                            position
+                        )
+                    )
+                },
+                valueRange = 0f..mediaPlayerState.duration.toFloat()
+            )
+            Text(
+                text = millisecondsToTimeString(mediaPlayerState.duration),
+                style = MaterialTheme.typography.bodyMedium,
+                color = LekcionarRed
+            )
+            IconButton(
+                onClick = {
+                    if (mediaPlayerState.isPlaying) {
+                        viewModel.onMediaPlayerEvent(event = MediaPlayerEvent.Pause)
+                    } else {
+                        viewModel.onMediaPlayerEvent(
+                            event = MediaPlayerEvent.Initialize(
+                                Uri.parse(
+                                    uri
+                                ), context
+                            )
+                        )
+                    }
+                }
+            ) {
+                if (mediaPlayerState.isPlaying) {
+                    Icon(
+                        imageVector = Icons.Filled.PlayArrow,
+                        tint = Color.Black,
+                        contentDescription = "Play"
+                    )
+                } else {
+                    Icon(
+                        imageVector = Icons.Filled.Pause,
+                        tint = Color.Black,
+                        contentDescription = "Pause"
+                    )
+                }
+
+            }
         }
     } else {
         Row(
@@ -326,13 +398,21 @@ private fun TimeBar(modifier: Modifier,
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Center
         ) {
-            Slider(modifier = Modifier
-                .padding(start = 8.dp, end = 8.dp)
-                .fillMaxWidth(0.9f),
+            Slider(
+                modifier = Modifier
+                    .padding(start = 8.dp, end = 8.dp)
+                    .fillMaxWidth(0.9f),
                 value = mediaPlayerState.currentPosition.toFloat(),
                 onValueChange = {},
-                valueRange =  0f..1f)
-            }
+                valueRange = 0f..1f
+            )
+            Icon(
+                imageVector = Icons.Filled.PlayArrow,
+                tint = Color.Black,
+                contentDescription = "Play"
+            )
+        }
+
     }
 }
 
