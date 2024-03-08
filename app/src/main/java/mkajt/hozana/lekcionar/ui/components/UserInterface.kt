@@ -15,12 +15,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.Pause
-import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.rounded.DateRange
 import androidx.compose.material.icons.rounded.KeyboardArrowLeft
 import androidx.compose.material.icons.rounded.KeyboardArrowRight
+import androidx.compose.material.icons.rounded.Pause
+import androidx.compose.material.icons.rounded.PlayArrow
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.BottomAppBarDefaults
 import androidx.compose.material3.Button
@@ -44,7 +44,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -285,30 +284,9 @@ fun DisplayData(podatki: PodatkiEntity, viewModel: LekcionarViewModel) {
             TimeBar(
                 modifier = Modifier.fillMaxWidth(),
                 viewModel = viewModel,
-                podatki.mp3,
-                context
+                uri = podatki.mp3,
+                context = context
             )
-        }
-
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.Center
-        ) {
-            Button(onClick = {
-                viewModel.onMediaPlayerEvent(
-                    event = MediaPlayerEvent.Initialize(
-                        Uri.parse(podatki.mp3),
-                        context
-                    )
-                )
-            }) {
-                Text(text = "Play")
-            }
-            Button(onClick = {
-                viewModel.onMediaPlayerEvent(event = MediaPlayerEvent.Pause)
-            }) {
-                Text(text = "Pause")
-            }
         }
     }
 
@@ -361,35 +339,22 @@ private fun TimeBar(
                 style = MaterialTheme.typography.bodyMedium,
                 color = LekcionarRed
             )
-            IconButton(
-                onClick = {
-                    if (mediaPlayerState.isPlaying) {
-                        viewModel.onMediaPlayerEvent(event = MediaPlayerEvent.Pause)
-                    } else {
-                        viewModel.onMediaPlayerEvent(
-                            event = MediaPlayerEvent.Initialize(
-                                Uri.parse(
-                                    uri
-                                ), context
-                            )
-                        )
-                    }
-                }
-            ) {
+            IconButton(onClick = {
                 if (mediaPlayerState.isPlaying) {
-                    Icon(
-                        imageVector = Icons.Filled.PlayArrow,
-                        tint = Color.Black,
-                        contentDescription = "Play"
-                    )
+                    viewModel.onMediaPlayerEvent(event = MediaPlayerEvent.Pause)
                 } else {
-                    Icon(
-                        imageVector = Icons.Filled.Pause,
-                        tint = Color.Black,
-                        contentDescription = "Pause"
+                    viewModel.onMediaPlayerEvent(
+                        event = MediaPlayerEvent.Initialize(
+                            Uri.parse(uri),
+                            context
+                        )
                     )
                 }
-
+            }) {
+                Icon(
+                    imageVector = if (mediaPlayerState.isPlaying) Icons.Rounded.Pause else Icons.Rounded.PlayArrow,
+                    contentDescription = "Play/Pause"
+                )
             }
         }
     } else {
@@ -406,13 +371,20 @@ private fun TimeBar(
                 onValueChange = {},
                 valueRange = 0f..1f
             )
-            Icon(
-                imageVector = Icons.Filled.PlayArrow,
-                tint = Color.Black,
-                contentDescription = "Play"
-            )
+            IconButton(onClick = {
+                viewModel.onMediaPlayerEvent(
+                    event = MediaPlayerEvent.Initialize(
+                        Uri.parse(uri),
+                        context
+                    )
+                )
+            }) {
+                Icon(
+                    imageVector = Icons.Rounded.PlayArrow,
+                    contentDescription = "Play"
+                )
+            }
         }
-
     }
 }
 
