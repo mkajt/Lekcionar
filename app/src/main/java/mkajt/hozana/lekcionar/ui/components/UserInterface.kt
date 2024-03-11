@@ -27,6 +27,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonColors
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
@@ -309,83 +310,102 @@ private fun TimeBar(
         }
     }*/
     Log.d("TimeBar", mediaPlayerState.currentPosition.toString())
-    if (mediaPlayerState.duration != 0) {
-        Row(
-            modifier = modifier,
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Center
-        ) {
-            Text(
-                text = millisecondsToTimeString(mediaPlayerState.currentPosition),
-                style = MaterialTheme.typography.bodyMedium,
-                color = LekcionarRed
-            )
-            Slider(
-                modifier = Modifier
-                    .padding(start = 8.dp, end = 8.dp)
-                    .fillMaxWidth(0.8f),
-                value = mediaPlayerState.currentPosition.toFloat(),
-                onValueChange = { position ->
-                    viewModel.onMediaPlayerEvent(
-                        event = MediaPlayerEvent.Seek(
-                            position
+
+    Box(modifier = modifier) {
+        if (mediaPlayerState.duration != 0) {
+            Row(
+                modifier = modifier,
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center
+            ) {
+
+                Slider(
+                    modifier = Modifier
+                        .padding(start = 4.dp, end = 4.dp)
+                        .fillMaxWidth(0.8f),
+                    value = mediaPlayerState.currentPosition.toFloat(),
+                    onValueChange = { position ->
+                        viewModel.onMediaPlayerEvent(
+                            event = MediaPlayerEvent.Seek(
+                                position
+                            )
                         )
-                    )
-                },
-                valueRange = 0f..mediaPlayerState.duration.toFloat()
-            )
-            Text(
-                text = millisecondsToTimeString(mediaPlayerState.duration),
-                style = MaterialTheme.typography.bodyMedium,
-                color = LekcionarRed
-            )
-            IconButton(onClick = {
-                if (mediaPlayerState.isPlaying) {
-                    viewModel.onMediaPlayerEvent(event = MediaPlayerEvent.Pause)
-                } else {
-                    viewModel.onMediaPlayerEvent(
-                        event = MediaPlayerEvent.Initialize(
-                            Uri.parse(uri),
-                            context
+                    },
+                    valueRange = 0f..mediaPlayerState.duration.toFloat()
+                )
+                IconButton(onClick = {
+                    if (mediaPlayerState.isPlaying) {
+                        viewModel.onMediaPlayerEvent(event = MediaPlayerEvent.Pause)
+                    } else {
+                        viewModel.onMediaPlayerEvent(
+                            event = MediaPlayerEvent.Initialize(
+                                Uri.parse(uri),
+                                context
+                            )
                         )
+                    }
+                }) {
+                    Icon(
+                        imageVector = if (mediaPlayerState.isPlaying) Icons.Rounded.Pause else Icons.Rounded.PlayArrow,
+                        contentDescription = "Play/Pause",
+                        tint = LekcionarRed,
+                        modifier = Modifier.size(35.dp)
                     )
                 }
-            }) {
-                Icon(
-                    imageVector = if (mediaPlayerState.isPlaying) Icons.Rounded.Pause else Icons.Rounded.PlayArrow,
-                    contentDescription = "Play/Pause"
+            }
+            Row (
+                modifier = modifier,
+                verticalAlignment = Alignment.CenterVertically){
+                Text(
+                    text = millisecondsToTimeString(mediaPlayerState.currentPosition),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = LekcionarRed,
+                    modifier = Modifier.padding(start = 20.dp).weight(1f),
+                    textAlign = TextAlign.Start
+                )
+
+                Text(
+                    text = millisecondsToTimeString(mediaPlayerState.duration),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = LekcionarRed,
+                    modifier = Modifier.padding(end = 40.dp).weight(1f),
+                    textAlign = TextAlign.End
                 )
             }
-        }
-    } else {
-        Row(
-            modifier = modifier,
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Center
-        ) {
-            Slider(
-                modifier = Modifier
-                    .padding(start = 8.dp, end = 8.dp)
-                    .fillMaxWidth(0.9f),
-                value = mediaPlayerState.currentPosition.toFloat(),
-                onValueChange = {},
-                valueRange = 0f..1f
-            )
-            IconButton(onClick = {
-                viewModel.onMediaPlayerEvent(
-                    event = MediaPlayerEvent.Initialize(
-                        Uri.parse(uri),
-                        context
+        } else {
+            Row(
+                modifier = modifier,
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center
+            ) {
+                Slider(
+                    modifier = Modifier
+                        .padding(start = 4.dp, end = 4.dp)
+                        .fillMaxWidth(0.8f),
+                    value = mediaPlayerState.currentPosition.toFloat(),
+                    onValueChange = {},
+                    valueRange = 0f..1f
+                )
+                IconButton(
+                    onClick = {
+                        viewModel.onMediaPlayerEvent(
+                            event = MediaPlayerEvent.Initialize(
+                                Uri.parse(uri),
+                                context
+                            )
+                        )
+                    }){
+                    Icon(
+                        imageVector = Icons.Rounded.PlayArrow,
+                        contentDescription = "Play",
+                        tint = LekcionarRed,
+                        modifier = Modifier.size(35.dp)
                     )
-                )
-            }) {
-                Icon(
-                    imageVector = Icons.Rounded.PlayArrow,
-                    contentDescription = "Play"
-                )
+                }
             }
         }
     }
+
 }
 
 private fun createSelektor(date: String, viewModel: LekcionarViewModel) {

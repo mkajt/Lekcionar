@@ -146,6 +146,11 @@ class LekcionarViewModel(
         _player = null
     }
     private fun seek(position: Float){
+        _mediaPlayerState.update {
+            it.copy(
+                currentPosition = position.toInt()
+            )
+        }
         _player?.seekTo(position.toInt())
     }
 
