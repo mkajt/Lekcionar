@@ -7,12 +7,16 @@ import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Settings
@@ -314,14 +318,15 @@ private fun TimeBar(
     Box(modifier = modifier) {
         if (mediaPlayerState.duration != 0) {
             Row(
-                modifier = modifier,
+                modifier = modifier
+                    .align(Alignment.TopCenter)
+                    .padding(bottom = 10.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.Center
             ) {
 
                 Slider(
                     modifier = Modifier
-                        .padding(start = 4.dp, end = 4.dp)
                         .fillMaxWidth(0.8f),
                     value = mediaPlayerState.currentPosition.toFloat(),
                     onValueChange = { position ->
@@ -349,18 +354,22 @@ private fun TimeBar(
                         imageVector = if (mediaPlayerState.isPlaying) Icons.Rounded.Pause else Icons.Rounded.PlayArrow,
                         contentDescription = "Play/Pause",
                         tint = LekcionarRed,
-                        modifier = Modifier.size(35.dp)
+                        modifier = Modifier.size(40.dp)
                     )
                 }
             }
             Row (
-                modifier = modifier,
-                verticalAlignment = Alignment.CenterVertically){
+                modifier = Modifier
+                    .fillMaxWidth(0.8f)
+                    .padding(end = 20.dp)
+                    .align(Alignment.BottomCenter),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center){
                 Text(
                     text = millisecondsToTimeString(mediaPlayerState.currentPosition),
                     style = MaterialTheme.typography.bodyMedium,
                     color = LekcionarRed,
-                    modifier = Modifier.padding(start = 20.dp).weight(1f),
+                    modifier = Modifier.weight(1f),
                     textAlign = TextAlign.Start
                 )
 
@@ -368,19 +377,17 @@ private fun TimeBar(
                     text = millisecondsToTimeString(mediaPlayerState.duration),
                     style = MaterialTheme.typography.bodyMedium,
                     color = LekcionarRed,
-                    modifier = Modifier.padding(end = 40.dp).weight(1f),
+                    modifier = Modifier.weight(1f),
                     textAlign = TextAlign.End
                 )
             }
         } else {
-            Row(
-                modifier = modifier,
+            Row(modifier = modifier,
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.Center
             ) {
                 Slider(
                     modifier = Modifier
-                        .padding(start = 4.dp, end = 4.dp)
                         .fillMaxWidth(0.8f),
                     value = mediaPlayerState.currentPosition.toFloat(),
                     onValueChange = {},
@@ -399,7 +406,7 @@ private fun TimeBar(
                         imageVector = Icons.Rounded.PlayArrow,
                         contentDescription = "Play",
                         tint = LekcionarRed,
-                        modifier = Modifier.size(35.dp)
+                        modifier = Modifier.size(40.dp)
                     )
                 }
             }
