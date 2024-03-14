@@ -4,6 +4,8 @@ import android.content.Context
 import android.net.Uri
 import android.util.Log
 import android.widget.Toast
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -18,6 +20,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Settings
@@ -47,6 +50,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.focusModifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -278,21 +282,27 @@ fun DisplayData(podatki: PodatkiEntity, viewModel: LekcionarViewModel) {
                 .fillMaxWidth(0.75f)
         )
     }
-
     if (podatki.mp3.isNotEmpty()) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.Center
-        ) {
-            TimeBar(
+        //Box(modifier = Modifier
+        //    .border(
+        //        width = 2.dp,
+        //        color = Color.Black,
+        //        shape = RoundedCornerShape(16.dp)
+        //    )
+        //) {
+            Row(
                 modifier = Modifier.fillMaxWidth(),
-                viewModel = viewModel,
-                uri = podatki.mp3,
-                context = context
-            )
-        }
+                horizontalArrangement = Arrangement.Center
+            ) {
+                TimeBar(
+                    modifier = Modifier.fillMaxWidth(),
+                    viewModel = viewModel,
+                    uri = podatki.mp3,
+                    context = context
+                )
+            }
+        //}
     }
-
 }
 
 @Composable
@@ -314,38 +324,28 @@ private fun TimeBar(
     Log.d("TimeBar", mediaPlayerState.currentPosition.toString())
 
     if (mediaPlayerState.duration != 0) {
-        Row(
-            modifier = modifier
-                .padding(bottom = 10.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Center
+        // Left Column
+        Column(
+            modifier = Modifier
+                .width(IntrinsicSize.Min)
+                .padding(start = 5.dp, end = 5.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-
-            Slider(
-                modifier = Modifier
-                    .fillMaxWidth(0.8f),
-                value = mediaPlayerState.currentPosition.toFloat(),
-                onValueChange = { position ->
-                    viewModel.onMediaPlayerEvent(
-                        event = MediaPlayerEvent.Seek(
-                            position
+            IconButton(
+                onClick = {
+                    if (mediaPlayerState.isPlaying) {
+                        viewModel.onMediaPlayerEvent(event = MediaPlayerEvent.Pause)
+                    } else {
+                        viewModel.onMediaPlayerEvent(
+                            event = MediaPlayerEvent.Initialize(
+                                Uri.parse(uri),
+                                context
+                            )
                         )
-                    )
+                    }
                 },
-                valueRange = 0f..mediaPlayerState.duration.toFloat()
-            )
-            IconButton(onClick = {
-                if (mediaPlayerState.isPlaying) {
-                    viewModel.onMediaPlayerEvent(event = MediaPlayerEvent.Pause)
-                } else {
-                    viewModel.onMediaPlayerEvent(
-                        event = MediaPlayerEvent.Initialize(
-                            Uri.parse(uri),
-                            context
-                        )
-                    )
-                }
-            }) {
+                modifier = Modifier.align(Alignment.CenterHorizontally)
+            ) {
                 Icon(
                     imageVector = if (mediaPlayerState.isPlaying) Icons.Rounded.Pause else Icons.Rounded.PlayArrow,
                     contentDescription = "Play/Pause",
@@ -354,30 +354,66 @@ private fun TimeBar(
                 )
             }
         }
-        Row(
-            modifier = Modifier
-                .fillMaxWidth(0.8f)
-                .padding(end = 20.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Center
-        ) {
-            Text(
-                text = millisecondsToTimeString(mediaPlayerState.currentPosition),
-                style = MaterialTheme.typography.bodyMedium,
-                color = LekcionarRed,
-                modifier = Modifier.weight(1f),
-                textAlign = TextAlign.Start
-            )
 
-            Text(
-                text = millisecondsToTimeString(mediaPlayerState.duration),
-                style = MaterialTheme.typography.bodyMedium,
-                color = LekcionarRed,
-                modifier = Modifier.weight(1f),
-                textAlign = TextAlign.End
-            )
+        // Right column
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(end = 20.dp),
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .align(Alignment.Start)
+            ) {
+                Row(
+                    modifier = Modifier
+                        .align(Alignment.TopStart)
+                        .padding(bottom = 10.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Slider(
+                        value = mediaPlayerState.currentPosition.toFloat(),
+                        onValueChange = { position ->
+                            viewModel.onMediaPlayerEvent(
+                                event = MediaPlayerEvent.Seek(
+                                    position
+                                )
+                            )
+                        },
+                        valueRange = 0f..mediaPlayerState.duration.toFloat()
+                    )
+                }
+
+                // Second row: current position and duration
+                Row(
+                    modifier = Modifier
+                        .align(Alignment.BottomStart)
+                        .padding(start = 7.dp, end = 7.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = millisecondsToTimeString(mediaPlayerState.currentPosition),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = LekcionarRed,
+                        modifier = Modifier.weight(1f),
+                        textAlign = TextAlign.Start
+                    )
+
+                    Spacer(modifier = Modifier.weight(1f))
+
+                    Text(
+                        text = millisecondsToTimeString(mediaPlayerState.duration),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = LekcionarRed,
+                        modifier = Modifier.weight(1f),
+                        textAlign = TextAlign.End
+                    )
+                }
+            }
         }
     } else {
+        // Left Column
         Column(
             modifier = Modifier
                 .fillMaxHeight()
@@ -386,7 +422,14 @@ private fun TimeBar(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             IconButton(
-                onClick = { /* Handle play button click */ },
+                onClick = {
+                    viewModel.onMediaPlayerEvent(
+                        event = MediaPlayerEvent.Initialize(
+                            Uri.parse(uri),
+                            context
+                        )
+                    )
+                },
                 modifier = Modifier.align(Alignment.CenterHorizontally)
             ) {
                 Icon(
@@ -396,10 +439,7 @@ private fun TimeBar(
                     modifier = Modifier.size(40.dp)
                 )
             }
-            // Spacer
-            //Spacer(modifier = Modifier.weight(1f))
         }
-
 
         // Right column
         Column(
@@ -420,27 +460,14 @@ private fun TimeBar(
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Slider(
-                        //modifier = Modifier.fillMaxWidth(0.98f),
-                        value = 0f, // Replace with actual value
-                        onValueChange = {}, // Replace with actual value change handler
+                        value = 0f,
+                        onValueChange = {},
                         valueRange = 0f..1f
                     )
-                }
-                // Second row: current position and duration
-                Row(
-                    modifier = Modifier
-                        .align(Alignment.BottomStart)
-                        .padding(start = 7.dp, end = 7.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(text = "00:00") // Replace with actual current position
-                    Spacer(modifier = Modifier.weight(1f))
-                    Text(text = "00:00") // Replace with actual duration
                 }
             }
         }
     }
-
 }
 
 
