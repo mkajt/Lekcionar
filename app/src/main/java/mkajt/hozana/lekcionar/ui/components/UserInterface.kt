@@ -11,12 +11,13 @@ import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Settings
@@ -27,21 +28,17 @@ import androidx.compose.material.icons.rounded.Pause
 import androidx.compose.material.icons.rounded.PlayArrow
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.BottomAppBarDefaults
-import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.IconButtonColors
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Slider
-import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -49,6 +46,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.focusModifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -315,105 +313,136 @@ private fun TimeBar(
     }*/
     Log.d("TimeBar", mediaPlayerState.currentPosition.toString())
 
-    Box(modifier = modifier) {
-        if (mediaPlayerState.duration != 0) {
-            Row(
-                modifier = modifier
-                    .align(Alignment.TopCenter)
-                    .padding(bottom = 10.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.Center
-            ) {
+    if (mediaPlayerState.duration != 0) {
+        Row(
+            modifier = modifier
+                .padding(bottom = 10.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center
+        ) {
 
-                Slider(
-                    modifier = Modifier
-                        .fillMaxWidth(0.8f),
-                    value = mediaPlayerState.currentPosition.toFloat(),
-                    onValueChange = { position ->
-                        viewModel.onMediaPlayerEvent(
-                            event = MediaPlayerEvent.Seek(
-                                position
-                            )
+            Slider(
+                modifier = Modifier
+                    .fillMaxWidth(0.8f),
+                value = mediaPlayerState.currentPosition.toFloat(),
+                onValueChange = { position ->
+                    viewModel.onMediaPlayerEvent(
+                        event = MediaPlayerEvent.Seek(
+                            position
                         )
-                    },
-                    valueRange = 0f..mediaPlayerState.duration.toFloat()
-                )
-                IconButton(onClick = {
-                    if (mediaPlayerState.isPlaying) {
-                        viewModel.onMediaPlayerEvent(event = MediaPlayerEvent.Pause)
-                    } else {
-                        viewModel.onMediaPlayerEvent(
-                            event = MediaPlayerEvent.Initialize(
-                                Uri.parse(uri),
-                                context
-                            )
+                    )
+                },
+                valueRange = 0f..mediaPlayerState.duration.toFloat()
+            )
+            IconButton(onClick = {
+                if (mediaPlayerState.isPlaying) {
+                    viewModel.onMediaPlayerEvent(event = MediaPlayerEvent.Pause)
+                } else {
+                    viewModel.onMediaPlayerEvent(
+                        event = MediaPlayerEvent.Initialize(
+                            Uri.parse(uri),
+                            context
                         )
-                    }
-                }) {
-                    Icon(
-                        imageVector = if (mediaPlayerState.isPlaying) Icons.Rounded.Pause else Icons.Rounded.PlayArrow,
-                        contentDescription = "Play/Pause",
-                        tint = LekcionarRed,
-                        modifier = Modifier.size(40.dp)
                     )
                 }
-            }
-            Row (
-                modifier = Modifier
-                    .fillMaxWidth(0.8f)
-                    .padding(end = 20.dp)
-                    .align(Alignment.BottomCenter),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.Center){
-                Text(
-                    text = millisecondsToTimeString(mediaPlayerState.currentPosition),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = LekcionarRed,
-                    modifier = Modifier.weight(1f),
-                    textAlign = TextAlign.Start
+            }) {
+                Icon(
+                    imageVector = if (mediaPlayerState.isPlaying) Icons.Rounded.Pause else Icons.Rounded.PlayArrow,
+                    contentDescription = "Play/Pause",
+                    tint = LekcionarRed,
+                    modifier = Modifier.size(40.dp)
                 )
+            }
+        }
+        Row(
+            modifier = Modifier
+                .fillMaxWidth(0.8f)
+                .padding(end = 20.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center
+        ) {
+            Text(
+                text = millisecondsToTimeString(mediaPlayerState.currentPosition),
+                style = MaterialTheme.typography.bodyMedium,
+                color = LekcionarRed,
+                modifier = Modifier.weight(1f),
+                textAlign = TextAlign.Start
+            )
 
-                Text(
-                    text = millisecondsToTimeString(mediaPlayerState.duration),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = LekcionarRed,
-                    modifier = Modifier.weight(1f),
-                    textAlign = TextAlign.End
+            Text(
+                text = millisecondsToTimeString(mediaPlayerState.duration),
+                style = MaterialTheme.typography.bodyMedium,
+                color = LekcionarRed,
+                modifier = Modifier.weight(1f),
+                textAlign = TextAlign.End
+            )
+        }
+    } else {
+        Column(
+            modifier = Modifier
+                .fillMaxHeight()
+                .width(IntrinsicSize.Min)
+                .padding(start = 5.dp, end = 5.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            IconButton(
+                onClick = { /* Handle play button click */ },
+                modifier = Modifier.align(Alignment.CenterHorizontally)
+            ) {
+                Icon(
+                    imageVector = Icons.Rounded.PlayArrow,
+                    contentDescription = "Play",
+                    tint = LekcionarRed,
+                    modifier = Modifier.size(40.dp)
                 )
             }
-        } else {
-            Row(modifier = modifier,
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.Center
+            // Spacer
+            //Spacer(modifier = Modifier.weight(1f))
+        }
+
+
+        // Right column
+        Column(
+            modifier = Modifier
+                .fillMaxHeight()
+                .fillMaxWidth()
+                .padding(end = 20.dp),
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .align(Alignment.Start)
             ) {
-                Slider(
+                Row(
                     modifier = Modifier
-                        .fillMaxWidth(0.8f),
-                    value = mediaPlayerState.currentPosition.toFloat(),
-                    onValueChange = {},
-                    valueRange = 0f..1f
-                )
-                IconButton(
-                    onClick = {
-                        viewModel.onMediaPlayerEvent(
-                            event = MediaPlayerEvent.Initialize(
-                                Uri.parse(uri),
-                                context
-                            )
-                        )
-                    }){
-                    Icon(
-                        imageVector = Icons.Rounded.PlayArrow,
-                        contentDescription = "Play",
-                        tint = LekcionarRed,
-                        modifier = Modifier.size(40.dp)
+                        .align(Alignment.TopStart)
+                        .padding(bottom = 15.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Slider(
+                        //modifier = Modifier.fillMaxWidth(0.98f),
+                        value = 0f, // Replace with actual value
+                        onValueChange = {}, // Replace with actual value change handler
+                        valueRange = 0f..1f
                     )
+                }
+                // Second row: current position and duration
+                Row(
+                    modifier = Modifier
+                        .align(Alignment.BottomStart)
+                        .padding(start = 7.dp, end = 7.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(text = "00:00") // Replace with actual current position
+                    Spacer(modifier = Modifier.weight(1f))
+                    Text(text = "00:00") // Replace with actual duration
                 }
             }
         }
     }
 
 }
+
 
 private fun createSelektor(date: String, viewModel: LekcionarViewModel) {
     val selektor = "$date-slovenija-kapucini"
