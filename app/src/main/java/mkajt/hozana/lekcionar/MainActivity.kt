@@ -36,6 +36,7 @@ class MainActivity : ComponentActivity() {
                     lekcionarRepository = LekcionarRepository(context, lekcionarDB, Dispatchers.IO)
                     lekcionarViewModel = LekcionarViewModel(application, lekcionarRepository)
                     lekcionarViewModel.checkDbAndfetchDataFromApi()
+
                     UserInterface(lekcionarViewModel)
                 }
             }

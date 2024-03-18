@@ -39,6 +39,12 @@ class LekcionarViewModel(
     val mediaPlayerState = _mediaPlayerState.asStateFlow()
     private val _handler = Handler(Looper.getMainLooper())
 
+    /*init {
+        viewModelScope.launch {
+            getPodatkiBySelektor()
+        }
+    }*/
+
     fun checkDbAndfetchDataFromApi() {
         viewModelScope.launch {
             try {
@@ -61,12 +67,12 @@ class LekcionarViewModel(
     }
 
     fun getPodatkiBySelektor() {
-        if (_selektor.value != "") {
-            viewModelScope.launch {
+        viewModelScope.launch {
+            if (_selektor.value != "") {
                 val ids = async { lekcionarRepository.getIdPodatekFromMap(_selektor.value) }
                 _idPodatek.value = ids.await()
                 val podatki = async { lekcionarRepository.getPodatki(_idPodatek.value!!) }
-                _podatki.update {podatki.await()}
+                _podatki.update { podatki.await() }
                 //_podatki.value = podatki.await()
                 Log.d("LVM", "Podatki: ${_podatki.value}")
             }
