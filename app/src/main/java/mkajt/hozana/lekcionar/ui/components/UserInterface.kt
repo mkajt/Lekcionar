@@ -73,7 +73,7 @@ fun UserInterface(viewModel: LekcionarViewModel) {
 
     val formatter = SimpleDateFormat("yyyy-MM-dd")
     val formattedDate = formatter.format(System.currentTimeMillis())
-    createSelektor(formattedDate.toString(), viewModel)
+    val selektor = createSelektor(formattedDate.toString(), viewModel)
 
     viewModel.getPodatkiBySelektor()
 
@@ -369,7 +369,7 @@ private fun TimeBar(
                 Row(
                     modifier = Modifier
                         .align(Alignment.TopStart)
-                        .padding(bottom = 10.dp),
+                        .padding(bottom = 8.dp),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Slider(
@@ -389,7 +389,7 @@ private fun TimeBar(
                 Row(
                     modifier = Modifier
                         .align(Alignment.BottomStart)
-                        .padding(start = 7.dp, end = 7.dp),
+                        .padding(start = 8.dp, end = 7.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
@@ -471,7 +471,8 @@ private fun TimeBar(
 }
 
 
-private fun createSelektor(date: String, viewModel: LekcionarViewModel) {
+private fun createSelektor(date: String, viewModel: LekcionarViewModel): String {
     val selektor = "$date-slovenija-kapucini"
     viewModel.updateSelektor(selektor)
+    return selektor
 }

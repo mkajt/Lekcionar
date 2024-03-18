@@ -47,9 +47,9 @@ class LekcionarViewModel(
                     _dataState.value = LekcionarViewState.Loading
                     lekcionarRepository.getLekcionarDataFromApi()
                     _dataState.value = LekcionarViewState.Loaded
-                } else {
-                    _dataState.value = LekcionarViewState.AlreadyInDb
                 }
+                _dataState.value = LekcionarViewState.AlreadyInDb
+
             } catch (e: Exception) {
                 _dataState.value = LekcionarViewState.Error(e.message ?: "Unknown error")
             }
@@ -66,7 +66,8 @@ class LekcionarViewModel(
                 val ids = async { lekcionarRepository.getIdPodatekFromMap(_selektor.value) }
                 _idPodatek.value = ids.await()
                 val podatki = async { lekcionarRepository.getPodatki(_idPodatek.value!!) }
-                _podatki.value = podatki.await()
+                _podatki.update {podatki.await()}
+                //_podatki.value = podatki.await()
                 Log.d("LVM", "Podatki: ${_podatki.value}")
             }
         }
