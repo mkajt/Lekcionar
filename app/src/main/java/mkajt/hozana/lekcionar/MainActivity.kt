@@ -4,14 +4,13 @@ import android.content.Context
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.platform.LocalContext
 import kotlinx.coroutines.Dispatchers
 import mkajt.hozana.lekcionar.model.LekcionarRepository
 import mkajt.hozana.lekcionar.model.database.LekcionarDB
-import mkajt.hozana.lekcionar.ui.components.UserInterface
-import mkajt.hozana.lekcionar.ui.theme.LekcionarTheme
+import mkajt.hozana.lekcionar.ui.components.HomeSection
+import mkajt.hozana.lekcionar.ui.theme.AppTheme
 import mkajt.hozana.lekcionar.viewModel.LekcionarViewModel
 
 class MainActivity : ComponentActivity() {
@@ -26,10 +25,10 @@ class MainActivity : ComponentActivity() {
         context = application.applicationContext
 
         setContent {
-            LekcionarTheme {
+            AppTheme {
                 // A surface container using the 'background' color from the theme
                 Surface(
-                    color = MaterialTheme.colorScheme.background
+                    color = AppTheme.colorScheme.background
                 ) {
                     context = LocalContext.current
                     lekcionarDB = LekcionarDB.getInstance(context)
@@ -37,7 +36,7 @@ class MainActivity : ComponentActivity() {
                     lekcionarViewModel = LekcionarViewModel(application, lekcionarRepository)
                     lekcionarViewModel.checkDbAndfetchDataFromApi()
 
-                    UserInterface(lekcionarViewModel)
+                    HomeSection(lekcionarViewModel)
                 }
             }
         }
