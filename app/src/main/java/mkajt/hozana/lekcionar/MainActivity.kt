@@ -6,10 +6,12 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.material3.Surface
 import androidx.compose.ui.platform.LocalContext
+import androidx.navigation.compose.rememberNavController
 import kotlinx.coroutines.Dispatchers
 import mkajt.hozana.lekcionar.model.LekcionarRepository
 import mkajt.hozana.lekcionar.model.database.LekcionarDB
 import mkajt.hozana.lekcionar.ui.components.HomeSection
+import mkajt.hozana.lekcionar.ui.routes.AppNavigation
 import mkajt.hozana.lekcionar.ui.theme.AppTheme
 import mkajt.hozana.lekcionar.viewModel.LekcionarViewModel
 
@@ -36,7 +38,9 @@ class MainActivity : ComponentActivity() {
                     lekcionarViewModel = LekcionarViewModel(application, lekcionarRepository)
                     lekcionarViewModel.checkDbAndfetchDataFromApi()
 
-                    HomeSection(lekcionarViewModel)
+                    AppNavigation(viewModel = lekcionarViewModel)
+
+                    //HomeSection(lekcionarViewModel)
                 }
             }
         }

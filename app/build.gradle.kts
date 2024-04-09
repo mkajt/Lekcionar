@@ -32,6 +32,7 @@ android {
         }
     }
     compileOptions {
+        isCoreLibraryDesugaringEnabled = true
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
     }
@@ -65,6 +66,7 @@ dependencies {
     implementation("com.google.devtools.ksp:symbol-processing-gradle-plugin:1.9.22-1.0.17")
     implementation("androidx.compose.material3:material3-android:1.2.0")
     implementation ("androidx.compose.material:material-icons-extended:1.6.1")
+    implementation ("androidx.navigation:navigation-compose:2.7.7")
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
@@ -72,7 +74,6 @@ dependencies {
     androidTestImplementation("androidx.compose.ui:ui-test-junit4")
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
-
 
     // Kotlin Coroutines
     //implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
@@ -92,4 +93,9 @@ dependencies {
     implementation("androidx.room:room-runtime:$roomVersion")
     implementation("androidx.room:room-ktx:$roomVersion")
     ksp("androidx.room:room-compiler:$roomVersion")
+
+    // Calendar: https://github.com/kizitonwose/Calendar?tab=readme-ov-file
+    coreLibraryDesugaring ("com.android.tools:desugar_jdk_libs:2.0.4")
+    implementation("com.kizitonwose.calendar:compose:2.5.0")
+
 }

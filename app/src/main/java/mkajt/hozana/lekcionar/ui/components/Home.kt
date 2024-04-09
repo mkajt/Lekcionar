@@ -64,6 +64,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.text.HtmlCompat
+import androidx.navigation.NavController
+import androidx.navigation.NavHost
 import kotlinx.coroutines.Dispatchers
 import mkajt.hozana.lekcionar.util.millisecondsToTimeString
 import mkajt.hozana.lekcionar.model.database.PodatkiEntity
@@ -80,7 +82,7 @@ import java.util.regex.Pattern
 @OptIn(ExperimentalMaterial3Api::class)
 @Preview(showBackground = true)
 @Composable
-fun HomeSection(viewModel: LekcionarViewModel) {
+fun HomeSection(viewModel: LekcionarViewModel, navController: NavController) {
     val context = LocalContext.current.applicationContext
 
     val formatter = SimpleDateFormat("yyyy-MM-dd")
@@ -146,8 +148,8 @@ fun HomeSection(viewModel: LekcionarViewModel) {
                 containerColor = White,
                 contentColor = LekcionarRed,
                 contentPadding = BottomAppBarDefaults.ContentPadding,
-                modifier = Modifier
-                    .height(80.dp)
+                //modifier = Modifier
+                 //   .height(80.dp)
                 /*.clip(
                     RoundedCornerShape(
                         topStart = 24.dp, topEnd = 24.dp
