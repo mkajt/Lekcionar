@@ -18,6 +18,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import mkajt.hozana.lekcionar.model.LekcionarRepository
 import mkajt.hozana.lekcionar.model.database.PodatkiEntity
+import java.time.format.DateTimeFormatter
 
 class LekcionarViewModel(
     application: Application?,
@@ -29,6 +30,7 @@ class LekcionarViewModel(
     val dataState: StateFlow<LekcionarViewState> = _dataState.asStateFlow()
 
     private val _selektor = MutableStateFlow("")
+    private val _selectedDate = MutableStateFlow("")
     private val _idPodatek = MutableStateFlow<List<String>?>(null)
     val idPodatek = _idPodatek.asStateFlow()
     private val _podatki = MutableStateFlow<List<PodatkiEntity>?>(null)

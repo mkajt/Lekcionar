@@ -18,6 +18,7 @@ data class AppColorScheme(
 data class AppTypography(
     val titleLarge: TextStyle,
     val titleNormal: TextStyle,
+    val titleSmall: TextStyle,
     val body: TextStyle,
     val bodyItalic: TextStyle,
     val labelXLarge: TextStyle,
@@ -52,6 +53,7 @@ val LocalAppTyphography = staticCompositionLocalOf {
     AppTypography(
         titleLarge = TextStyle.Default,
         titleNormal = TextStyle.Default,
+        titleSmall = TextStyle.Default,
         body = TextStyle.Default,
         bodyItalic = TextStyle.Default,
         labelXLarge = TextStyle.Default,

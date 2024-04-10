@@ -40,6 +40,11 @@ private val typography = AppTypography(
         fontWeight = FontWeight.SemiBold,
         fontSize = 20.sp
     ),
+    titleSmall = TextStyle(
+        fontFamily = Roboto_condensed,
+        fontWeight = FontWeight.SemiBold,
+        fontSize = 18.sp
+    ),
     body = TextStyle(
         fontFamily = PT_sefif,
         fontSize = 18.sp
