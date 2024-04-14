@@ -18,7 +18,7 @@ enum class Screen {
 @Composable
 fun AppNavigation(viewModel: LekcionarViewModel) {
     val navController = rememberNavController()
-    NavHost(navController = navController, startDestination = Screen.CALLENDAR.name) {
+    NavHost(navController = navController, startDestination = Screen.HOME.name) {
         composable(Screen.HOME.name) { Home(viewModel = viewModel, navController = navController)}
         composable(Screen.CALLENDAR.name) { Calendar(viewModel = viewModel, navController = navController)}
     }

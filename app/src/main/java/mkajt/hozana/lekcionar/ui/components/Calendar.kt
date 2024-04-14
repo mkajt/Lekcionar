@@ -60,6 +60,7 @@ import com.kizitonwose.calendar.core.nextMonth
 import com.kizitonwose.calendar.core.previousMonth
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.launch
+import mkajt.hozana.lekcionar.ui.routes.Screen
 import mkajt.hozana.lekcionar.ui.theme.AppTheme
 import mkajt.hozana.lekcionar.viewModel.LekcionarViewModel
 import java.time.DayOfWeek
@@ -78,7 +79,9 @@ fun Calendar(viewModel: LekcionarViewModel, navController: NavController) {
                     Text(text = "Koledar", style = AppTheme.typography.titleLarge)
                 },
                 navigationIcon = {
-                    IconButton(onClick = { /*TODO*/ }) {
+                    IconButton(onClick = {
+                        navController.navigate(Screen.HOME.name)
+                    }) {
                         Icon(
                             imageVector = Icons.Rounded.ArrowBack,
                             contentDescription = "Back to Home"
@@ -115,10 +118,10 @@ fun CalendarSection(viewModel: LekcionarViewModel, navController: NavController)
     val selections = remember { mutableStateListOf<CalendarDay>() }
     val daysOfWeek = remember { daysOfWeek(firstDayOfWeek = DayOfWeek.MONDAY) }
 
+
     Column(
         modifier = Modifier
-            .fillMaxHeight()
-            .fillMaxWidth()
+            .fillMaxSize()
             .padding(top = 20.dp),
     ) {
         val state = rememberCalendarState(
@@ -129,6 +132,7 @@ fun CalendarSection(viewModel: LekcionarViewModel, navController: NavController)
         )
         val coroutineScope = rememberCoroutineScope()
         val visibleMonth = rememberFirstMostVisibleMonth(state, viewportPercent = 90f)
+
         SimpleCalendarTitle(
             modifier = Modifier.padding(vertical = 10.dp, horizontal = 8.dp),
             currentMonth = visibleMonth.yearMonth,
@@ -141,8 +145,9 @@ fun CalendarSection(viewModel: LekcionarViewModel, navController: NavController)
                 coroutineScope.launch {
                     state.animateScrollToMonth(state.firstVisibleMonth.yearMonth.nextMonth)
                 }
-            },
+            }
         )
+
         HorizontalCalendar(
             modifier = Modifier.padding(top = 30.dp),
             state = state,
@@ -159,6 +164,7 @@ fun CalendarSection(viewModel: LekcionarViewModel, navController: NavController)
                 MonthHeader(daysOfWeek = daysOfWeek)
             },
         )
+
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -170,7 +176,7 @@ fun CalendarSection(viewModel: LekcionarViewModel, navController: NavController)
                 onClick = {
                     Log.d("Calendar", "Select")
                 },
-                modifier = Modifier.padding(),
+                modifier = Modifier.padding(bottom = 30.dp),
                 colors = ButtonDefaults.outlinedButtonColors(
                     containerColor = AppTheme.colorScheme.background,
                     contentColor = AppTheme.colorScheme.primary,

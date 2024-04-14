@@ -57,6 +57,7 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.text.HtmlCompat
 import androidx.navigation.NavController
 import mkajt.hozana.lekcionar.model.database.PodatkiEntity
+import mkajt.hozana.lekcionar.ui.routes.Screen
 import mkajt.hozana.lekcionar.ui.theme.AppTheme
 import mkajt.hozana.lekcionar.ui.theme.LekcionarRed
 import mkajt.hozana.lekcionar.ui.theme.White
@@ -71,12 +72,9 @@ import java.util.regex.Pattern
 fun Home(viewModel: LekcionarViewModel, navController: NavController) {
     val context = LocalContext.current.applicationContext
 
-    val formatter = SimpleDateFormat("yyyy-MM-dd")
-    val formattedDate = formatter.format(System.currentTimeMillis())
-    val selektor = createSelektor(formattedDate.toString(), viewModel)
+    createSelektor(viewModel)
 
     viewModel.getPodatkiBySelektor()
-
 
     Scaffold(
         topBar = {
@@ -148,7 +146,7 @@ fun Home(viewModel: LekcionarViewModel, navController: NavController) {
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     IconButton(onClick = {
-                        Toast.makeText(context, "Bottom", Toast.LENGTH_SHORT).show()
+                        viewModel.goToPreviousDate()
                     }) {
                         Icon(
                             imageVector = Icons.Rounded.KeyboardArrowLeft,
@@ -157,7 +155,7 @@ fun Home(viewModel: LekcionarViewModel, navController: NavController) {
                         )
                     }
                     IconButton(onClick = {
-                        Toast.makeText(context, "Bottom", Toast.LENGTH_SHORT).show()
+                        navController.navigate(Screen.CALLENDAR.name)
                     }) {
                         Icon(
                             imageVector = Icons.Rounded.DateRange,
@@ -168,7 +166,7 @@ fun Home(viewModel: LekcionarViewModel, navController: NavController) {
                         )
                     }
                     IconButton(onClick = {
-                        Toast.makeText(context, "Bottom", Toast.LENGTH_SHORT).show()
+                        viewModel.goToNextDate()
                     }) {
                         Icon(
                             imageVector = Icons.Rounded.KeyboardArrowRight,
@@ -750,6 +748,7 @@ private fun addBreakAfterSourceOfAleluja(text: String): String {
 
 }
 
+
 @Preview(showBackground = true)
 @Composable
 private fun DisplayDataMultiple(podatki: PodatkiEntity, viewModel: LekcionarViewModel) {
@@ -810,9 +809,7 @@ private fun DisplayDataMultiple(podatki: PodatkiEntity, viewModel: LekcionarView
     }
 }
 
-private fun createSelektor(date: String, viewModel: LekcionarViewModel): String {
-    val selektor = "$date-slovenija-kapucini"
-    val selektor2 = "2024-03-31-slovenija-kapucini"
-    viewModel.updateSelektor(selektor2)
-    return selektor
+private fun createSelektor(viewModel: LekcionarViewModel) {
+    viewModel.updateSelectedRed("kapucini")
+    viewModel.updateSelectedSkofija("slovenija")
 }

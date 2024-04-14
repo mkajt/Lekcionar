@@ -18,6 +18,8 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import mkajt.hozana.lekcionar.model.LekcionarRepository
 import mkajt.hozana.lekcionar.model.database.PodatkiEntity
+import java.time.LocalDate
+import java.time.YearMonth
 import java.time.format.DateTimeFormatter
 
 class LekcionarViewModel(
@@ -29,8 +31,13 @@ class LekcionarViewModel(
     private val _dataState = MutableStateFlow<LekcionarViewState>(LekcionarViewState.Start)
     val dataState: StateFlow<LekcionarViewState> = _dataState.asStateFlow()
 
+    private val dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
     private val _selektor = MutableStateFlow("")
-    private val _selectedDate = MutableStateFlow("")
+
+    private val _selectedDate = MutableStateFlow(dateFormatter.format(LocalDate.now()))
+    private val _selectedRed = MutableStateFlow("kapucini")
+    private val _selectedSkofija = MutableStateFlow("slovenija")
+
     private val _idPodatek = MutableStateFlow<List<String>?>(null)
     val idPodatek = _idPodatek.asStateFlow()
     private val _podatki = MutableStateFlow<List<PodatkiEntity>?>(null)
@@ -64,9 +71,37 @@ class LekcionarViewModel(
         }
     }
 
-    fun updateSelektor(newSelektor: String) {
-        _selektor.value = newSelektor
+    private fun updateSelektor() {
+        _selektor.value = "${_selectedDate.value}-${_selectedSkofija.value}-${_selectedRed.value}"
+        Log.d("DATE", _selektor.value)
+        getPodatkiBySelektor()
     }
+
+    fun updateSelectedDate(date: LocalDate) {
+        _selectedDate.value = dateFormatter.format(date)
+        updateSelektor()
+    }
+
+    fun updateSelectedRed(red: String) {
+        _selectedRed.value = red
+        updateSelektor()
+    }
+
+    fun updateSelectedSkofija(skofija: String) {
+        _selectedSkofija.value = skofija
+        updateSelektor()
+    }
+
+    fun goToNextDate() {
+        val currentDate = LocalDate.parse(_selectedDate.value, dateFormatter)
+        updateSelectedDate(currentDate.plusDays(1))
+    }
+
+    fun goToPreviousDate() {
+        val currentDate = LocalDate.parse(_selectedDate.value, dateFormatter)
+        updateSelectedDate(currentDate.minusDays(1))
+    }
+
 
     fun getPodatkiBySelektor() {
         viewModelScope.launch {
