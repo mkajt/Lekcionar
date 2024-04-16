@@ -74,8 +74,6 @@ fun Home(viewModel: LekcionarViewModel, navController: NavController) {
 
     createSelektor(viewModel)
 
-    viewModel.getPodatkiBySelektor()
-
     Scaffold(
         topBar = {
             TopAppBar(
@@ -180,7 +178,6 @@ fun Home(viewModel: LekcionarViewModel, navController: NavController) {
     )
 }
 
-@Preview(showBackground = true)
 @Composable
 fun ContentSectionHome(innerPadding: PaddingValues, viewModel: LekcionarViewModel) {
 
@@ -201,7 +198,7 @@ fun ContentSectionHome(innerPadding: PaddingValues, viewModel: LekcionarViewMode
             )
         ) {
             //Greeting(name = "AlreadyInDb", modifier = Modifier.padding(innerPadding))
-            if (podatki != null && podatki!!.size == 1) {
+            if (podatki != null) {
                 Column(
                     modifier = Modifier
                         .padding(innerPadding)
@@ -212,27 +209,21 @@ fun ContentSectionHome(innerPadding: PaddingValues, viewModel: LekcionarViewMode
                         text = podatki!!.first().datum, Modifier.padding(top = 20.dp),
                         style = AppTheme.typography.titleNormal
                     )
-                    DisplayDataSingle(podatki = podatki!!.first(), viewModel = viewModel)
-                }
-            } else {
-                if (podatki?.isNotEmpty() == true) {
-                    Text(
-                        text = podatki!!.first().datum, Modifier.padding(top = 20.dp),
-                        style = AppTheme.typography.titleNormal
-                    )
-                    for (podatek in podatki!!) {
-                        Column(
-                            modifier = Modifier
-                                .padding(innerPadding)
-                                .fillMaxWidth(),
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            DisplayDataMultiple(podatki = podatek, viewModel = viewModel)
+                    if (podatki!!.size == 1) {
+                        DisplayDataSingle(podatki = podatki!!.first(), viewModel = viewModel)
+                    } else {
+                        for (podatek in podatki!!) {
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth(),
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+                                DisplayDataMultiple(podatki = podatek, viewModel = viewModel)
+                            }
                         }
                     }
                 }
             }
-
             Log.d("UI", "AlreadyInDb or Loaded")
         } /*else if (!idPodatek.isNullOrEmpty()) {
             Greeting(name = idPodatek!![0], modifier = Modifier.padding(innerPadding))
@@ -256,40 +247,39 @@ fun ContentSectionHome(innerPadding: PaddingValues, viewModel: LekcionarViewMode
 
 @Composable
 private fun DisplayDataSingle(podatki: PodatkiEntity, viewModel: LekcionarViewModel) {
-    var isButtonClicked by remember { mutableStateOf(false) }
     val context = LocalContext.current.applicationContext
 
     OutlinedButton(
-        onClick = {
-            isButtonClicked = !isButtonClicked
-            Log.d("DisplayData", isButtonClicked.toString())
-        },
+        onClick = {},
         modifier = Modifier.padding(top = 10.dp, end = 10.dp),
         colors = ButtonDefaults.outlinedButtonColors(
-            containerColor = AppTheme.colorScheme.background,
-            contentColor = AppTheme.colorScheme.primary,
+            containerColor = AppTheme.colorScheme.background
         ),
+        enabled = false,
         shape = AppTheme.shape.button,
         border = BorderStroke(1.5.dp, AppTheme.colorScheme.activeSliderTrack)
     ) {
-        Text(text = podatki.opis, style = AppTheme.typography.labelLarge)
+        Text(text = podatki.opis, style = AppTheme.typography.labelLarge, color = AppTheme.colorScheme.primary)
     }
 
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(top = 10.dp),
-        horizontalArrangement = Arrangement.Center
-    ) {
-        Text(
-            text = podatki.vrstica,
-            textAlign = TextAlign.Center,
+    if (podatki.vrstica.isNotEmpty()) {
+        Row(
             modifier = Modifier
-                .padding(horizontal = 8.dp)
-                .fillMaxWidth(0.75f),
-            style = AppTheme.typography.bodyItalic
-        )
+                .fillMaxWidth()
+                .padding(top = 10.dp),
+            horizontalArrangement = Arrangement.Center
+        ) {
+            Text(
+                text = podatki.vrstica,
+                textAlign = TextAlign.Center,
+                modifier = Modifier
+                    .padding(horizontal = 8.dp)
+                    .fillMaxWidth(0.75f),
+                style = AppTheme.typography.bodyItalic
+            )
+        }
     }
+
     if (podatki.mp3.isNotEmpty()) {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -311,6 +301,72 @@ private fun DisplayDataSingle(podatki: PodatkiEntity, viewModel: LekcionarViewMo
         Berila(podatki = podatki)
     }
 
+}
+
+@Composable
+private fun DisplayDataMultiple(podatki: PodatkiEntity, viewModel: LekcionarViewModel) {
+    var isButtonClicked by remember { mutableStateOf(false) }
+    val context = LocalContext.current.applicationContext
+
+    OutlinedButton(
+        onClick = {
+            isButtonClicked = !isButtonClicked
+            Log.d("DisplayData", isButtonClicked.toString())
+        },
+        modifier = Modifier.padding(top = 10.dp, end = 10.dp),
+        colors =
+            ButtonDefaults.outlinedButtonColors(
+                containerColor = if (isButtonClicked) AppTheme.colorScheme.background else AppTheme.colorScheme.primary,
+                contentColor = if (isButtonClicked) AppTheme.colorScheme.primary else AppTheme.colorScheme.background,
+            ),
+        shape = AppTheme.shape.button,
+        border = if (isButtonClicked) BorderStroke(1.5.dp, AppTheme.colorScheme.activeSliderTrack) else BorderStroke(1.5.dp, AppTheme.colorScheme.primary)
+    ) {
+        Text(text = podatki.opis, style = AppTheme.typography.labelLarge)
+    }
+
+    if (isButtonClicked) {
+
+        if (podatki.vrstica.isNotEmpty()) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 10.dp),
+                horizontalArrangement = Arrangement.Center
+            ) {
+                Text(
+                    text = podatki.vrstica,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier
+                        .padding(horizontal = 8.dp)
+                        .fillMaxWidth(0.75f),
+                    style = AppTheme.typography.bodyItalic
+                )
+            }
+        }
+
+        if (podatki.mp3.isNotEmpty()) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.Center
+            ) {
+                MediaPlayer(
+                    viewModel = viewModel,
+                    uri = podatki.mp3,
+                    context = context
+                )
+            }
+        }
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 16.dp),
+            horizontalArrangement = Arrangement.Center
+        ) {
+            Berila(podatki = podatki)
+        }
+    }
 }
 
 @Composable
@@ -670,7 +726,7 @@ private fun Evangelij(podatki: PodatkiEntity) {
 }
 
 @Composable
-fun HtmlBody(text: String) {
+private fun HtmlBody(text: String) {
     val textSizeBody = AppTheme.typography.body.fontSize.value
     val textColorBody = AppTheme.colorScheme.secondary
     val textFontBody = AppTheme.typography.body
@@ -693,7 +749,7 @@ fun HtmlBody(text: String) {
 }
 
 @Composable
-fun HtmlBodyItalic(text: String) {
+private fun HtmlBodyItalic(text: String) {
     val textSizeBody = AppTheme.typography.body.fontSize.value
     val textColorBody = AppTheme.colorScheme.secondary
     val textFontBody = AppTheme.typography.bodyItalic
@@ -747,68 +803,6 @@ private fun addBreakAfterSourceOfAleluja(text: String): String {
     return text
 
 }
-
-
-@Preview(showBackground = true)
-@Composable
-private fun DisplayDataMultiple(podatki: PodatkiEntity, viewModel: LekcionarViewModel) {
-    var isButtonClicked by remember { mutableStateOf(false) }
-    val context = LocalContext.current.applicationContext
-
-    Text(text = podatki.datum, Modifier.padding(top = 10.dp))
-
-    OutlinedButton(
-        onClick = {
-            isButtonClicked = !isButtonClicked
-            Log.d("DisplayData", isButtonClicked.toString())
-        },
-        modifier = Modifier.padding(top = 10.dp, end = 10.dp),
-        colors = ButtonDefaults.outlinedButtonColors(
-            containerColor = AppTheme.colorScheme.background,
-            contentColor = AppTheme.colorScheme.primary,
-        ),
-        shape = AppTheme.shape.button,
-        border = BorderStroke(1.dp, AppTheme.colorScheme.secondary)
-    ) {
-        Text(text = podatki.opis)
-    }
-
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(top = 10.dp),
-        horizontalArrangement = Arrangement.Center
-    ) {
-        Text(
-            text = podatki.vrstica,
-            textAlign = TextAlign.Center,
-            modifier = Modifier
-                .padding(horizontal = 8.dp)
-                .fillMaxWidth(0.75f)
-        )
-    }
-    if (podatki.mp3.isNotEmpty()) {
-        //Box(modifier = Modifier
-        //    .border(
-        //        width = 2.dp,
-        //        color = Color.Black,
-        //        shape = RoundedCornerShape(16.dp)
-        //    )
-        //) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.Center
-        ) {
-            MediaPlayer(
-                viewModel = viewModel,
-                uri = podatki.mp3,
-                context = context
-            )
-        }
-        //}
-    }
-}
-
 private fun createSelektor(viewModel: LekcionarViewModel) {
     viewModel.updateSelectedRed("kapucini")
     viewModel.updateSelectedSkofija("slovenija")

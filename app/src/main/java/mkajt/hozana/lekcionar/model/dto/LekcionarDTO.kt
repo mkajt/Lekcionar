@@ -4,8 +4,8 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class LekcionarDTO(
-        val map: List<MapDTO>, //JsonOBject
-        val data: List<PodatkiDTO>, //JsonObject
+        val map: List<MapDTO>,
+        val data: List<PodatkiDTO>,
         val skofije: List<SkofijaDTO>,
         val redovi: List<RedDTO>
 )

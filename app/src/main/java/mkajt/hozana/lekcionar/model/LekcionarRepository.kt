@@ -3,7 +3,6 @@ package mkajt.hozana.lekcionar.model
 import android.content.Context
 import android.util.Log
 
-import android.widget.Toast
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -17,13 +16,9 @@ import mkajt.hozana.lekcionar.model.dto.Mapper
 import mkajt.hozana.lekcionar.model.dto.PodatkiDTO
 import mkajt.hozana.lekcionar.model.dto.RedDTO
 import mkajt.hozana.lekcionar.model.dto.SkofijaDTO
-import retrofit2.Call
-import retrofit2.Callback
+import okhttp3.Headers
 import retrofit2.HttpException
 import retrofit2.Response
-import kotlin.coroutines.resume
-import kotlin.coroutines.resumeWithException
-import kotlin.coroutines.suspendCoroutine
 
 class LekcionarRepository(
     mContext: Context,
@@ -48,12 +43,21 @@ class LekcionarRepository(
 
     suspend fun getLekcionarDataFromApi() {
         try {
-            val lekcionarDTO: LekcionarDTO? = withContext(ioDispatcher) {
-                lekcionarApi?.getLekcionarData(Constants.BASE, Constants.KEY)
+            val response: Response<LekcionarDTO> = withContext(ioDispatcher) {
+                lekcionarApi?.getLekcionarData(Constants.BASE, Constants.KEY)!!
             }
-            if (lekcionarDTO != null) {
-                insertDataIntoDB(lekcionarDTO)
-                Log.d(TAG,"Data Loaded!")
+
+            val header: Headers = response.headers()
+            //val contentType: String? = headers?.get("Content-Type")
+
+            if (response.isSuccessful) {
+                val lekcionarDTO: LekcionarDTO? = response.body()
+                if (lekcionarDTO != null) {
+                    insertDataIntoDB(lekcionarDTO)
+                    Log.d(TAG,"Data Loaded!")
+                }
+            } else {
+                Log.d(TAG, "Failed to fetch data from API: ${response.message()}")
             }
         } catch (e: HttpException) {
             Log.d(TAG, "Failed to fetch data from API: ${e.message()}")
@@ -64,7 +68,7 @@ class LekcionarRepository(
         }
     }
 
-    suspend fun getIdPodatekFromMap(selektor: String): List<String> {
+    suspend fun getIdPodatekFromMap(selektor: String): String {
         return withContext(ioDispatcher) {
             lekcionarDB.lekcionarDao().getIdPodatekFromMap(selektor)
         }

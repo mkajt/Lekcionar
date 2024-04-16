@@ -8,7 +8,7 @@ import androidx.room.Query
 @Dao
 interface LekcionarDAO {
 
-    @Insert(onConflict = OnConflictStrategy.IGNORE) //TODO did this because of the error in logs
+    @Insert(onConflict = OnConflictStrategy.IGNORE) //did this because of the error in logs
     suspend fun insertMap(mapEntities: List<MapEntity>)
 
     @Insert
@@ -21,7 +21,7 @@ interface LekcionarDAO {
     suspend fun insertSkofija(skofijeEntities: List<SkofijaEntity>)
 
     @Query("SELECT id_podatek FROM map WHERE selektor = :selektor")
-    suspend fun getIdPodatekFromMap(selektor: String): List<String>
+    suspend fun getIdPodatekFromMap(selektor: String): String
 
     @Query("SELECT * FROM podatki WHERE id = :id_podatek")
     suspend fun getPodatki(id_podatek: String): PodatkiEntity

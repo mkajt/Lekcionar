@@ -19,7 +19,6 @@ import kotlinx.coroutines.launch
 import mkajt.hozana.lekcionar.model.LekcionarRepository
 import mkajt.hozana.lekcionar.model.database.PodatkiEntity
 import java.time.LocalDate
-import java.time.YearMonth
 import java.time.format.DateTimeFormatter
 
 class LekcionarViewModel(
@@ -59,36 +58,37 @@ class LekcionarViewModel(
             try {
                 val count = lekcionarRepository.countPodatki()
                 if (count == 0) {
-                    _dataState.value = LekcionarViewState.Loading
+                    _dataState.update { LekcionarViewState.Loading }
                     lekcionarRepository.getLekcionarDataFromApi()
-                    _dataState.value = LekcionarViewState.Loaded
+                    _dataState.update { LekcionarViewState.Loaded }
                 }
-                _dataState.value = LekcionarViewState.AlreadyInDb
+                _dataState.update { LekcionarViewState.AlreadyInDb }
+                getPodatkiBySelektor()
 
             } catch (e: Exception) {
-                _dataState.value = LekcionarViewState.Error(e.message ?: "Unknown error")
+                _dataState.update { LekcionarViewState.Error(e.message ?: "Unknown error") }
             }
         }
     }
 
     private fun updateSelektor() {
-        _selektor.value = "${_selectedDate.value}-${_selectedSkofija.value}-${_selectedRed.value}"
+        _selektor.update { "${_selectedDate.value}-${_selectedSkofija.value}-${_selectedRed.value}" }
         Log.d("DATE", _selektor.value)
         getPodatkiBySelektor()
     }
 
     fun updateSelectedDate(date: LocalDate) {
-        _selectedDate.value = dateFormatter.format(date)
+        _selectedDate.update { dateFormatter.format(date) }
         updateSelektor()
     }
 
     fun updateSelectedRed(red: String) {
-        _selectedRed.value = red
+        _selectedRed.update { red }
         updateSelektor()
     }
 
     fun updateSelectedSkofija(skofija: String) {
-        _selectedSkofija.value = skofija
+        _selectedSkofija.update { skofija }
         updateSelektor()
     }
 
@@ -103,11 +103,14 @@ class LekcionarViewModel(
     }
 
 
-    fun getPodatkiBySelektor() {
+    private fun getPodatkiBySelektor() {
         viewModelScope.launch {
             if (_selektor.value != "") {
                 val ids = async { lekcionarRepository.getIdPodatekFromMap(_selektor.value) }
-                _idPodatek.value = ids.await()
+                val idsString = ids.await() ?: return@launch
+                _idPodatek.update { idsString.split(",") }
+                //Log.d("LVM", "Id podatek: ${_idPodatek.value}")
+
                 val podatki = async { lekcionarRepository.getPodatki(_idPodatek.value!!) }
                 _podatki.update { podatki.await() }
                 //_podatki.value = podatki.await()

@@ -10,7 +10,7 @@ object Mapper {
     fun mapRedDtoToEntity(redoviDTO: List<RedDTO>) : List<RedEntity> {
         var redEntities = ArrayList<RedEntity>()
         redoviDTO.forEach { red ->
-            var rEntity = RedEntity(red.id, red.red)
+            val rEntity = RedEntity(red.id, red.red)
             redEntities.add(rEntity)
         }
         return redEntities
@@ -19,7 +19,7 @@ object Mapper {
     fun mapSkofijaDtoToEntity(skofijeDTO: List<SkofijaDTO>) : List<SkofijaEntity> {
         var skofijaEntities = ArrayList<SkofijaEntity>()
         skofijeDTO.forEach { skofija ->
-            var sEntity = SkofijaEntity(skofija.id, skofija.skofija)
+            val sEntity = SkofijaEntity(skofija.id, skofija.skofija)
             skofijaEntities.add(sEntity)
         }
         return skofijaEntities
@@ -29,7 +29,7 @@ object Mapper {
     fun mapPodatkiDtoToEntity(podatkiDTO: List<PodatkiDTO>) : List<PodatkiEntity> {
         var podatkiEntities = ArrayList<PodatkiEntity>()
         podatkiDTO.forEach { podatki ->
-            var pEntity = PodatkiEntity(
+            val pEntity = PodatkiEntity(
                 podatki.id,
                 podatki.opis,
                 podatki.timestamp,
@@ -59,7 +59,7 @@ object Mapper {
     fun mapMapDtoToEntity(mapDTO: List<MapDTO>) : List<MapEntity> {
         var mapEntities = ArrayList<MapEntity>()
         mapDTO.forEach { map ->
-            var mEntity = MapEntity(map.selektor, map.data_ids)
+            val mEntity = MapEntity(map.selektor, map.data_ids.joinToString(","))
             mapEntities.add(mEntity)
         }
         return mapEntities
