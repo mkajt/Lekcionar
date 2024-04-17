@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -21,6 +22,7 @@ import androidx.compose.material.icons.rounded.KeyboardArrowLeft
 import androidx.compose.material.icons.rounded.KeyboardArrowRight
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.ArrowBack
+import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -32,10 +34,13 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -64,6 +69,7 @@ import mkajt.hozana.lekcionar.ui.routes.Screen
 import mkajt.hozana.lekcionar.ui.theme.AppTheme
 import mkajt.hozana.lekcionar.viewModel.LekcionarViewModel
 import java.time.DayOfWeek
+import java.time.LocalDate
 import java.time.YearMonth
 import java.time.format.TextStyle
 import java.util.Locale
@@ -112,12 +118,14 @@ fun Calendar(viewModel: LekcionarViewModel, navController: NavController) {
 @Composable
 fun CalendarSection(viewModel: LekcionarViewModel, navController: NavController) {
     val adjacentMonths: Long = 5
-    val currentMonth = remember { YearMonth.now() }
+    val currentDate by viewModel.selectedDate.collectAsState()
+    val currentMonth = remember { YearMonth.parse(currentDate, viewModel.dateFormatter) }
     val startMonth = remember { currentMonth.minusMonths(adjacentMonths) }
     val endMonth = remember { currentMonth.plusMonths(adjacentMonths) }
     val selections = remember { mutableStateListOf<CalendarDay>() }
     val daysOfWeek = remember { daysOfWeek(firstDayOfWeek = DayOfWeek.MONDAY) }
 
+    var calendarSelectedDate by remember { mutableStateOf(currentDate) }
 
     Column(
         modifier = Modifier
@@ -152,12 +160,12 @@ fun CalendarSection(viewModel: LekcionarViewModel, navController: NavController)
             modifier = Modifier.padding(top = 30.dp),
             state = state,
             dayContent = { day ->
-                Day(day, isSelected = selections.contains(day)) { clicked ->
-                    if (selections.contains(clicked)) {
-                        selections.remove(clicked)
-                    } else {
-                        selections.add(clicked)
-                    }
+                Day(day,
+                    isSelected = selections.contains(day),
+                    viewModel = viewModel,
+                    calendarSelectedDate = calendarSelectedDate
+                ) { newSelectedDate ->
+                    calendarSelectedDate = newSelectedDate
                 }
             },
             monthHeader = {
@@ -174,7 +182,8 @@ fun CalendarSection(viewModel: LekcionarViewModel, navController: NavController)
         ) {
             OutlinedButton(
                 onClick = {
-                    Log.d("Calendar", "Select")
+                    navController.navigate(Screen.HOME.name)
+                    viewModel.updateSelectedDate(LocalDate.parse(calendarSelectedDate, viewModel.dateFormatter))
                 },
                 modifier = Modifier.padding(bottom = 30.dp),
                 colors = ButtonDefaults.outlinedButtonColors(
@@ -218,26 +227,37 @@ fun MonthHeader(daysOfWeek: List<DayOfWeek>) {
 }
 
 @Composable
-fun Day(day: CalendarDay, isSelected: Boolean, onClick: (CalendarDay) -> Unit) {
+fun Day(day: CalendarDay, isSelected: Boolean, calendarSelectedDate: String, viewModel: LekcionarViewModel, onSelectedDateChange: (String) -> Unit) {
+    val interactionSource = remember { MutableInteractionSource() }
     Box(
         modifier = Modifier
             .aspectRatio(1f) // This is important for square-sizing!
             .testTag("MonthDay")
             .padding(6.dp)
             .clip(CircleShape)
-            .background(color = if (isSelected) AppTheme.colorScheme.primary else Color.Transparent)
+            .background(
+                color = if (viewModel.dateFormatter
+                        .format(day.date)
+                        .equals(calendarSelectedDate)
+                ) AppTheme.colorScheme.primary else Color.Transparent
+            )
             // Disable clicks on inDates/outDates
             .clickable(
                 enabled = day.position == DayPosition.MonthDate,
                 //showRipple = !isSelected,
-                onClick = { onClick(day) },
+                indication = rememberRipple(
+                    color = AppTheme.colorScheme.background,
+                    bounded = false
+                ),
+                interactionSource = interactionSource,
+                onClick = { onSelectedDateChange(viewModel.dateFormatter.format(day.date)) },
             ),
         contentAlignment = Alignment.Center,
     ) {
         val textColor = when (day.position) {
             // Color.Unspecified will use the default text color from the current theme
-            DayPosition.MonthDate -> if (isSelected) AppTheme.colorScheme.background else AppTheme.colorScheme.secondary
-            DayPosition.InDate -> AppTheme.colorScheme.activeSliderTrack
+            DayPosition.MonthDate -> if (viewModel.dateFormatter.format(day.date).equals(calendarSelectedDate)) AppTheme.colorScheme.background else AppTheme.colorScheme.secondary
+            DayPosition.InDate -> AppTheme.colorScheme.inactiveSliderTrack
             DayPosition.OutDate -> AppTheme.colorScheme.inactiveSliderTrack
 
         }

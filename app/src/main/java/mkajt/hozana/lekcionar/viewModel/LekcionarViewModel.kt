@@ -30,10 +30,11 @@ class LekcionarViewModel(
     private val _dataState = MutableStateFlow<LekcionarViewState>(LekcionarViewState.Start)
     val dataState: StateFlow<LekcionarViewState> = _dataState.asStateFlow()
 
-    private val dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+    val dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
     private val _selektor = MutableStateFlow("")
 
     private val _selectedDate = MutableStateFlow(dateFormatter.format(LocalDate.now()))
+    val selectedDate = _selectedDate.asStateFlow()
     private val _selectedRed = MutableStateFlow("kapucini")
     private val _selectedSkofija = MutableStateFlow("slovenija")
 

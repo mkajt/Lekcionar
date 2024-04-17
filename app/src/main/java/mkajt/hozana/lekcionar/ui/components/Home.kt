@@ -37,6 +37,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -51,7 +52,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFontFamilyResolver
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.text.HtmlCompat
@@ -63,7 +63,6 @@ import mkajt.hozana.lekcionar.ui.theme.LekcionarRed
 import mkajt.hozana.lekcionar.ui.theme.White
 import mkajt.hozana.lekcionar.viewModel.LekcionarViewModel
 import mkajt.hozana.lekcionar.viewModel.LekcionarViewState
-import java.text.SimpleDateFormat
 import java.util.regex.Matcher
 import java.util.regex.Pattern
 
@@ -89,7 +88,6 @@ fun Home(viewModel: LekcionarViewModel, navController: NavController) {
                         Icon(
                             imageVector = Icons.Default.Settings,
                             contentDescription = "Settings",
-                            //tint = White,
                             modifier = Modifier.size(25.dp)
                         )
                     }
@@ -311,11 +309,10 @@ private fun DisplayDataMultiple(podatki: PodatkiEntity, viewModel: LekcionarView
     OutlinedButton(
         onClick = {
             isButtonClicked = !isButtonClicked
-            Log.d("DisplayData", isButtonClicked.toString())
         },
-        modifier = Modifier.padding(top = 10.dp, end = 10.dp),
-        colors =
-            ButtonDefaults.outlinedButtonColors(
+        modifier = Modifier
+            .padding(top = 10.dp, end = 10.dp),
+        colors = ButtonDefaults.outlinedButtonColors(
                 containerColor = if (isButtonClicked) AppTheme.colorScheme.background else AppTheme.colorScheme.primary,
                 contentColor = if (isButtonClicked) AppTheme.colorScheme.primary else AppTheme.colorScheme.background,
             ),
@@ -403,8 +400,12 @@ private fun Berila(podatki: PodatkiEntity) {
 @Composable
 private fun Berilo(podatki: PodatkiEntity, type: String) {
     var open by remember { mutableStateOf(false) }
-
     val borderColor = AppTheme.colorScheme.inactiveSliderTrack
+
+    LaunchedEffect(podatki) {
+        open = false
+    }
+
     Column (
         modifier = Modifier
             .fillMaxWidth()
@@ -506,8 +507,12 @@ private fun Berilo(podatki: PodatkiEntity, type: String) {
 @Composable
 private fun Psalm(podatki: PodatkiEntity) {
     var open by remember { mutableStateOf(false) }
-
     val borderColor = AppTheme.colorScheme.inactiveSliderTrack
+
+    LaunchedEffect(podatki) {
+        open = false
+    }
+
     Column (
         modifier = Modifier
             .fillMaxWidth()
@@ -617,8 +622,12 @@ private fun Psalm(podatki: PodatkiEntity) {
 @Composable
 private fun Evangelij(podatki: PodatkiEntity) {
     var open by remember { mutableStateOf(false) }
-
     val borderColor = AppTheme.colorScheme.inactiveSliderTrack
+
+    LaunchedEffect(podatki) {
+        open = false
+    }
+
     Column (
         modifier = Modifier
             .fillMaxWidth()
@@ -695,31 +704,30 @@ private fun Evangelij(podatki: PodatkiEntity) {
                     .height(IntrinsicSize.Min)
                     .padding(start = 16.dp, end = 16.dp)
             ) {
-                Row(
-                    verticalAlignment = Alignment.Top,
-                    horizontalArrangement = Arrangement.Start
-                ){
 
-                    Text(
-                        text = "Aleluja: ",
-                        style = AppTheme.typography.body,
-                        color = AppTheme.colorScheme.primary
-                    )
-                    /*Text(
-                        text = addBreakAfterSourceOfAleluja(podatki.aleluja),
-                        style = AppTheme.typography.bodyItalic,
-                        color = AppTheme.colorScheme.secondary
-                    )*/
-                    HtmlBodyItalic(text = addBreakAfterSourceOfAleluja(podatki.aleluja))
-                }
-
-                Row(
-                    modifier = Modifier
-                        .padding(top = 20.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
+                if (podatki.aleluja != "") {
+                    Row(
+                        verticalAlignment = Alignment.Top,
+                        horizontalArrangement = Arrangement.Start
+                    ){
+                        Text(
+                            text = "Aleluja: ",
+                            style = AppTheme.typography.body,
+                            color = AppTheme.colorScheme.primary
+                        )
+                        HtmlBodyItalic(text = addBreakAfterSourceOfAleluja(podatki.aleluja))
+                    }
+                    Row(
+                        modifier = Modifier
+                            .padding(top = 20.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        HtmlBody(text = podatki.evangelij_vsebina)
+                    }
+                } else {
                     HtmlBody(text = podatki.evangelij_vsebina)
                 }
+
             }
         }
     }
