@@ -94,6 +94,9 @@ dependencies {
     implementation("androidx.room:room-ktx:$roomVersion")
     ksp("androidx.room:room-compiler:$roomVersion")
 
+    // Preferences DataStore
+    implementation ("androidx.datastore:datastore-preferences:1.1.0")
+
     // Calendar: https://github.com/kizitonwose/Calendar?tab=readme-ov-file
     coreLibraryDesugaring ("com.android.tools:desugar_jdk_libs:2.0.4")
     implementation("com.kizitonwose.calendar:compose:2.5.0")

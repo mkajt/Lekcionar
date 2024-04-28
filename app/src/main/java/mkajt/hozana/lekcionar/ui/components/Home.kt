@@ -4,6 +4,8 @@ import android.util.Log
 import android.widget.TextView
 import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -33,6 +35,10 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Snackbar
+import androidx.compose.material3.SnackbarData
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -47,6 +53,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFontFamilyResolver
@@ -70,10 +77,18 @@ import java.util.regex.Pattern
 @Composable
 fun Home(viewModel: LekcionarViewModel, navController: NavController) {
     val context = LocalContext.current.applicationContext
-
+    val snackbarHostState = remember {SnackbarHostState()}
     createSelektor(viewModel)
 
+
     Scaffold(
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState) {
+            Snackbar(
+                snackbarData = it,
+                containerColor = AppTheme.colorScheme.activeSliderTrack,
+                contentColor = AppTheme.colorScheme.background
+            )
+        } },
         topBar = {
             TopAppBar(
                 title = {
@@ -116,8 +131,9 @@ fun Home(viewModel: LekcionarViewModel, navController: NavController) {
             Column(
                 modifier = Modifier
                     .verticalScroll(rememberScrollState())
+                    .background(color = AppTheme.colorScheme.background)
             ) {
-                ContentSectionHome(innerPadding = innerPadding, viewModel = viewModel)
+                ContentSectionHome(innerPadding = innerPadding, viewModel = viewModel, snackbarHostState = snackbarHostState)
             }
         },
         bottomBar = {
@@ -125,8 +141,8 @@ fun Home(viewModel: LekcionarViewModel, navController: NavController) {
 
             }*/
             BottomAppBar(
-                containerColor = White,
-                contentColor = LekcionarRed,
+                containerColor = AppTheme.colorScheme.background,
+                contentColor = AppTheme.colorScheme.primary,
                 contentPadding = BottomAppBarDefaults.ContentPadding,
                 //modifier = Modifier
                  //   .height(80.dp)
@@ -137,7 +153,7 @@ fun Home(viewModel: LekcionarViewModel, navController: NavController) {
                 )*/
             ) {
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier.fillMaxWidth().border(width = 2.dp, color = AppTheme.colorScheme.background, shape = RectangleShape),
                     horizontalArrangement = Arrangement.Center,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
@@ -177,7 +193,7 @@ fun Home(viewModel: LekcionarViewModel, navController: NavController) {
 }
 
 @Composable
-fun ContentSectionHome(innerPadding: PaddingValues, viewModel: LekcionarViewModel) {
+fun ContentSectionHome(innerPadding: PaddingValues, viewModel: LekcionarViewModel, snackbarHostState: SnackbarHostState) {
 
     val dataState by viewModel.dataState.collectAsState()
     val idPodatek by viewModel.idPodatek.collectAsState()
@@ -208,7 +224,7 @@ fun ContentSectionHome(innerPadding: PaddingValues, viewModel: LekcionarViewMode
                         style = AppTheme.typography.titleNormal
                     )
                     if (podatki!!.size == 1) {
-                        DisplayDataSingle(podatki = podatki!!.first(), viewModel = viewModel)
+                        DisplayDataSingle(podatki = podatki!!.first(), viewModel = viewModel, snackbarHostState = snackbarHostState)
                     } else {
                         for (podatek in podatki!!) {
                             Column(
@@ -216,7 +232,7 @@ fun ContentSectionHome(innerPadding: PaddingValues, viewModel: LekcionarViewMode
                                     .fillMaxWidth(),
                                 horizontalAlignment = Alignment.CenterHorizontally
                             ) {
-                                DisplayDataMultiple(podatki = podatek, viewModel = viewModel)
+                                DisplayDataMultiple(podatki = podatek, viewModel = viewModel, snackbarHostState = snackbarHostState)
                             }
                         }
                     }
@@ -244,12 +260,12 @@ fun ContentSectionHome(innerPadding: PaddingValues, viewModel: LekcionarViewMode
 }
 
 @Composable
-private fun DisplayDataSingle(podatki: PodatkiEntity, viewModel: LekcionarViewModel) {
+private fun DisplayDataSingle(podatki: PodatkiEntity, viewModel: LekcionarViewModel, snackbarHostState: SnackbarHostState) {
     val context = LocalContext.current.applicationContext
 
     OutlinedButton(
         onClick = {},
-        modifier = Modifier.padding(top = 10.dp, end = 10.dp),
+        modifier = Modifier.padding(top = 10.dp),
         colors = ButtonDefaults.outlinedButtonColors(
             containerColor = AppTheme.colorScheme.background
         ),
@@ -286,7 +302,8 @@ private fun DisplayDataSingle(podatki: PodatkiEntity, viewModel: LekcionarViewMo
             MediaPlayer(
                 viewModel = viewModel,
                 uri = podatki.mp3,
-                context = context
+                context = context,
+                snackbarHostState = snackbarHostState
             )
         }
     }
@@ -302,7 +319,7 @@ private fun DisplayDataSingle(podatki: PodatkiEntity, viewModel: LekcionarViewMo
 }
 
 @Composable
-private fun DisplayDataMultiple(podatki: PodatkiEntity, viewModel: LekcionarViewModel) {
+private fun DisplayDataMultiple(podatki: PodatkiEntity, viewModel: LekcionarViewModel, snackbarHostState: SnackbarHostState) {
     var isButtonClicked by remember { mutableStateOf(false) }
     val context = LocalContext.current.applicationContext
 
@@ -311,7 +328,7 @@ private fun DisplayDataMultiple(podatki: PodatkiEntity, viewModel: LekcionarView
             isButtonClicked = !isButtonClicked
         },
         modifier = Modifier
-            .padding(top = 10.dp, end = 10.dp),
+            .padding(top = 10.dp),
         colors = ButtonDefaults.outlinedButtonColors(
                 containerColor = if (isButtonClicked) AppTheme.colorScheme.background else AppTheme.colorScheme.primary,
                 contentColor = if (isButtonClicked) AppTheme.colorScheme.primary else AppTheme.colorScheme.background,
@@ -350,7 +367,8 @@ private fun DisplayDataMultiple(podatki: PodatkiEntity, viewModel: LekcionarView
                 MediaPlayer(
                     viewModel = viewModel,
                     uri = podatki.mp3,
-                    context = context
+                    context = context,
+                    snackbarHostState = snackbarHostState
                 )
             }
         }

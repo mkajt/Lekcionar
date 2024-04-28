@@ -29,6 +29,12 @@ interface LekcionarDAO {
     @Query("SELECT COUNT(*) FROM podatki")
     suspend fun countPodatki(): Int
 
+    @Query("SELECT timestamp FROM podatki ORDER BY timestamp ASC LIMIT 1")
+    suspend fun getSmallestTimestamp(): Long
+
+    @Query("SELECT timestamp FROM podatki ORDER BY timestamp DESC LIMIT 1")
+    suspend fun getBiggestTimestamp(): Long
+
     @Query("DELETE FROM map")
     suspend fun deleteAllFromMap()
 

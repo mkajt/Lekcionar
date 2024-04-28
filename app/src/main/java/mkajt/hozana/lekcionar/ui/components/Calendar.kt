@@ -1,6 +1,5 @@
 package mkajt.hozana.lekcionar.ui.components
 
-import android.util.Log
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -69,8 +68,10 @@ import mkajt.hozana.lekcionar.ui.routes.Screen
 import mkajt.hozana.lekcionar.ui.theme.AppTheme
 import mkajt.hozana.lekcionar.viewModel.LekcionarViewModel
 import java.time.DayOfWeek
+import java.time.Instant
 import java.time.LocalDate
 import java.time.YearMonth
+import java.time.ZoneId
 import java.time.format.TextStyle
 import java.util.Locale
 
@@ -117,11 +118,16 @@ fun Calendar(viewModel: LekcionarViewModel, navController: NavController) {
 
 @Composable
 fun CalendarSection(viewModel: LekcionarViewModel, navController: NavController) {
-    val adjacentMonths: Long = 5
     val currentDate by viewModel.selectedDate.collectAsState()
+    //val smallestTimestamp by viewModel.smallestTimestamp.collectAsState()
+    //val biggestTimestamp by viewModel.biggestTimestamp.collectAsState()
+
+    val firstDataTimestamp by viewModel.firstDataTimestamp.collectAsState()
+    val lastDataTimestamp by viewModel.lastDataTimestamp.collectAsState()
+
     val currentMonth = remember { YearMonth.parse(currentDate, viewModel.dateFormatter) }
-    val startMonth = remember { currentMonth.minusMonths(adjacentMonths) }
-    val endMonth = remember { currentMonth.plusMonths(adjacentMonths) }
+    val startMonth = remember { YearMonth.from(timestampToLocalDate(firstDataTimestamp)) }
+    val endMonth = remember { YearMonth.from(timestampToLocalDate(lastDataTimestamp)) }
     val selections = remember { mutableStateListOf<CalendarDay>() }
     val daysOfWeek = remember { daysOfWeek(firstDayOfWeek = DayOfWeek.MONDAY) }
 
@@ -205,6 +211,10 @@ private fun displayMonthNameLocale(yearMonth: YearMonth): String {
 
 private fun displayWeekNameLocale(dayOfWeek: DayOfWeek): String {
     return dayOfWeek.getDisplayName(TextStyle.SHORT, Locale("sl")).uppercase().substring(0, 3)
+}
+
+private fun timestampToLocalDate(seconds: Long): LocalDate {
+    return Instant.ofEpochSecond(seconds).atZone(ZoneId.systemDefault()).toLocalDate()
 }
 
 @Composable

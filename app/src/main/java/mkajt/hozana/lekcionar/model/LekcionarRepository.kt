@@ -41,14 +41,15 @@ class LekcionarRepository(
         context = mContext
     }
 
-    suspend fun getLekcionarDataFromApi() {
+    suspend fun getLekcionarDataFromApi(): Long {
+        val updatedTimestamp: Long
         try {
             val response: Response<LekcionarDTO> = withContext(ioDispatcher) {
                 lekcionarApi?.getLekcionarData(Constants.BASE, Constants.KEY)!!
             }
 
             val header: Headers = response.headers()
-            //val contentType: String? = headers?.get("Content-Type")
+            updatedTimestamp = if (header["timestamp"] != null) header["timestamp"]!!.toLong() else 0L
 
             if (response.isSuccessful) {
                 val lekcionarDTO: LekcionarDTO? = response.body()
@@ -59,10 +60,13 @@ class LekcionarRepository(
             } else {
                 Log.d(TAG, "Failed to fetch data from API: ${response.message()}")
             }
+            return updatedTimestamp
         } catch (e: HttpException) {
             Log.d(TAG, "Failed to fetch data from API: ${e.message()}")
+            return 0L
         } catch (e: Exception) {
             Log.d(TAG, "An error occurred: ${e.message}")
+            return 0L
         } finally {
             Log.d(TAG, "Successfully loaded data from API and inserted into DB")
         }
@@ -90,6 +94,18 @@ class LekcionarRepository(
     suspend fun countPodatki(): Int {
         return withContext(ioDispatcher) {
             lekcionarDB.lekcionarDao().countPodatki()
+        }
+    }
+
+    suspend fun getSmallestTimestamp(): Long {
+        return withContext(ioDispatcher) {
+            lekcionarDB.lekcionarDao().getSmallestTimestamp()
+        }
+    }
+
+    suspend fun getBiggestTimestamp(): Long {
+        return withContext(ioDispatcher) {
+            lekcionarDB.lekcionarDao().getBiggestTimestamp()
         }
     }
 

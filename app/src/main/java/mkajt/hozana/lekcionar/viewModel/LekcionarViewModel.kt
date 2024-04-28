@@ -12,11 +12,14 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import mkajt.hozana.lekcionar.model.LekcionarRepository
+import mkajt.hozana.lekcionar.model.dataStore.DataStoreManager
 import mkajt.hozana.lekcionar.model.database.PodatkiEntity
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -27,7 +30,7 @@ class LekcionarViewModel(
 ) :
     AndroidViewModel(application!!) {
 
-    private val _dataState = MutableStateFlow<LekcionarViewState>(LekcionarViewState.Start)
+     private val _dataState = MutableStateFlow<LekcionarViewState>(LekcionarViewState.Start)
     val dataState: StateFlow<LekcionarViewState> = _dataState.asStateFlow()
 
     val dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
@@ -38,32 +41,91 @@ class LekcionarViewModel(
     private val _selectedRed = MutableStateFlow("kapucini")
     private val _selectedSkofija = MutableStateFlow("slovenija")
 
+    private val _smallestTimestamp = MutableStateFlow(0L)
+    //val smallestTimestamp = _smallestTimestamp.asStateFlow()
+    private val _biggestTimestamp = MutableStateFlow(0L)
+    //val biggestTimestamp = _biggestTimestamp.asStateFlow()
+
     private val _idPodatek = MutableStateFlow<List<String>?>(null)
     val idPodatek = _idPodatek.asStateFlow()
     private val _podatki = MutableStateFlow<List<PodatkiEntity>?>(null)
     val podatki = _podatki.asStateFlow()
+
+    private val dataStore : DataStoreManager
+    private val isDarkTheme: StateFlow<Boolean>
+    private val updatedDataTimestamp: StateFlow<Long>
+    val firstDataTimestamp: StateFlow<Long>
+    val lastDataTimestamp: StateFlow<Long>
 
     private var _player: MediaPlayer? = null
     private var _mediaPlayerState = MutableStateFlow(MediaPlayerState())
     val mediaPlayerState = _mediaPlayerState.asStateFlow()
     private val _handler = Handler(Looper.getMainLooper())
 
-    /*init {
-        viewModelScope.launch {
-            getPodatkiBySelektor()
-        }
-    }*/
+    init {
+        val context: Context = getApplication<Application>().applicationContext
+        dataStore = DataStoreManager(context)
+        isDarkTheme = dataStore.getTheme().stateIn(viewModelScope, SharingStarted.Lazily, false)
+        updatedDataTimestamp = dataStore.getUpdatedDataTimestamp().stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0L)
+        firstDataTimestamp = dataStore.getFirstDataTimestamp().stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0L)
+        lastDataTimestamp = dataStore.getLastDataTimestamp().stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0L)
+    }
 
-    fun checkDbAndfetchDataFromApi() {
+    fun toggleIsDarkTheme() {
+        viewModelScope.launch {
+            val toggleTheme: Boolean = !isDarkTheme.value
+            dataStore.setTheme(toggleTheme)
+        }
+    }
+
+    fun getFirstDataTimestamp(): Long {
+        return firstDataTimestamp.value
+    }
+
+    private suspend fun setFirstDataTimestamp(timestamp: Long) {
+        dataStore.setFirstDataTimestamp(timestamp)
+        /*viewModelScope.launch {
+        }*/
+    }
+
+    fun getLastDataTimestamp(): Long {
+        return lastDataTimestamp.value
+    }
+
+    private suspend fun setLastDataTimestamp(timestamp: Long) {
+        dataStore.setLastDataTimestamp(timestamp)
+        /*viewModelScope.launch {
+            dataStore.setLastDataTimestamp(timestamp)
+        }*/
+    }
+
+    fun getUpdatedDataTimestamp(): Long {
+        return  updatedDataTimestamp.value
+    }
+
+
+    fun checkDbAndFetchDataFromApi() {
         viewModelScope.launch {
             try {
                 val count = lekcionarRepository.countPodatki()
                 if (count == 0) {
                     _dataState.update { LekcionarViewState.Loading }
-                    lekcionarRepository.getLekcionarDataFromApi()
+                    val updatedTimestamp = lekcionarRepository.getLekcionarDataFromApi()
+                    dataStore.setUpdatedDataTimestamp(updatedTimestamp)
                     _dataState.update { LekcionarViewState.Loaded }
                 }
                 _dataState.update { LekcionarViewState.AlreadyInDb }
+                _smallestTimestamp.update { lekcionarRepository.getSmallestTimestamp() }
+                _biggestTimestamp.update { lekcionarRepository.getBiggestTimestamp() }
+                Log.d("LVM", "SmallestTimestamp: " + _smallestTimestamp.value)
+                Log.d("LVM", "BiggestTimestamp: " + _biggestTimestamp.value)
+                //setFirstDataTimestamp(_smallestTimestamp.value)
+                //setLastDataTimestamp(_biggestTimestamp.value)
+                dataStore.setFirstDataTimestamp(_smallestTimestamp.value)
+                dataStore.setLastDataTimestamp(_biggestTimestamp.value)
+
+                Log.d("LVM", "FirstTimestamp: " + firstDataTimestamp.value)
+                Log.d("LVM", "LastTimestamp: " + lastDataTimestamp.value)
                 getPodatkiBySelektor()
 
             } catch (e: Exception) {
@@ -130,13 +192,19 @@ class LekcionarViewModel(
         }
     }
     private fun initPlayer(uri: Uri, context: Context) {
-        if (_player == null) {
+        if (_player == null || _player?.duration!! == 0) {
             viewModelScope.launch {
                 _player = MediaPlayer().apply {
                     setDataSource(context, uri)
-                    prepare()
+                    setOnErrorListener { mediaPlayer, what, extra ->
+                        Log.e("MediaPlayer", "Error occurred while preparing media source: $what; extra: $extra")
+                        false
+                    }
+                    setOnPreparedListener{
+                        play()
+                    }
+                    prepareAsync()
                 }
-                play()
             }
         } else {
             play()
