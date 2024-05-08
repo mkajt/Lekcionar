@@ -1,0 +1,334 @@
+package mkajt.hozana.lekcionar.mediaPlayer
+
+import android.app.Notification
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.app.PendingIntent
+import android.app.Service
+import android.content.Context
+import android.content.Intent
+import android.graphics.Bitmap
+import android.graphics.Color
+import android.graphics.drawable.Drawable
+import android.media.MediaPlayer
+import android.net.Uri
+import android.os.Binder
+import android.os.Build
+import android.os.Handler
+import android.os.IBinder
+import android.os.Looper
+import android.support.v4.media.session.MediaSessionCompat
+import android.util.Log
+import androidx.compose.ui.graphics.toArgb
+import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationManagerCompat
+import androidx.core.content.ContextCompat
+import androidx.core.content.res.ResourcesCompat
+import androidx.core.graphics.drawable.toBitmap
+import mkajt.hozana.lekcionar.MainActivity
+import mkajt.hozana.lekcionar.R
+import mkajt.hozana.lekcionar.ui.theme.GreyInactiveTrack
+import mkajt.hozana.lekcionar.viewModel.LekcionarViewModel
+
+class MediaPlayerService: Service() {
+
+    private lateinit var viewModel: LekcionarViewModel
+
+    companion object {
+        private val TAG: String? = MediaPlayerService::class.simpleName
+        private const val channelID = "background_player"
+        const val ACTION_START = "start_service"
+        const val ACTION_STOP = "stop_service"
+        const val ACTION_PAUSE = "pause_service"
+        const val ACTION_SEEK = "seek_to_service"
+        const val ACTION_EXIT = "exit_service"
+        const val NOTIFICATION_ID = 11
+    }
+
+    // allows communication with service
+    inner class RunServiceBinder : Binder() {
+        val service: MediaPlayerService
+            get() = this@MediaPlayerService
+    }
+
+    private var serviceBinder: Binder = RunServiceBinder()
+
+    private var mainActivity: MainActivity = MainActivity()
+    var context: Context? = null
+
+    var mediaPlayer: MediaPlayer? = null
+    var mediaPlayerState = MediaPlayerState()
+
+    private val handler = Handler(Looper.getMainLooper())
+
+    //if start or pause button was clicked
+    var started: Boolean = false
+    var paused: Boolean = false
+
+    // notification manager
+    private var notificationManagerCompat: NotificationManagerCompat? = null
+    private lateinit var mediaSessionCompat: MediaSessionCompat
+    private lateinit var notificationManager: NotificationManager
+
+    fun injectViewModel(lekcionarViewModel: LekcionarViewModel) {
+        viewModel = lekcionarViewModel
+    }
+
+    override fun onCreate() {
+        Log.d(TAG, "Creating service")
+
+        context = this
+
+        mediaPlayerState = MediaPlayerState()
+        started = false
+        paused = false
+        mediaPlayer = MediaPlayer()
+
+        notificationManagerCompat = NotificationManagerCompat.from(this)
+        mediaSessionCompat = MediaSessionCompat(context as MediaPlayerService, TAG!!)
+        // create notification channel
+        createNotificationChannel()
+
+    }
+
+    override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int {
+        //startForeground(NOTIFICATION_ID, createNotification())
+        when (intent.action) {
+            ACTION_START -> {
+                val uri = intent.getStringExtra("uri")
+                val opis = intent.getStringExtra("opis")
+                if (uri != null) {
+                    playInit(Uri.parse(uri), opis!!)
+                }
+            }
+            ACTION_STOP -> {
+                stop()
+            }
+            ACTION_PAUSE -> {
+                pause()
+            }
+            ACTION_SEEK -> {
+                val seekTo = intent.getFloatExtra("seekTo", 0F)
+                seek(seekTo)
+            }
+            ACTION_EXIT -> {
+                stop()
+                exit()
+            }
+        }
+
+        return START_STICKY
+    }
+
+    override fun onBind(p0: Intent?): IBinder {
+        Log.d(TAG, "Binding service")
+        return serviceBinder
+    }
+
+    override fun onTaskRemoved(rootIntent: Intent?) {
+        stop()
+        exit()
+    }
+
+    fun playInit(uri: Uri, opis: String) {
+        if (opis != mediaPlayerState.title) {
+            mediaPlayerState.currentPosition = 0
+            mediaPlayerState.duration = 0
+            mediaPlayerState.isPlaying = false
+            mediaPlayerState.uri = uri
+            mediaPlayerState.title = opis
+        }
+        viewModel.updateMediaPlayerState(mediaPlayerState)
+        if (!started || !paused) {
+            mediaPlayer?.reset()
+            mediaPlayer?.apply {
+                context?.let { mediaPlayerState.uri?.let { it1 -> setDataSource(it, it1) } }
+                setOnErrorListener { mediaPlayer, what, extra ->
+                    Log.e("MediaPlayer", "Error occurred while preparing media source: $what; extra: $extra")
+                    false
+                }
+                setOnPreparedListener{
+                    play()
+                }
+                prepareAsync()
+            }
+        } else {
+            play()
+        }
+    }
+
+    private fun play() {
+        mediaPlayerState.isPlaying = true
+        mediaPlayerState.duration = mediaPlayer?.duration!!
+        mediaPlayer?.seekTo(mediaPlayerState.currentPosition)
+        mediaPlayer?.start()
+        paused = false
+        started = true
+        handler.postDelayed(object: Runnable {
+            override fun run() {
+                try {
+                    mediaPlayerState.currentPosition = mediaPlayer?.currentPosition!!
+                    viewModel.updateMediaPlayerState(mediaPlayerState)
+                    // log if media player on notification stop and then onResume() playInit() starts to flicker
+                    //Log.d(TAG, "Current: " + mediaPlayerState.currentPosition + " Duration: " + mediaPlayerState.duration)
+                    if (notificationManager.activeNotifications.any{it.id == NOTIFICATION_ID}) {
+                        foreground()
+                    }
+                    handler.postDelayed(this, 1000)
+                } catch (e: Exception) {
+                    mediaPlayerState.currentPosition = 0
+                    viewModel.updateMediaPlayerState(mediaPlayerState)
+                    e.printStackTrace()
+                }
+            }
+
+        }, 0)
+    }
+
+    fun stop() {
+        if (started) {
+            mediaPlayerState.isPlaying = false
+            mediaPlayerState.currentPosition = 0
+            mediaPlayerState.duration = 0
+            viewModel.updateMediaPlayerState(mediaPlayerState)
+            mediaPlayer?.stop()
+            started = false
+            paused = false
+            handler.removeMessages(0)
+        }
+    }
+
+    fun pause() {
+        if (started && !paused) {
+            mediaPlayerState.isPlaying = false
+            mediaPlayerState.currentPosition = mediaPlayer?.currentPosition ?: 0
+            paused = true
+        }
+        viewModel.updateMediaPlayerState(mediaPlayerState)
+        mediaPlayer?.pause()
+        handler.removeMessages(0)
+        if (notificationManager.activeNotifications.any{it.id == NOTIFICATION_ID}) {
+            foreground()
+        }
+    }
+
+    fun seek(position: Float) {
+        mediaPlayerState.currentPosition = position.toInt()
+        viewModel.updateMediaPlayerState(mediaPlayerState)
+        mediaPlayer?.seekTo(mediaPlayerState.currentPosition)
+    }
+
+    //todo why use this -> in activity onStop()
+    fun exit() {
+        Log.d(TAG, "exit()")
+        if (started && mediaPlayer != null) {
+            mediaPlayer?.stop()
+            mediaPlayer?.release()
+            Log.d(TAG, "Media player stopped and released")
+        }
+        started = false
+        paused = false
+
+        notificationManagerCompat?.cancel(NOTIFICATION_ID)
+        stopSelf()
+    }
+
+    // create a notification channel for the foreground service
+    private fun createNotificationChannel() {
+        if (Build.VERSION.SDK_INT > 26) {
+            val channel = NotificationChannel(channelID, "Foreground channel", NotificationManager.IMPORTANCE_LOW)
+            channel.description = "Notifications about mediaPlayerService"
+            channel.enableLights(false)
+            channel.enableVibration(false)
+            //channel.enableLights(true)
+            //channel.lightColor = Color.RED
+            //channel.enableVibration(true)
+            notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
+            notificationManager.createNotificationChannel(channel)
+        }
+    }
+
+    private fun createNotification(): Notification {
+        val actionIntentStop = Intent(this, MediaPlayerService::class.java)
+        actionIntentStop.action = ACTION_STOP
+        val actionPendingIntentStop = PendingIntent.getService(this, 0, actionIntentStop, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
+
+        val actionIntentStartPause = Intent(this, MediaPlayerService::class.java)
+        lateinit var actionPendingIntentStartPause: PendingIntent
+
+        val actionIntentExit = Intent(this, MediaPlayerService::class.java)
+        actionIntentExit.action = ACTION_EXIT
+        val actionPendingIntentExit = PendingIntent.getService(this, 0, actionIntentExit, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
+
+        if (mediaPlayer?.isPlaying!! && !paused) {
+            //mediaPlayer is playing
+            actionIntentStartPause.action = ACTION_PAUSE
+            actionPendingIntentStartPause = PendingIntent.getService(this, 0, actionIntentStartPause, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
+        } else {
+            //mediaPlayer is paused
+            actionIntentStartPause.action = ACTION_START
+            actionIntentStartPause.putExtra("uri", mediaPlayerState.uri.toString())
+            actionIntentStartPause.putExtra("opis", mediaPlayerState.title)
+            actionPendingIntentStartPause = PendingIntent.getService(this, 0, actionIntentStartPause, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
+        }
+
+        val playPauseIcon = if (mediaPlayer?.isPlaying!! && !paused) R.drawable.pause else R.drawable.play
+
+        val builder = NotificationCompat.Builder(this, channelID)
+            .setContentTitle(mediaPlayerState.title)
+            .setContentText(getConcatTime(mediaPlayer!!.currentPosition, mediaPlayerState.duration))
+            .setSmallIcon(R.mipmap.ic_launcher)
+            .setChannelId(channelID)
+            .setColor(ContextCompat.getColor(context!!,R.color.grey_inactive_track))
+            //.setPriority(NotificationCompat.PRIORITY_MIN)
+            /*.setStyle(androidx.media.app.NotificationCompat.MediaStyle()
+                .setShowActionsInCompactView(0)
+            )*/
+            .addAction(playPauseIcon, if (mediaPlayer?.isPlaying!! && !paused) "Pause" else "Play", actionPendingIntentStartPause)
+            //.addAction(R.drawable.exit, "Exit", actionPendingIntentExit)
+            //.addAction(R.drawable.stop, "Stop", actionPendingIntentStop)
+
+        val resultIntent = Intent(this, MainActivity::class.java)
+        val resultPendingIntent = PendingIntent.getActivity(this, 0, resultIntent,
+            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
+
+        builder.setContentIntent(resultPendingIntent)
+        builder.setDeleteIntent(actionPendingIntentExit)
+        return builder.build()
+    }
+
+    fun foreground() {
+        startForeground(NOTIFICATION_ID, createNotification())
+    }
+
+    fun background() {
+        //notificationManager.cancel(NOTIFICATION_ID)
+        stopForeground(STOP_FOREGROUND_REMOVE)
+    }
+
+    private fun getConcatTime(current: Int, duration: Int): String {
+        val curr = getTime(current)
+        val dur = getTime(duration)
+        return "$curr / $dur"
+    }
+
+    private fun getTime(milliseconds: Int): String {
+        val minutes = milliseconds / 1000 / 60
+        val seconds = milliseconds / 1000 % 60
+        if (seconds < 10) {
+            return "$minutes:0$seconds"
+        }
+        return "$minutes:$seconds"
+    }
+
+    private fun getBitmapFromVector(context: Context, vectorDrawableId: Int): Bitmap {
+        val vectorDrawable = ContextCompat.getDrawable(context, vectorDrawableId)
+        /*return Bitmap.createBitmap(
+            vectorDrawable!!.intrinsicWidth,
+            vectorDrawable.intrinsicHeight,
+            Bitmap.Config.ARGB_8888
+        )*/
+        return vectorDrawable!!.toBitmap()
+    }
+
+}

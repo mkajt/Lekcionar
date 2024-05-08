@@ -18,6 +18,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import mkajt.hozana.lekcionar.mediaPlayer.MediaPlayerEvent
+import mkajt.hozana.lekcionar.mediaPlayer.MediaPlayerState
 import mkajt.hozana.lekcionar.model.LekcionarRepository
 import mkajt.hozana.lekcionar.model.dataStore.DataStoreManager
 import mkajt.hozana.lekcionar.model.database.PodatkiEntity
@@ -62,8 +64,11 @@ class LekcionarViewModel(
     val mediaPlayerState = _mediaPlayerState.asStateFlow()
     private val _handler = Handler(Looper.getMainLooper())
 
+    //private val notificationManager: NotificationMng
+
     init {
         val context: Context = getApplication<Application>().applicationContext
+        //notificationManager = ContextCompat.getSystemService(context, NotificationMng(context, this)::class.java)!!
         dataStore = DataStoreManager(context)
         isDarkTheme = dataStore.getTheme().stateIn(viewModelScope, SharingStarted.Lazily, false)
         updatedDataTimestamp = dataStore.getUpdatedDataTimestamp().stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0L)
@@ -141,8 +146,10 @@ class LekcionarViewModel(
     }
 
     fun updateSelectedDate(date: LocalDate) {
-        _selectedDate.update { dateFormatter.format(date) }
-        updateSelektor()
+        if (dateFormatter.format(date) != _selectedDate.value) {
+            _selectedDate.update { dateFormatter.format(date) }
+            updateSelektor()
+        }
     }
 
     fun updateSelectedRed(red: String) {
@@ -179,6 +186,18 @@ class LekcionarViewModel(
                 //_podatki.value = podatki.await()
                 Log.d("LVM", "Podatki: ${_podatki.value}")
             }
+        }
+    }
+
+    fun updateMediaPlayerState(state: MediaPlayerState) {
+        _mediaPlayerState.update {
+            it.copy(
+                isPlaying = state.isPlaying,
+                currentPosition = state.currentPosition,
+                duration = state.duration,
+                title = state.title,
+                uri = state.uri
+            )
         }
     }
 

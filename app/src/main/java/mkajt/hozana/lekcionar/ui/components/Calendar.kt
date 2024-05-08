@@ -64,6 +64,7 @@ import com.kizitonwose.calendar.core.nextMonth
 import com.kizitonwose.calendar.core.previousMonth
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.launch
+import mkajt.hozana.lekcionar.ActivityListener
 import mkajt.hozana.lekcionar.ui.routes.Screen
 import mkajt.hozana.lekcionar.ui.theme.AppTheme
 import mkajt.hozana.lekcionar.viewModel.LekcionarViewModel
@@ -77,7 +78,7 @@ import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun Calendar(viewModel: LekcionarViewModel, navController: NavController) {
+fun Calendar(viewModel: LekcionarViewModel, navController: NavController, actListener: ActivityListener) {
 
     Scaffold(
         topBar = {
@@ -110,14 +111,14 @@ fun Calendar(viewModel: LekcionarViewModel, navController: NavController) {
                     .fillMaxHeight()
                     .padding(innerPadding)
             ) {
-                CalendarSection(viewModel = viewModel, navController = navController)
+                CalendarSection(viewModel = viewModel, navController = navController, activityListener = actListener)
             }
         }
     )
 }
 
 @Composable
-fun CalendarSection(viewModel: LekcionarViewModel, navController: NavController) {
+fun CalendarSection(viewModel: LekcionarViewModel, navController: NavController, activityListener: ActivityListener) {
     val currentDate by viewModel.selectedDate.collectAsState()
     //val smallestTimestamp by viewModel.smallestTimestamp.collectAsState()
     //val biggestTimestamp by viewModel.biggestTimestamp.collectAsState()
@@ -188,6 +189,9 @@ fun CalendarSection(viewModel: LekcionarViewModel, navController: NavController)
         ) {
             OutlinedButton(
                 onClick = {
+                    if (calendarSelectedDate != currentDate) {
+                        activityListener.stopClick()
+                    }
                     navController.navigate(Screen.HOME.name)
                     viewModel.updateSelectedDate(LocalDate.parse(calendarSelectedDate, viewModel.dateFormatter))
                 },

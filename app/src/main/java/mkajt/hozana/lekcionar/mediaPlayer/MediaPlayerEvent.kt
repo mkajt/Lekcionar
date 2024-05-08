@@ -1,4 +1,4 @@
-package mkajt.hozana.lekcionar.viewModel
+package mkajt.hozana.lekcionar.mediaPlayer
 
 import android.content.Context
 import android.net.Uri

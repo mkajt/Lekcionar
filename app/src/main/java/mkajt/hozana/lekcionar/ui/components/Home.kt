@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -48,6 +49,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -63,6 +65,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.text.HtmlCompat
 import androidx.navigation.NavController
+import mkajt.hozana.lekcionar.ActivityListener
 import mkajt.hozana.lekcionar.model.database.PodatkiEntity
 import mkajt.hozana.lekcionar.ui.routes.Screen
 import mkajt.hozana.lekcionar.ui.theme.AppTheme
@@ -73,10 +76,13 @@ import mkajt.hozana.lekcionar.viewModel.LekcionarViewState
 import java.util.regex.Matcher
 import java.util.regex.Pattern
 
+var activityListener: ActivityListener? = null
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun Home(viewModel: LekcionarViewModel, navController: NavController) {
+fun Home(viewModel: LekcionarViewModel, navController: NavController, actListener: ActivityListener) {
     val context = LocalContext.current.applicationContext
+    activityListener = actListener
     val snackbarHostState = remember {SnackbarHostState()}
     createSelektor(viewModel)
 
@@ -153,11 +159,18 @@ fun Home(viewModel: LekcionarViewModel, navController: NavController) {
                 )*/
             ) {
                 Row(
-                    modifier = Modifier.fillMaxWidth().border(width = 2.dp, color = AppTheme.colorScheme.background, shape = RectangleShape),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .border(
+                            width = 2.dp,
+                            color = AppTheme.colorScheme.background,
+                            shape = RectangleShape
+                        ),
                     horizontalArrangement = Arrangement.Center,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     IconButton(onClick = {
+                        activityListener?.stopClick()
                         viewModel.goToPreviousDate()
                     }) {
                         Icon(
@@ -171,13 +184,14 @@ fun Home(viewModel: LekcionarViewModel, navController: NavController) {
                     }) {
                         Icon(
                             imageVector = Icons.Rounded.DateRange,
-                            contentDescription = "Callendar",
+                            contentDescription = "Calendar",
                             modifier = Modifier
                                 .size(450.dp)
                                 .padding(horizontal = 5.dp)
                         )
                     }
                     IconButton(onClick = {
+                        activityListener?.stopClick()
                         viewModel.goToNextDate()
                     }) {
                         Icon(
@@ -196,20 +210,25 @@ fun Home(viewModel: LekcionarViewModel, navController: NavController) {
 fun ContentSectionHome(innerPadding: PaddingValues, viewModel: LekcionarViewModel, snackbarHostState: SnackbarHostState) {
 
     val dataState by viewModel.dataState.collectAsState()
-    val idPodatek by viewModel.idPodatek.collectAsState()
     val podatki by viewModel.podatki.collectAsState()
+    //var previousPodatki by remember { mutableStateOf(podatki) }
+
+    /*LaunchedEffect(podatki) {
+        if (podatki != previousPodatki) {
+            //activityListener?.stopClick()
+            previousPodatki = podatki
+        }
+    }*/
 
     val errorMessage = when (dataState) {
         is LekcionarViewState.Error -> (dataState as LekcionarViewState.Error).errorMessage
         else -> null
     }
     if (errorMessage == null) {
-        if (dataState.equals(LekcionarViewState.Loading)) {
+        if (dataState == LekcionarViewState.Loading) {
             Greeting(name = "Loading", modifier = Modifier.padding(innerPadding))
             Log.d("UI", "Loading")
-        } else if (dataState.equals(LekcionarViewState.AlreadyInDb) || dataState.equals(
-                LekcionarViewState.Loaded
-            )
+        } else if (dataState == LekcionarViewState.AlreadyInDb || dataState == LekcionarViewState.Loaded
         ) {
             //Greeting(name = "AlreadyInDb", modifier = Modifier.padding(innerPadding))
             if (podatki != null) {
@@ -242,7 +261,7 @@ fun ContentSectionHome(innerPadding: PaddingValues, viewModel: LekcionarViewMode
         } /*else if (!idPodatek.isNullOrEmpty()) {
             Greeting(name = idPodatek!![0], modifier = Modifier.padding(innerPadding))
         } */
-        else if (dataState.equals(LekcionarViewState.Start)) {
+        else if (dataState == LekcionarViewState.Start) {
             Greeting(name = "Start", modifier = Modifier.padding(innerPadding))
             Log.d("UI", "Start")
         } /*else if (dataState.equals(LekcionarViewState.Loaded)){
@@ -265,7 +284,9 @@ private fun DisplayDataSingle(podatki: PodatkiEntity, viewModel: LekcionarViewMo
 
     OutlinedButton(
         onClick = {},
-        modifier = Modifier.padding(top = 10.dp),
+        modifier = Modifier
+            .padding(top = 10.dp)
+            .width(IntrinsicSize.Max),
         colors = ButtonDefaults.outlinedButtonColors(
             containerColor = AppTheme.colorScheme.background
         ),
@@ -273,7 +294,7 @@ private fun DisplayDataSingle(podatki: PodatkiEntity, viewModel: LekcionarViewMo
         shape = AppTheme.shape.button,
         border = BorderStroke(1.5.dp, AppTheme.colorScheme.activeSliderTrack)
     ) {
-        Text(text = podatki.opis, style = AppTheme.typography.labelLarge, color = AppTheme.colorScheme.primary)
+        Text(text = podatki.opis, style = AppTheme.typography.labelLarge, color = AppTheme.colorScheme.primary, textAlign = TextAlign.Center)
     }
 
     if (podatki.vrstica.isNotEmpty()) {
@@ -302,8 +323,10 @@ private fun DisplayDataSingle(podatki: PodatkiEntity, viewModel: LekcionarViewMo
             MediaPlayer(
                 viewModel = viewModel,
                 uri = podatki.mp3,
+                opis = podatki.opis,
                 context = context,
-                snackbarHostState = snackbarHostState
+                snackbarHostState = snackbarHostState,
+                activityListener = activityListener
             )
         }
     }
@@ -320,7 +343,8 @@ private fun DisplayDataSingle(podatki: PodatkiEntity, viewModel: LekcionarViewMo
 
 @Composable
 private fun DisplayDataMultiple(podatki: PodatkiEntity, viewModel: LekcionarViewModel, snackbarHostState: SnackbarHostState) {
-    var isButtonClicked by remember { mutableStateOf(false) }
+    var isButtonClicked by rememberSaveable { mutableStateOf(false) }
+
     val context = LocalContext.current.applicationContext
 
     OutlinedButton(
@@ -336,7 +360,7 @@ private fun DisplayDataMultiple(podatki: PodatkiEntity, viewModel: LekcionarView
         shape = AppTheme.shape.button,
         border = if (isButtonClicked) BorderStroke(1.5.dp, AppTheme.colorScheme.activeSliderTrack) else BorderStroke(1.5.dp, AppTheme.colorScheme.primary)
     ) {
-        Text(text = podatki.opis, style = AppTheme.typography.labelLarge)
+        Text(text = podatki.opis, style = AppTheme.typography.labelLarge, textAlign = TextAlign.Center)
     }
 
     if (isButtonClicked) {
@@ -367,8 +391,10 @@ private fun DisplayDataMultiple(podatki: PodatkiEntity, viewModel: LekcionarView
                 MediaPlayer(
                     viewModel = viewModel,
                     uri = podatki.mp3,
+                    opis = podatki.opis,
                     context = context,
-                    snackbarHostState = snackbarHostState
+                    snackbarHostState = snackbarHostState,
+                    activityListener = activityListener
                 )
             }
         }

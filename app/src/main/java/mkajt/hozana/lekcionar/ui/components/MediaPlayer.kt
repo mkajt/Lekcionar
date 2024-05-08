@@ -2,6 +2,7 @@ package mkajt.hozana.lekcionar.ui.components
 
 import android.content.Context
 import android.net.Uri
+import android.util.Log
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
@@ -32,33 +33,28 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import mkajt.hozana.lekcionar.ActivityListener
 import mkajt.hozana.lekcionar.ui.theme.AppTheme
-import mkajt.hozana.lekcionar.ui.theme.LekcionarRed
 import mkajt.hozana.lekcionar.util.isInternetAvailable
 import mkajt.hozana.lekcionar.util.millisecondsToTimeString
 import mkajt.hozana.lekcionar.viewModel.LekcionarViewModel
-import mkajt.hozana.lekcionar.viewModel.MediaPlayerEvent
+import mkajt.hozana.lekcionar.mediaPlayer.MediaPlayerEvent
 
 @Composable
 fun MediaPlayer(
     viewModel: LekcionarViewModel,
     uri: String,
+    opis: String,
     context: Context,
-    snackbarHostState: SnackbarHostState
+    snackbarHostState: SnackbarHostState,
+    activityListener: ActivityListener?
 ) {
 
     val coroutineScope = rememberCoroutineScope()
     val mediaPlayerState by viewModel.mediaPlayerState.collectAsState(Dispatchers.IO)
-    /*val mediaPlayerState = remember { mutableStateOf(viewModel.mediaPlayerState.value) }
 
-    LaunchedEffect(Unit) {
-        viewModel.mediaPlayerState.collect { newState ->
-            mediaPlayerState.value = newState
-        }
-    }*/
-    //Log.d("TimeBar", mediaPlayerState.currentPosition.toString())
-
-    if (mediaPlayerState.duration != 0) {
+    Log.d("MediaPlayer.kt", "Duration: " + mediaPlayerState.duration.toString())
+    if (mediaPlayerState.duration != 0 && opis == mediaPlayerState.title) {
         // Left Column
         Column(
             modifier = Modifier
@@ -69,14 +65,9 @@ fun MediaPlayer(
             IconButton(
                 onClick = {
                     if (mediaPlayerState.isPlaying) {
-                        viewModel.onMediaPlayerEvent(event = MediaPlayerEvent.Pause)
+                        activityListener?.pauseClick()
                     } else {
-                        viewModel.onMediaPlayerEvent(
-                            event = MediaPlayerEvent.Initialize(
-                                Uri.parse(uri),
-                                context
-                            )
-                        )
+                        activityListener?.playClick(uri, opis)
                     }
                 },
                 modifier = Modifier.align(Alignment.CenterHorizontally)
@@ -110,11 +101,7 @@ fun MediaPlayer(
                     Slider(
                         value = mediaPlayerState.currentPosition.toFloat(),
                         onValueChange = { position ->
-                            viewModel.onMediaPlayerEvent(
-                                event = MediaPlayerEvent.Seek(
-                                    position
-                                )
-                            )
+                            activityListener?.seekClick(position)
                         },
                         valueRange = 0f..mediaPlayerState.duration.toFloat(),
                         colors = SliderDefaults.colors(
@@ -167,12 +154,7 @@ fun MediaPlayer(
                             snackbarHostState.showSnackbar("Ni internetne povezave!", null, true, SnackbarDuration.Short)
                         }
                     } else {
-                        viewModel.onMediaPlayerEvent(
-                            event = MediaPlayerEvent.Initialize(
-                                Uri.parse(uri),
-                                context
-                            )
-                        )
+                        activityListener?.playClick(uri, opis)
                     }
                 },
                 modifier = Modifier.align(Alignment.CenterHorizontally)
