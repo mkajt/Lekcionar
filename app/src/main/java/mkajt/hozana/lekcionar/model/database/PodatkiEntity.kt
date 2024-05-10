@@ -2,7 +2,6 @@ package mkajt.hozana.lekcionar.model.database
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import java.sql.Timestamp
 
 @Entity(tableName = "podatki")
 data class PodatkiEntity(
@@ -10,7 +9,7 @@ data class PodatkiEntity(
     @PrimaryKey
     val id: String,
 
-    val opis: String,
+    val opis_dolgi: String,
     val timestamp: Long, //check myb just Long
     val datum: String,
     val mp3: String,

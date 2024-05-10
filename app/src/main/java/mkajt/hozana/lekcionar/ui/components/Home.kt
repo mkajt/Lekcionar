@@ -5,7 +5,6 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -18,6 +17,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -37,7 +37,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Snackbar
-import androidx.compose.material3.SnackbarData
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
@@ -55,8 +54,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFontFamilyResolver
 import androidx.compose.ui.text.font.FontFamily
@@ -70,7 +69,6 @@ import mkajt.hozana.lekcionar.model.database.PodatkiEntity
 import mkajt.hozana.lekcionar.ui.routes.Screen
 import mkajt.hozana.lekcionar.ui.theme.AppTheme
 import mkajt.hozana.lekcionar.ui.theme.LekcionarRed
-import mkajt.hozana.lekcionar.ui.theme.White
 import mkajt.hozana.lekcionar.viewModel.LekcionarViewModel
 import mkajt.hozana.lekcionar.viewModel.LekcionarViewState
 import java.util.regex.Matcher
@@ -88,6 +86,7 @@ fun Home(viewModel: LekcionarViewModel, navController: NavController, actListene
 
 
     Scaffold(
+        containerColor = AppTheme.colorScheme.background,
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) {
             Snackbar(
                 snackbarData = it,
@@ -160,12 +159,12 @@ fun Home(viewModel: LekcionarViewModel, navController: NavController, actListene
             ) {
                 Row(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .border(
+                        .fillMaxWidth(),
+                        /*.border(
                             width = 2.dp,
                             color = AppTheme.colorScheme.background,
                             shape = RectangleShape
-                        ),
+                        ),*/
                     horizontalArrangement = Arrangement.Center,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
@@ -243,7 +242,7 @@ fun ContentSectionHome(innerPadding: PaddingValues, viewModel: LekcionarViewMode
                         style = AppTheme.typography.titleNormal
                     )
                     if (podatki!!.size == 1) {
-                        DisplayDataSingle(podatki = podatki!!.first(), viewModel = viewModel, snackbarHostState = snackbarHostState)
+                        DisplayDataSingle(podatki = podatki!!.first(), viewModel = viewModel, snackbarHostState = snackbarHostState, innerPadding = innerPadding)
                     } else {
                         for (podatek in podatki!!) {
                             Column(
@@ -279,14 +278,17 @@ fun ContentSectionHome(innerPadding: PaddingValues, viewModel: LekcionarViewMode
 }
 
 @Composable
-private fun DisplayDataSingle(podatki: PodatkiEntity, viewModel: LekcionarViewModel, snackbarHostState: SnackbarHostState) {
+private fun DisplayDataSingle(podatki: PodatkiEntity, viewModel: LekcionarViewModel, snackbarHostState: SnackbarHostState, innerPadding: PaddingValues) {
     val context = LocalContext.current.applicationContext
+    val screenWidthDp = LocalConfiguration.current.screenWidthDp
+    val maxButtonWidth = (screenWidthDp * 0.85).dp
 
     OutlinedButton(
         onClick = {},
         modifier = Modifier
             .padding(top = 10.dp)
-            .width(IntrinsicSize.Max),
+            .width(IntrinsicSize.Max)
+            .widthIn(max = maxButtonWidth),
         colors = ButtonDefaults.outlinedButtonColors(
             containerColor = AppTheme.colorScheme.background
         ),
@@ -294,7 +296,7 @@ private fun DisplayDataSingle(podatki: PodatkiEntity, viewModel: LekcionarViewMo
         shape = AppTheme.shape.button,
         border = BorderStroke(1.5.dp, AppTheme.colorScheme.activeSliderTrack)
     ) {
-        Text(text = podatki.opis, style = AppTheme.typography.labelLarge, color = AppTheme.colorScheme.primary, textAlign = TextAlign.Center)
+        Text(text = podatki.opis_dolgi, style = AppTheme.typography.labelLarge, color = AppTheme.colorScheme.primary, textAlign = TextAlign.Center)
     }
 
     if (podatki.vrstica.isNotEmpty()) {
@@ -323,7 +325,7 @@ private fun DisplayDataSingle(podatki: PodatkiEntity, viewModel: LekcionarViewMo
             MediaPlayer(
                 viewModel = viewModel,
                 uri = podatki.mp3,
-                opis = podatki.opis,
+                opis = podatki.opis_dolgi,
                 context = context,
                 snackbarHostState = snackbarHostState,
                 activityListener = activityListener
@@ -346,13 +348,17 @@ private fun DisplayDataMultiple(podatki: PodatkiEntity, viewModel: LekcionarView
     var isButtonClicked by rememberSaveable { mutableStateOf(false) }
 
     val context = LocalContext.current.applicationContext
+    val screenWidthDp = LocalConfiguration.current.screenWidthDp
+    val maxButtonWidth = (screenWidthDp * 0.85).dp
 
     OutlinedButton(
         onClick = {
             isButtonClicked = !isButtonClicked
         },
         modifier = Modifier
-            .padding(top = 10.dp),
+            .padding(top = 10.dp)
+            .width(IntrinsicSize.Max)
+            .widthIn(max = maxButtonWidth),
         colors = ButtonDefaults.outlinedButtonColors(
                 containerColor = if (isButtonClicked) AppTheme.colorScheme.background else AppTheme.colorScheme.primary,
                 contentColor = if (isButtonClicked) AppTheme.colorScheme.primary else AppTheme.colorScheme.background,
@@ -360,7 +366,7 @@ private fun DisplayDataMultiple(podatki: PodatkiEntity, viewModel: LekcionarView
         shape = AppTheme.shape.button,
         border = if (isButtonClicked) BorderStroke(1.5.dp, AppTheme.colorScheme.activeSliderTrack) else BorderStroke(1.5.dp, AppTheme.colorScheme.primary)
     ) {
-        Text(text = podatki.opis, style = AppTheme.typography.labelLarge, textAlign = TextAlign.Center)
+        Text(text = podatki.opis_dolgi, style = AppTheme.typography.labelLarge, textAlign = TextAlign.Center)
     }
 
     if (isButtonClicked) {
@@ -391,7 +397,7 @@ private fun DisplayDataMultiple(podatki: PodatkiEntity, viewModel: LekcionarView
                 MediaPlayer(
                     viewModel = viewModel,
                     uri = podatki.mp3,
-                    opis = podatki.opis,
+                    opis = podatki.opis_dolgi,
                     context = context,
                     snackbarHostState = snackbarHostState,
                     activityListener = activityListener

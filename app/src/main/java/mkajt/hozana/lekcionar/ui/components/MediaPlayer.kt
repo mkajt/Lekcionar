@@ -53,8 +53,8 @@ fun MediaPlayer(
     val coroutineScope = rememberCoroutineScope()
     val mediaPlayerState by viewModel.mediaPlayerState.collectAsState(Dispatchers.IO)
 
-    Log.d("MediaPlayer.kt", "Duration: " + mediaPlayerState.duration.toString())
-    if (mediaPlayerState.duration != 0 && opis == mediaPlayerState.title) {
+    //Log.d("MediaPlayer.kt", "Duration: " + mediaPlayerState.duration.toString())
+    if (mediaPlayerState.duration != 0 && opis == mediaPlayerState.title && !mediaPlayerState.isStopped) {
         // Left Column
         Column(
             modifier = Modifier

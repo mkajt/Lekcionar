@@ -61,6 +61,7 @@ class MediaPlayerService: Service() {
 
     private val handler = Handler(Looper.getMainLooper())
 
+
     //if start or pause button was clicked
     var started: Boolean = false
     var paused: Boolean = false
@@ -130,6 +131,28 @@ class MediaPlayerService: Service() {
         exit()
     }
 
+    private var mediaRunnable = object : Runnable {
+        override fun run() {
+            try {
+                mediaPlayerState.currentPosition = mediaPlayer?.currentPosition!!
+                viewModel.updateMediaPlayerState(mediaPlayerState)
+                if (getTime(mediaPlayerState.currentPosition) == getTime(mediaPlayerState.duration) && mediaPlayerState.duration != 0) {
+                    stop()
+                }
+                // log if media player on notification stop and then onResume() playInit() starts to flicker
+                Log.d(TAG, "Current: " + getTime(mediaPlayerState.currentPosition) + " Duration: " + getTime(mediaPlayerState.duration))
+                if (notificationManager.activeNotifications.any{it.id == NOTIFICATION_ID}) {
+                    foreground()
+                }
+                handler.postDelayed(this, 1000)
+            } catch (e: Exception) {
+                mediaPlayerState.currentPosition = 0
+                viewModel.updateMediaPlayerState(mediaPlayerState)
+                e.printStackTrace()
+            }
+        }
+    }
+
     fun playInit(uri: Uri, opis: String) {
         if (opis != mediaPlayerState.title) {
             mediaPlayerState.currentPosition = 0
@@ -159,42 +182,39 @@ class MediaPlayerService: Service() {
 
     private fun play() {
         mediaPlayerState.isPlaying = true
+        mediaPlayerState.isStopped = false
         mediaPlayerState.duration = mediaPlayer?.duration!!
         mediaPlayer?.seekTo(mediaPlayerState.currentPosition)
         mediaPlayer?.start()
+
+        handler.postDelayed(mediaRunnable, 0)
+
         paused = false
         started = true
-        handler.postDelayed(object: Runnable {
-            override fun run() {
-                try {
-                    mediaPlayerState.currentPosition = mediaPlayer?.currentPosition!!
-                    viewModel.updateMediaPlayerState(mediaPlayerState)
-                    // log if media player on notification stop and then onResume() playInit() starts to flicker
-                    //Log.d(TAG, "Current: " + mediaPlayerState.currentPosition + " Duration: " + mediaPlayerState.duration)
-                    if (notificationManager.activeNotifications.any{it.id == NOTIFICATION_ID}) {
-                        foreground()
-                    }
-                    handler.postDelayed(this, 1000)
-                } catch (e: Exception) {
-                    mediaPlayerState.currentPosition = 0
-                    viewModel.updateMediaPlayerState(mediaPlayerState)
-                    e.printStackTrace()
-                }
-            }
-
-        }, 0)
     }
 
     fun stop() {
         if (started) {
+            handler.postDelayed({
+                handler.removeCallbacks(mediaRunnable)
+            }, 100)
+
             mediaPlayerState.isPlaying = false
+            mediaPlayerState.isStopped = true
             mediaPlayerState.currentPosition = 0
-            mediaPlayerState.duration = 0
+            //mediaPlayerState.duration = 0
+            //mediaPlayerState.title = ""
             viewModel.updateMediaPlayerState(mediaPlayerState)
+
             mediaPlayer?.stop()
+
             started = false
             paused = false
-            handler.removeMessages(0)
+
+            //handler.removeCallbacksAndMessages(null)
+            if (notificationManager.activeNotifications.any{it.id == NOTIFICATION_ID}) {
+                foreground()
+            }
         }
     }
 
@@ -206,7 +226,11 @@ class MediaPlayerService: Service() {
         }
         viewModel.updateMediaPlayerState(mediaPlayerState)
         mediaPlayer?.pause()
-        handler.removeMessages(0)
+
+        handler.postDelayed({
+            handler.removeCallbacks(mediaRunnable)
+        }, 100)
+
         if (notificationManager.activeNotifications.any{it.id == NOTIFICATION_ID}) {
             foreground()
         }
@@ -218,7 +242,6 @@ class MediaPlayerService: Service() {
         mediaPlayer?.seekTo(mediaPlayerState.currentPosition)
     }
 
-    //todo why use this -> in activity onStop()
     fun exit() {
         Log.d(TAG, "exit()")
         if (started && mediaPlayer != null) {
@@ -240,9 +263,6 @@ class MediaPlayerService: Service() {
             channel.description = "Notifications about mediaPlayerService"
             channel.enableLights(false)
             channel.enableVibration(false)
-            //channel.enableLights(true)
-            //channel.lightColor = Color.RED
-            //channel.enableVibration(true)
             notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
             notificationManager.createNotificationChannel(channel)
         }
@@ -276,10 +296,10 @@ class MediaPlayerService: Service() {
 
         val builder = NotificationCompat.Builder(this, channelID)
             .setContentTitle(mediaPlayerState.title)
-            .setContentText(getConcatTime(mediaPlayer!!.currentPosition, mediaPlayerState.duration))
+            .setContentText(getConcatTime(mediaPlayerState.currentPosition, mediaPlayerState.duration))
             .setSmallIcon(R.mipmap.ic_launcher)
             .setChannelId(channelID)
-            .setColor(ContextCompat.getColor(context!!,R.color.grey_inactive_track))
+            //.setColor(ContextCompat.getColor(context!!,R.color.grey_active_track))
             //.setPriority(NotificationCompat.PRIORITY_MIN)
             /*.setStyle(androidx.media.app.NotificationCompat.MediaStyle()
                 .setShowActionsInCompactView(0)

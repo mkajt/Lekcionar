@@ -59,16 +59,11 @@ class LekcionarViewModel(
     val firstDataTimestamp: StateFlow<Long>
     val lastDataTimestamp: StateFlow<Long>
 
-    private var _player: MediaPlayer? = null
     private var _mediaPlayerState = MutableStateFlow(MediaPlayerState())
     val mediaPlayerState = _mediaPlayerState.asStateFlow()
-    private val _handler = Handler(Looper.getMainLooper())
-
-    //private val notificationManager: NotificationMng
 
     init {
         val context: Context = getApplication<Application>().applicationContext
-        //notificationManager = ContextCompat.getSystemService(context, NotificationMng(context, this)::class.java)!!
         dataStore = DataStoreManager(context)
         isDarkTheme = dataStore.getTheme().stateIn(viewModelScope, SharingStarted.Lazily, false)
         updatedDataTimestamp = dataStore.getUpdatedDataTimestamp().stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0L)
@@ -193,100 +188,13 @@ class LekcionarViewModel(
         _mediaPlayerState.update {
             it.copy(
                 isPlaying = state.isPlaying,
+                isStopped = state.isStopped,
                 currentPosition = state.currentPosition,
                 duration = state.duration,
                 title = state.title,
                 uri = state.uri
             )
         }
-    }
-
-    fun onMediaPlayerEvent(event: MediaPlayerEvent) {
-        when (event) {
-            is MediaPlayerEvent.Initialize -> initPlayer(event.uri, event.context)
-            is MediaPlayerEvent.Seek -> seek(event.position)
-            is MediaPlayerEvent.Play -> play()
-            is MediaPlayerEvent.Pause -> pause()
-            is MediaPlayerEvent.Stop -> stop()
-        }
-    }
-    private fun initPlayer(uri: Uri, context: Context) {
-        if (_player == null || _player?.duration!! == 0) {
-            viewModelScope.launch {
-                _player = MediaPlayer().apply {
-                    setDataSource(context, uri)
-                    setOnErrorListener { mediaPlayer, what, extra ->
-                        Log.e("MediaPlayer", "Error occurred while preparing media source: $what; extra: $extra")
-                        false
-                    }
-                    setOnPreparedListener{
-                        play()
-                    }
-                    prepareAsync()
-                }
-            }
-        } else {
-            play()
-        }
-    }
-    private fun play() {
-        _mediaPlayerState.update {
-            it.copy(
-                isPlaying = true,
-                duration = _player?.duration!!)
-        }
-
-        //Log.d("LVM", _mediaPlayerState.value.duration.toString())
-
-        _player?.seekTo(_mediaPlayerState.value.currentPosition)
-        _player?.start()
-        _handler.postDelayed(object : Runnable {
-            override fun run() {
-                try {
-                    _mediaPlayerState.update {
-                        it.copy(currentPosition = _player?.currentPosition!!)
-                    }
-                    _handler.postDelayed(this, 1000)
-                    //Log.d("HANDLER", _mediaPlayerState.value.currentPosition.toString())
-                } catch (e: Exception) {
-                    _mediaPlayerState.update {
-                        it.copy(currentPosition = 0)
-                    }
-                    e.printStackTrace()
-                }
-            }
-        }, 0)
-
-    }
-    private fun pause() {
-        _mediaPlayerState.update {
-            it.copy(
-                isPlaying = false,
-                currentPosition = _player?.currentPosition ?: 0)
-        }
-        _player?.pause()
-        _handler.removeMessages(0)
-    }
-    private fun stop() {
-        _mediaPlayerState.update {
-            it.copy(
-                isPlaying = false,
-                currentPosition = 0,
-                duration = 0
-            )
-        }
-        _player?.stop()
-        _player?.reset()
-        _player?.release()
-        _player = null
-    }
-    private fun seek(position: Float){
-        _mediaPlayerState.update {
-            it.copy(
-                currentPosition = position.toInt()
-            )
-        }
-        _player?.seekTo(position.toInt())
     }
 
 }

@@ -1,5 +1,6 @@
 package mkajt.hozana.lekcionar.model.dto
 
+import android.util.Log
 import mkajt.hozana.lekcionar.model.database.MapEntity
 import mkajt.hozana.lekcionar.model.database.PodatkiEntity
 import mkajt.hozana.lekcionar.model.database.RedEntity
@@ -31,7 +32,7 @@ object Mapper {
         podatkiDTO.forEach { podatki ->
             val pEntity = PodatkiEntity(
                 podatki.id,
-                podatki.opis,
+                if (podatki.opis_dolgi == "") podatki.opis else podatki.opis_dolgi,
                 podatki.timestamp,
                 podatki.datum,
                 podatki.mp3,

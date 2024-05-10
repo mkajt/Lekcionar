@@ -44,7 +44,6 @@ class MainActivity : ComponentActivity(), ActivityListener {
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     private val PERMISSION_POST_NOTIFICATIONS = arrayOf(Manifest.permission.POST_NOTIFICATIONS)
 
-    private val processingScope = MainScope()
     private var mediaPlayerService: MediaPlayerService? = null
     private var serviceBound: Boolean = false
 
@@ -68,7 +67,7 @@ class MainActivity : ComponentActivity(), ActivityListener {
         val localActivity = staticCompositionLocalOf<ActivityListener> {
             error("No ActivityListener provided")
         }
-        //context = LocalContext.current
+
         lekcionarDB = LekcionarDB.getInstance(context)
         lekcionarRepository = LekcionarRepository(context, lekcionarDB, Dispatchers.IO)
         lekcionarViewModel = LekcionarViewModel(application, lekcionarRepository)
@@ -81,10 +80,7 @@ class MainActivity : ComponentActivity(), ActivityListener {
                     Surface(
                         color = AppTheme.colorScheme.background
                     ) {
-
                         AppNavigation(viewModel = lekcionarViewModel, activityListener = this@MainActivity)
-
-                        //HomeSection(lekcionarViewModel)
                     }
                 }
             }
@@ -173,10 +169,9 @@ class MainActivity : ComponentActivity(), ActivityListener {
             Log.d(TAG, "Service bound")
             val binder = iBinder as MediaPlayerService.RunServiceBinder
             mediaPlayerService = binder.service
+
             mediaPlayerService?.background()
 
-            // Update the UI if the service is already running
-            //updateUI()
             serviceBound = true
             mediaPlayerService?.injectViewModel(lekcionarViewModel)
             mediaPlayerService?.mediaPlayerState?.let { lekcionarViewModel.updateMediaPlayerState(it) }
