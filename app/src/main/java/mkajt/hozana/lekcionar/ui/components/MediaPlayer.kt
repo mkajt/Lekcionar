@@ -1,8 +1,10 @@
 package mkajt.hozana.lekcionar.ui.components
 
+import android.Manifest
+import android.app.Activity
 import android.content.Context
-import android.net.Uri
-import android.util.Log
+import android.content.pm.PackageManager
+import android.os.Build
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
@@ -31,14 +33,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.core.app.ActivityCompat.requestPermissions
+import androidx.core.content.ContextCompat
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import mkajt.hozana.lekcionar.ActivityListener
+import mkajt.hozana.lekcionar.MainActivity
 import mkajt.hozana.lekcionar.ui.theme.AppTheme
 import mkajt.hozana.lekcionar.util.isInternetAvailable
 import mkajt.hozana.lekcionar.util.millisecondsToTimeString
 import mkajt.hozana.lekcionar.viewModel.LekcionarViewModel
-import mkajt.hozana.lekcionar.mediaPlayer.MediaPlayerEvent
 
 @Composable
 fun MediaPlayer(
@@ -53,7 +57,6 @@ fun MediaPlayer(
     val coroutineScope = rememberCoroutineScope()
     val mediaPlayerState by viewModel.mediaPlayerState.collectAsState(Dispatchers.IO)
 
-    //Log.d("MediaPlayer.kt", "Duration: " + mediaPlayerState.duration.toString())
     if (mediaPlayerState.duration != 0 && opis == mediaPlayerState.title && !mediaPlayerState.isStopped) {
         // Left Column
         Column(
@@ -153,6 +156,8 @@ fun MediaPlayer(
                         coroutineScope.launch {
                             snackbarHostState.showSnackbar("Ni internetne povezave!", null, true, SnackbarDuration.Short)
                         }
+                    } else if (!checkPermission(activityListener?.getActivity())) {
+                        activityListener?.requestNotificationPermission()
                     } else {
                         activityListener?.playClick(uri, opis)
                     }
@@ -199,4 +204,12 @@ fun MediaPlayer(
             }
         }
     }
+}
+
+private fun checkPermission(context: Context?): Boolean {
+
+    if (Build.VERSION.SDK_INT >= 33 && context != null) {
+        return ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED
+    }
+    return true
 }

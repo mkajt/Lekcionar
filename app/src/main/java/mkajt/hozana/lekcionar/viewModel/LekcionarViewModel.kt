@@ -62,6 +62,7 @@ class LekcionarViewModel(
     private var _mediaPlayerState = MutableStateFlow(MediaPlayerState())
     val mediaPlayerState = _mediaPlayerState.asStateFlow()
 
+
     init {
         val context: Context = getApplication<Application>().applicationContext
         dataStore = DataStoreManager(context)
@@ -70,6 +71,7 @@ class LekcionarViewModel(
         firstDataTimestamp = dataStore.getFirstDataTimestamp().stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0L)
         lastDataTimestamp = dataStore.getLastDataTimestamp().stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0L)
     }
+
 
     fun toggleIsDarkTheme() {
         viewModelScope.launch {
