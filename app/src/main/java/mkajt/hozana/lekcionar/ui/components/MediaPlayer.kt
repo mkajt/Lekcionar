@@ -1,7 +1,6 @@
 package mkajt.hozana.lekcionar.ui.components
 
 import android.Manifest
-import android.app.Activity
 import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build
@@ -33,12 +32,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.core.app.ActivityCompat.requestPermissions
 import androidx.core.content.ContextCompat
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import mkajt.hozana.lekcionar.ActivityListener
-import mkajt.hozana.lekcionar.MainActivity
 import mkajt.hozana.lekcionar.ui.theme.AppTheme
 import mkajt.hozana.lekcionar.util.isInternetAvailable
 import mkajt.hozana.lekcionar.util.millisecondsToTimeString
@@ -207,7 +204,6 @@ fun MediaPlayer(
 }
 
 private fun checkPermission(context: Context?): Boolean {
-
     if (Build.VERSION.SDK_INT >= 33 && context != null) {
         return ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED
     }

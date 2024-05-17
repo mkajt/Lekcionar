@@ -92,29 +92,32 @@ class MediaPlayerService: Service() {
 
     }
 
-    override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int {
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         //startForeground(NOTIFICATION_ID, createNotification())
-        when (intent.action) {
-            ACTION_START -> {
-                val uri = intent.getStringExtra("uri")
-                val opis = intent.getStringExtra("opis")
-                if (uri != null) {
-                    playInit(Uri.parse(uri), opis!!)
+        //null validation for error: Caused by: java.lang.NullPointerException: Parameter specified as non-null is null: method .onStartCommand, parameter intent
+        if (intent != null) {
+            when (intent.action) {
+                ACTION_START -> {
+                    val uri = intent.getStringExtra("uri")
+                    val opis = intent.getStringExtra("opis")
+                    if (uri != null) {
+                        playInit(Uri.parse(uri), opis!!)
+                    }
                 }
-            }
-            ACTION_STOP -> {
-                stop()
-            }
-            ACTION_PAUSE -> {
-                pause()
-            }
-            ACTION_SEEK -> {
-                val seekTo = intent.getFloatExtra("seekTo", 0F)
-                seek(seekTo)
-            }
-            ACTION_EXIT -> {
-                stop()
-                exit()
+                ACTION_STOP -> {
+                    stop()
+                }
+                ACTION_PAUSE -> {
+                    pause()
+                }
+                ACTION_SEEK -> {
+                    val seekTo = intent.getFloatExtra("seekTo", 0F)
+                    seek(seekTo)
+                }
+                ACTION_EXIT -> {
+                    stop()
+                    exit()
+                }
             }
         }
 

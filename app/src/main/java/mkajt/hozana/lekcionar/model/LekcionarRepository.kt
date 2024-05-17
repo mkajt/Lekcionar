@@ -58,30 +58,28 @@ class LekcionarRepository(
                     Log.d(TAG,"Data Loaded!")
                 }
             } else {
-                Log.d(TAG, "Failed to fetch data from API: ${response.message()}")
+                Log.e(TAG, "Failed to fetch data from API: ${response.message()}")
             }
             return updatedTimestamp
         } catch (e: HttpException) {
-            Log.d(TAG, "Failed to fetch data from API: ${e.message()}")
+            Log.e(TAG, "Failed to fetch data from API: ${e.message()}")
             return 0L
         } catch (e: Exception) {
-            Log.d(TAG, "An error occurred: ${e.message}")
+            Log.e(TAG, "An error occurred: ${e.message}")
             return 0L
-        } finally {
-            Log.d(TAG, "Successfully loaded data from API and inserted into DB")
         }
     }
 
-    suspend fun getIdPodatekFromMap(selektor: String): String {
+    suspend fun getIdPodatekFromMap(selektor: String): String? {
         return withContext(ioDispatcher) {
             lekcionarDB.lekcionarDao().getIdPodatekFromMap(selektor)
         }
     }
 
-    suspend fun getPodatki(id_podatek: List<String>): List<PodatkiEntity> {
+    suspend fun getPodatki(idPodatek: List<String>): List<PodatkiEntity> {
         return withContext(ioDispatcher) {
             val podatki = mutableListOf<PodatkiEntity>()
-            for (id in id_podatek) {
+            for (id in idPodatek) {
                 val podatek = lekcionarDB.lekcionarDao().getPodatki(id)
                 if (podatek != null) {
                     podatki.add(podatek)

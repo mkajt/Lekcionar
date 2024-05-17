@@ -1,10 +1,5 @@
 package mkajt.hozana.lekcionar.viewModel
 
-import mkajt.hozana.lekcionar.model.dto.MapDTO
-import mkajt.hozana.lekcionar.model.dto.PodatkiDTO
-import mkajt.hozana.lekcionar.model.dto.RedDTO
-import mkajt.hozana.lekcionar.model.dto.SkofijaDTO
-
 sealed class LekcionarViewState {
 
     object Loading : LekcionarViewState()
@@ -15,12 +10,8 @@ sealed class LekcionarViewState {
 
     object AlreadyInDb : LekcionarViewState()
 
+    object NoInternet : LekcionarViewState()
+
     data class Error(val errorMessage: String) : LekcionarViewState()
 
-    data class Data(
-        var redovi: List<RedDTO>? = null,
-        var skofije: List<SkofijaDTO>? = null,
-        var map: List<MapDTO>? = null,
-        var podatki: List<PodatkiDTO>? = null,
-    ) : LekcionarViewState()
 }

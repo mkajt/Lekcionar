@@ -68,7 +68,6 @@ import mkajt.hozana.lekcionar.ActivityListener
 import mkajt.hozana.lekcionar.model.database.PodatkiEntity
 import mkajt.hozana.lekcionar.ui.routes.Screen
 import mkajt.hozana.lekcionar.ui.theme.AppTheme
-import mkajt.hozana.lekcionar.ui.theme.LekcionarRed
 import mkajt.hozana.lekcionar.viewModel.LekcionarViewModel
 import mkajt.hozana.lekcionar.viewModel.LekcionarViewState
 import java.util.regex.Matcher
@@ -82,6 +81,7 @@ fun Home(viewModel: LekcionarViewModel, navController: NavController, actListene
     val context = LocalContext.current.applicationContext
     activityListener = actListener
     val snackbarHostState = remember {SnackbarHostState()}
+    val dataState by viewModel.dataState.collectAsState()
     createSelektor(viewModel)
 
 
@@ -142,62 +142,49 @@ fun Home(viewModel: LekcionarViewModel, navController: NavController, actListene
             }
         },
         bottomBar = {
-            /*Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-
-            }*/
-            BottomAppBar(
-                containerColor = AppTheme.colorScheme.background,
-                contentColor = AppTheme.colorScheme.primary,
-                contentPadding = BottomAppBarDefaults.ContentPadding,
-                //modifier = Modifier
-                 //   .height(80.dp)
-                /*.clip(
-                    RoundedCornerShape(
-                        topStart = 24.dp, topEnd = 24.dp
-                    )
-                )*/
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth(),
-                        /*.border(
-                            width = 2.dp,
-                            color = AppTheme.colorScheme.background,
-                            shape = RectangleShape
-                        ),*/
-                    horizontalArrangement = Arrangement.Center,
-                    verticalAlignment = Alignment.CenterVertically
+            if (dataState == LekcionarViewState.AlreadyInDb) {
+                BottomAppBar(
+                    containerColor = AppTheme.colorScheme.background,
+                    contentColor = AppTheme.colorScheme.primary,
+                    contentPadding = BottomAppBarDefaults.ContentPadding
                 ) {
-                    IconButton(onClick = {
-                        activityListener?.stopClick()
-                        viewModel.goToPreviousDate()
-                    }) {
-                        Icon(
-                            imageVector = Icons.Rounded.KeyboardArrowLeft,
-                            contentDescription = "Previous Date",
-                            modifier = Modifier.size(450.dp)
-                        )
-                    }
-                    IconButton(onClick = {
-                        navController.navigate(Screen.CALLENDAR.name)
-                    }) {
-                        Icon(
-                            imageVector = Icons.Rounded.DateRange,
-                            contentDescription = "Calendar",
-                            modifier = Modifier
-                                .size(450.dp)
-                                .padding(horizontal = 5.dp)
-                        )
-                    }
-                    IconButton(onClick = {
-                        activityListener?.stopClick()
-                        viewModel.goToNextDate()
-                    }) {
-                        Icon(
-                            imageVector = Icons.Rounded.KeyboardArrowRight,
-                            contentDescription = "Next Date",
-                            modifier = Modifier.size(450.dp)
-                        )
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth(),
+                        horizontalArrangement = Arrangement.Center,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        IconButton(onClick = {
+                            activityListener?.stopClick()
+                            viewModel.goToPreviousDate()
+                        }) {
+                            Icon(
+                                imageVector = Icons.Rounded.KeyboardArrowLeft,
+                                contentDescription = "Previous Date",
+                                modifier = Modifier.size(450.dp)
+                            )
+                        }
+                        IconButton(onClick = {
+                            navController.navigate(Screen.CALLENDAR.name)
+                        }) {
+                            Icon(
+                                imageVector = Icons.Rounded.DateRange,
+                                contentDescription = "Calendar",
+                                modifier = Modifier
+                                    .size(450.dp)
+                                    .padding(horizontal = 5.dp)
+                            )
+                        }
+                        IconButton(onClick = {
+                            activityListener?.stopClick()
+                            viewModel.goToNextDate()
+                        }) {
+                            Icon(
+                                imageVector = Icons.Rounded.KeyboardArrowRight,
+                                contentDescription = "Next Date",
+                                modifier = Modifier.size(450.dp)
+                            )
+                        }
                     }
                 }
             }
@@ -210,26 +197,17 @@ fun ContentSectionHome(innerPadding: PaddingValues, viewModel: LekcionarViewMode
 
     val dataState by viewModel.dataState.collectAsState()
     val podatki by viewModel.podatki.collectAsState()
-    //var previousPodatki by remember { mutableStateOf(podatki) }
-
-    /*LaunchedEffect(podatki) {
-        if (podatki != previousPodatki) {
-            //activityListener?.stopClick()
-            previousPodatki = podatki
-        }
-    }*/
 
     val errorMessage = when (dataState) {
         is LekcionarViewState.Error -> (dataState as LekcionarViewState.Error).errorMessage
         else -> null
     }
     if (errorMessage == null) {
-        if (dataState == LekcionarViewState.Loading) {
-            Greeting(name = "Loading", modifier = Modifier.padding(innerPadding))
-            Log.d("UI", "Loading")
-        } else if (dataState == LekcionarViewState.AlreadyInDb || dataState == LekcionarViewState.Loaded
-        ) {
-            //Greeting(name = "AlreadyInDb", modifier = Modifier.padding(innerPadding))
+        if (dataState == LekcionarViewState.Start || dataState == LekcionarViewState.Loading) {
+            DisplayStatus(state = "Loading", modifier = Modifier.padding(innerPadding)) {}
+            val status = if (dataState == LekcionarViewState.Start) "Start" else "Loading"
+            Log.d("UI", "LekcionarViewState: $status")
+        } else if (dataState == LekcionarViewState.AlreadyInDb || dataState == LekcionarViewState.Loaded) {
             if (podatki != null) {
                 Column(
                     modifier = Modifier
@@ -242,7 +220,7 @@ fun ContentSectionHome(innerPadding: PaddingValues, viewModel: LekcionarViewMode
                         style = AppTheme.typography.titleNormal
                     )
                     if (podatki!!.size == 1) {
-                        DisplayDataSingle(podatki = podatki!!.first(), viewModel = viewModel, snackbarHostState = snackbarHostState, innerPadding = innerPadding)
+                        DisplayDataSingle(podatki = podatki!!.first(), viewModel = viewModel, snackbarHostState = snackbarHostState)
                     } else {
                         for (podatek in podatki!!) {
                             Column(
@@ -256,29 +234,20 @@ fun ContentSectionHome(innerPadding: PaddingValues, viewModel: LekcionarViewMode
                     }
                 }
             }
-            Log.d("UI", "AlreadyInDb or Loaded")
-        } /*else if (!idPodatek.isNullOrEmpty()) {
-            Greeting(name = idPodatek!![0], modifier = Modifier.padding(innerPadding))
-        } */
-        else if (dataState == LekcionarViewState.Start) {
-            Greeting(name = "Start", modifier = Modifier.padding(innerPadding))
-            Log.d("UI", "Start")
-        } /*else if (dataState.equals(LekcionarViewState.Loaded)){
-            Greeting(name = "Loaded", modifier = Modifier.padding(innerPadding))
-            Log.d("UI", "Loaded")
-        }*/
+            Log.d("UI", "LekcionarViewState: AlreadyInDb or Loaded")
+        } else if (dataState == LekcionarViewState.NoInternet){
+            DisplayStatus(state = "NoInternet", modifier = Modifier.padding(innerPadding)) { viewModel.checkDbAndFetchDataFromApi() }
+            Log.d("UI", "LekcionarViewState: NoInternet")
+        }
     } else {
-        Text(
-            text = errorMessage,
-            modifier = Modifier.padding(innerPadding),
-            color = LekcionarRed
-        )
+        DisplayStatus(state = "Error", modifier = Modifier.padding(innerPadding)) { viewModel.checkDbAndFetchDataFromApi() }
+        Log.e("UI", "LekcionarViewState: $errorMessage")
     }
 
 }
 
 @Composable
-private fun DisplayDataSingle(podatki: PodatkiEntity, viewModel: LekcionarViewModel, snackbarHostState: SnackbarHostState, innerPadding: PaddingValues) {
+private fun DisplayDataSingle(podatki: PodatkiEntity, viewModel: LekcionarViewModel, snackbarHostState: SnackbarHostState) {
     val context = LocalContext.current.applicationContext
     val screenWidthDp = LocalConfiguration.current.screenWidthDp
     val maxButtonWidth = (screenWidthDp * 0.85).dp

@@ -2,15 +2,9 @@ package mkajt.hozana.lekcionar.viewModel
 
 import android.app.Application
 import android.content.Context
-import android.media.MediaPlayer
-import android.net.Uri
-import android.os.Handler
-import android.os.Looper
 import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.Runnable
-import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -18,11 +12,11 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import mkajt.hozana.lekcionar.mediaPlayer.MediaPlayerEvent
 import mkajt.hozana.lekcionar.mediaPlayer.MediaPlayerState
 import mkajt.hozana.lekcionar.model.LekcionarRepository
 import mkajt.hozana.lekcionar.model.dataStore.DataStoreManager
 import mkajt.hozana.lekcionar.model.database.PodatkiEntity
+import mkajt.hozana.lekcionar.util.isInternetAvailable
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
@@ -61,6 +55,7 @@ class LekcionarViewModel(
 
     private var _mediaPlayerState = MutableStateFlow(MediaPlayerState())
     val mediaPlayerState = _mediaPlayerState.asStateFlow()
+
 
 
     init {
@@ -111,10 +106,18 @@ class LekcionarViewModel(
             try {
                 val count = lekcionarRepository.countPodatki()
                 if (count == 0) {
-                    _dataState.update { LekcionarViewState.Loading }
-                    val updatedTimestamp = lekcionarRepository.getLekcionarDataFromApi()
-                    dataStore.setUpdatedDataTimestamp(updatedTimestamp)
-                    _dataState.update { LekcionarViewState.Loaded }
+                    if (!isInternetAvailable(context = getApplication<Application>().applicationContext)) {
+                        _dataState.update { LekcionarViewState.NoInternet }
+                        return@launch
+                    } else {
+                        _dataState.update { LekcionarViewState.Loading }
+                        val updatedTimestamp= lekcionarRepository.getLekcionarDataFromApi()
+                        if (updatedTimestamp == 0L) {
+                            throw Exception("Error occurred while downloading data.")
+                        }
+                        dataStore.setUpdatedDataTimestamp(updatedTimestamp)
+                        _dataState.update { LekcionarViewState.Loaded }
+                    }
                 }
                 _dataState.update { LekcionarViewState.AlreadyInDb }
                 _smallestTimestamp.update { lekcionarRepository.getSmallestTimestamp() }
@@ -173,14 +176,14 @@ class LekcionarViewModel(
     private fun getPodatkiBySelektor() {
         viewModelScope.launch {
             if (_selektor.value != "") {
-                val ids = async { lekcionarRepository.getIdPodatekFromMap(_selektor.value) }
-                val idsString = ids.await() ?: return@launch
-                _idPodatek.update { idsString.split(",") }
-                //Log.d("LVM", "Id podatek: ${_idPodatek.value}")
+                val ids = lekcionarRepository.getIdPodatekFromMap(_selektor.value)
+                if (ids.isNullOrEmpty()) {
+                    return@launch
+                }
+                _idPodatek.update { ids.split(",") }
 
-                val podatki = async { lekcionarRepository.getPodatki(_idPodatek.value!!) }
-                _podatki.update { podatki.await() }
-                //_podatki.value = podatki.await()
+                val podatki = lekcionarRepository.getPodatki(_idPodatek.value!!)
+                _podatki.update { podatki }
                 Log.d("LVM", "Podatki: ${_podatki.value}")
             }
         }

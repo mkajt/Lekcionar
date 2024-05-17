@@ -11,10 +11,8 @@ import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.material3.Surface
-import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.MainScope
 import mkajt.hozana.lekcionar.mediaPlayer.MediaPlayerService
 import mkajt.hozana.lekcionar.model.LekcionarRepository
 import mkajt.hozana.lekcionar.model.database.LekcionarDB
@@ -92,7 +90,6 @@ class MainActivity : ComponentActivity(), ActivityListener {
                     }
                 } else {
                     openAppSettings(context)
-
                 }
             }
         }
@@ -111,9 +108,7 @@ class MainActivity : ComponentActivity(), ActivityListener {
         }*/
 
         startService(i)
-        // bind the Service
         bindService(i, mConnection, 0);
-
     }
 
     override fun onResume() {
