@@ -18,15 +18,17 @@ private val lightColorScheme = AppColorScheme(
     secondary = Black,
     background = White,
     activeSliderTrack = GreyActiveTrack,
-    inactiveSliderTrack = GreyInactiveTrack
+    inactiveSliderTrack = GreyInactiveTrack,
+    headerContent = White
 )
 
 private val darkColorScheme = AppColorScheme(
     primary = LekcionarRed,
     secondary = White,
     background = Grey,
-    activeSliderTrack = GreyActiveTrack,
-    inactiveSliderTrack = GreyInactiveTrack
+    activeSliderTrack = GreyInactiveTrack,
+    inactiveSliderTrack = GreyActiveTrack,
+    headerContent = White
 )
 
 private val typography = AppTypography(

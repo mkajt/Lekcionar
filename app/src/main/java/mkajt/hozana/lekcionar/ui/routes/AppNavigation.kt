@@ -7,6 +7,7 @@ import androidx.navigation.compose.rememberNavController
 import mkajt.hozana.lekcionar.ActivityListener
 import mkajt.hozana.lekcionar.ui.components.Calendar
 import mkajt.hozana.lekcionar.ui.components.Home
+import mkajt.hozana.lekcionar.ui.components.Settings
 import mkajt.hozana.lekcionar.viewModel.LekcionarViewModel
 
 enum class Screen {
@@ -22,5 +23,6 @@ fun AppNavigation(viewModel: LekcionarViewModel, activityListener: ActivityListe
     NavHost(navController = navController, startDestination = Screen.HOME.name) {
         composable(Screen.HOME.name) { Home(viewModel = viewModel, navController = navController, actListener = activityListener )}
         composable(Screen.CALLENDAR.name) { Calendar(viewModel = viewModel, navController = navController, actListener = activityListener)}
+        composable(Screen.SETTINGS.name) { Settings(viewModel = viewModel, navController = navController)}
     }
 }

@@ -4,6 +4,7 @@
     <color name="grey_inactive_track">#BEBEBE</color>
     <color name="grey">#FF312E2E</color>
     <color name="lekcionar_red">#FFB71C1C</color>
+    <color name="lekcionar_red_status_bar">#680F0F</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFAF9F9</color>
 </resources>

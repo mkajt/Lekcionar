@@ -33,7 +33,7 @@ fun DisplayStatus(state: String, modifier: Modifier, retry: () -> Unit) {
     }
 
     Column(modifier = modifier
-        .fillMaxSize(),
+            .fillMaxSize(),
         verticalArrangement = Arrangement.SpaceBetween,
         horizontalAlignment = Alignment.CenterHorizontally) {
         Row(modifier = Modifier
@@ -44,6 +44,7 @@ fun DisplayStatus(state: String, modifier: Modifier, retry: () -> Unit) {
             Text(
                 text = displayStatus,
                 style = AppTheme.typography.labelLarge,
+                color = AppTheme.colorScheme.secondary,
                 textAlign = TextAlign.Center,
                 modifier = Modifier
                     .fillMaxWidth()

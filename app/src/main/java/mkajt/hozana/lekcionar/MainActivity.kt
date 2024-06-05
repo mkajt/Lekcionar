@@ -27,6 +27,8 @@ import android.os.Build
 import android.provider.Settings
 import androidx.annotation.RequiresApi
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.core.app.ActivityCompat
 
@@ -62,8 +64,9 @@ class MainActivity : ComponentActivity(), ActivityListener {
         lekcionarViewModel.checkDbAndFetchDataFromApi()
 
         setContent {
+            val selectedTheme by lekcionarViewModel.isDarkTheme.collectAsState()
             CompositionLocalProvider(localActivity provides this@MainActivity) {
-                AppTheme {
+                AppTheme(isDarkTheme = selectedTheme) {
                     // A surface container using the 'background' color from the theme
                     Surface(
                         color = AppTheme.colorScheme.background
@@ -114,7 +117,7 @@ class MainActivity : ComponentActivity(), ActivityListener {
     override fun onResume() {
         super.onResume()
         //in case of error: kotlin.uninitializedpropertyaccessexception: lateinit property
-        //mediaPlayerService?.injectViewModel(lekcionarViewModel)ž
+        //mediaPlayerService?.injectViewModel(lekcionarViewModel)
     }
 
     override fun requestNotificationPermission() {
@@ -170,22 +173,6 @@ class MainActivity : ComponentActivity(), ActivityListener {
                 serviceBound = false
             } else {
                 mediaPlayerService?.exit()
-
-                //val i = Intent(this, MediaPlayerService::class.java)
-                //i.action = MediaPlayerService.ACTION_EXIT
-                //startService(i)
-
-                //or:
-                //mediaPlayerService?.exit()
-                //stopService(Intent(this, MediaPlayerService::class.java))
-
-                //mediaPlayerService?.background()
-                //mediaPlayerService?.stopSelf()
-                //unbindService(mConnection)
-                //serviceBound = false
-                //finishAndRemoveTask()
-                //exitProcess(0)
-                //exitClick()
             }
         }
     }
@@ -255,7 +242,6 @@ class MainActivity : ComponentActivity(), ActivityListener {
         }
     }
 
-    // todo why use this -> onStop()
     override fun exitClick() {
         Log.d(TAG, "exitClick()")
 

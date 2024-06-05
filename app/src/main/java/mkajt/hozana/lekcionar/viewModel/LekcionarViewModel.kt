@@ -2,6 +2,7 @@ package mkajt.hozana.lekcionar.viewModel
 
 import android.app.Application
 import android.content.Context
+import android.provider.ContactsContract.Data
 import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
@@ -9,13 +10,18 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.drop
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import mkajt.hozana.lekcionar.mediaPlayer.MediaPlayerState
 import mkajt.hozana.lekcionar.model.LekcionarRepository
 import mkajt.hozana.lekcionar.model.dataStore.DataStoreManager
 import mkajt.hozana.lekcionar.model.database.PodatkiEntity
+import mkajt.hozana.lekcionar.model.database.RedEntity
+import mkajt.hozana.lekcionar.model.database.SkofijaEntity
 import mkajt.hozana.lekcionar.util.isInternetAvailable
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -48,10 +54,17 @@ class LekcionarViewModel(
     val podatki = _podatki.asStateFlow()
 
     private val dataStore : DataStoreManager
-    private val isDarkTheme: StateFlow<Boolean>
-    private val updatedDataTimestamp: StateFlow<Long>
+    val isDarkTheme: StateFlow<Boolean>
+    val updatedDataTimestamp: StateFlow<Long>
     val firstDataTimestamp: StateFlow<Long>
     val lastDataTimestamp: StateFlow<Long>
+    val selectedRed: StateFlow<String>
+    val selectedSkofija: StateFlow<String>
+
+    private val _redList = MutableStateFlow<List<RedEntity>?>(null)
+    val redList = _redList.asStateFlow()
+    private val _skofijaList = MutableStateFlow<List<SkofijaEntity>?>(null)
+    val skofijaList = _skofijaList.asStateFlow()
 
     private var _mediaPlayerState = MutableStateFlow(MediaPlayerState())
     val mediaPlayerState = _mediaPlayerState.asStateFlow()
@@ -61,12 +74,19 @@ class LekcionarViewModel(
     init {
         val context: Context = getApplication<Application>().applicationContext
         dataStore = DataStoreManager(context)
-        isDarkTheme = dataStore.getTheme().stateIn(viewModelScope, SharingStarted.Lazily, false)
-        updatedDataTimestamp = dataStore.getUpdatedDataTimestamp().stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0L)
-        firstDataTimestamp = dataStore.getFirstDataTimestamp().stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0L)
-        lastDataTimestamp = dataStore.getLastDataTimestamp().stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0L)
+        isDarkTheme = dataStore.getTheme().stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), runBlocking { dataStore.getTheme().first() })
+        updatedDataTimestamp = dataStore.getUpdatedDataTimestamp().stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), runBlocking { dataStore.getUpdatedDataTimestamp().first() })
+        firstDataTimestamp = dataStore.getFirstDataTimestamp().stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), runBlocking { dataStore.getFirstDataTimestamp().first() })
+        lastDataTimestamp = dataStore.getLastDataTimestamp().stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), runBlocking { dataStore.getLastDataTimestamp().first() })
+        selectedRed = dataStore.getRed().stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), runBlocking { dataStore.getRed().first() })
+        selectedSkofija = dataStore.getSkofija().stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), runBlocking { dataStore.getSkofija().first() })
+        Log.d("LVM", "Initial firstDataTimestamp: ${firstDataTimestamp.value}")
+        Log.d("LVM", "Initial lastDataTimestamp: ${lastDataTimestamp.value}")
     }
 
+    fun getIsDarkTheme(): Boolean {
+        return isDarkTheme.value
+    }
 
     fun toggleIsDarkTheme() {
         viewModelScope.launch {
@@ -75,31 +95,81 @@ class LekcionarViewModel(
         }
     }
 
+    fun setIsDarkTheme(isDark: Boolean) {
+        viewModelScope.launch {
+            dataStore.setTheme(isDark)
+        }
+    }
+
     fun getFirstDataTimestamp(): Long {
         return firstDataTimestamp.value
     }
 
-    private suspend fun setFirstDataTimestamp(timestamp: Long) {
-        dataStore.setFirstDataTimestamp(timestamp)
-        /*viewModelScope.launch {
-        }*/
+    private fun setFirstDataTimestamp(timestamp: Long) {
+        viewModelScope.launch {
+            dataStore.setFirstDataTimestamp(timestamp)
+        }
     }
 
     fun getLastDataTimestamp(): Long {
         return lastDataTimestamp.value
     }
 
-    private suspend fun setLastDataTimestamp(timestamp: Long) {
-        dataStore.setLastDataTimestamp(timestamp)
-        /*viewModelScope.launch {
+    private fun setLastDataTimestamp(timestamp: Long) {
+        viewModelScope.launch {
             dataStore.setLastDataTimestamp(timestamp)
-        }*/
+        }
     }
 
     fun getUpdatedDataTimestamp(): Long {
         return  updatedDataTimestamp.value
     }
 
+    fun getSelectedRed(): String {
+        return selectedRed.value
+    }
+
+    fun setSelectedRed(red: String) {
+        viewModelScope.launch {
+            dataStore.setRed(red)
+            updateSelektor()
+        }
+    }
+
+    fun getSelectedSkofija(): String {
+        return selectedSkofija.value
+    }
+
+    fun setSelectedSkofija(skofija: String) {
+        viewModelScope.launch {
+            dataStore.setSkofija(skofija)
+            updateSelektor()
+        }
+    }
+
+
+    private fun updateSelektor() {
+        _selektor.update { "${_selectedDate.value}-${selectedSkofija.value}-${selectedRed.value}" }
+        Log.d("SELEKTOR", _selektor.value)
+        getPodatkiBySelektor()
+    }
+
+    fun updateSelectedDate(date: LocalDate) {
+        if (dateFormatter.format(date) != _selectedDate.value) {
+            _selectedDate.update { dateFormatter.format(date) }
+            updateSelektor()
+        }
+    }
+
+    fun goToNextDate() {
+        val currentDate = LocalDate.parse(_selectedDate.value, dateFormatter)
+        updateSelectedDate(currentDate.plusDays(1))
+    }
+
+    fun goToPreviousDate() {
+        val currentDate = LocalDate.parse(_selectedDate.value, dateFormatter)
+        updateSelectedDate(currentDate.minusDays(1))
+    }
 
     fun checkDbAndFetchDataFromApi() {
         viewModelScope.launch {
@@ -117,20 +187,20 @@ class LekcionarViewModel(
                         }
                         dataStore.setUpdatedDataTimestamp(updatedTimestamp)
                         _dataState.update { LekcionarViewState.Loaded }
+                        val smallestTimestamp = lekcionarRepository.getSmallestTimestamp()
+                        val biggestTimestamp = lekcionarRepository.getBiggestTimestamp()
+                        dataStore.setFirstDataTimestamp(smallestTimestamp)
+                        dataStore.setLastDataTimestamp(biggestTimestamp)
+                        Log.d("LVM", "SmallestTimestamp: $smallestTimestamp")
+                        Log.d("LVM", "BiggestTimestamp: $biggestTimestamp")
                     }
                 }
                 _dataState.update { LekcionarViewState.AlreadyInDb }
-                _smallestTimestamp.update { lekcionarRepository.getSmallestTimestamp() }
-                _biggestTimestamp.update { lekcionarRepository.getBiggestTimestamp() }
-                Log.d("LVM", "SmallestTimestamp: " + _smallestTimestamp.value)
-                Log.d("LVM", "BiggestTimestamp: " + _biggestTimestamp.value)
-                //setFirstDataTimestamp(_smallestTimestamp.value)
-                //setLastDataTimestamp(_biggestTimestamp.value)
-                dataStore.setFirstDataTimestamp(_smallestTimestamp.value)
-                dataStore.setLastDataTimestamp(_biggestTimestamp.value)
-
-                Log.d("LVM", "FirstTimestamp: " + firstDataTimestamp.value)
-                Log.d("LVM", "LastTimestamp: " + lastDataTimestamp.value)
+                val red = lekcionarRepository.getRedList()
+                _redList.update { red }
+                val skofija = lekcionarRepository.getSkofijaList()
+                _skofijaList.update { skofija }
+                updateSelektor()
                 getPodatkiBySelektor()
 
             } catch (e: Exception) {
@@ -139,20 +209,7 @@ class LekcionarViewModel(
         }
     }
 
-    private fun updateSelektor() {
-        _selektor.update { "${_selectedDate.value}-${_selectedSkofija.value}-${_selectedRed.value}" }
-        Log.d("DATE", _selektor.value)
-        getPodatkiBySelektor()
-    }
-
-    fun updateSelectedDate(date: LocalDate) {
-        if (dateFormatter.format(date) != _selectedDate.value) {
-            _selectedDate.update { dateFormatter.format(date) }
-            updateSelektor()
-        }
-    }
-
-    fun updateSelectedRed(red: String) {
+    /*fun updateSelectedRed(red: String) {
         _selectedRed.update { red }
         updateSelektor()
     }
@@ -160,17 +217,7 @@ class LekcionarViewModel(
     fun updateSelectedSkofija(skofija: String) {
         _selectedSkofija.update { skofija }
         updateSelektor()
-    }
-
-    fun goToNextDate() {
-        val currentDate = LocalDate.parse(_selectedDate.value, dateFormatter)
-        updateSelectedDate(currentDate.plusDays(1))
-    }
-
-    fun goToPreviousDate() {
-        val currentDate = LocalDate.parse(_selectedDate.value, dateFormatter)
-        updateSelectedDate(currentDate.minusDays(1))
-    }
+    }*/
 
 
     private fun getPodatkiBySelektor() {

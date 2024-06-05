@@ -8,10 +8,10 @@ import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.emptyPreferences
 import androidx.datastore.preferences.core.longPreferencesKey
+import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import java.io.IOException
 
@@ -24,6 +24,8 @@ class DataStoreManager(context: Context) {
         val firstDataTimestamp = longPreferencesKey("FIRST_DATA_TIMESTAMP")
         val lastDataTimestamp = longPreferencesKey("LAST_DATA_TIMESTAMP")
         val isDarkTheme = booleanPreferencesKey("IS_DARK_THEME")
+        val red = stringPreferencesKey("RED")
+        val skofija = stringPreferencesKey("SKOFIJA")
     }
 
     private val dataStore = context.dataStore
@@ -47,7 +49,6 @@ class DataStoreManager(context: Context) {
             .map { preferences ->
                 val uiMode = preferences[isDarkTheme] ?: false
                 uiMode
-
             }
     }
 
@@ -89,8 +90,8 @@ class DataStoreManager(context: Context) {
                 }
             }
             .map { preferences ->
-                val uiMode = preferences[firstDataTimestamp] ?: 0L
-                uiMode
+                val first = preferences[firstDataTimestamp] ?: 0L
+                first
 
             }
     }
@@ -111,9 +112,50 @@ class DataStoreManager(context: Context) {
                 }
             }
             .map { preferences ->
-                val uiMode = preferences[lastDataTimestamp] ?: 0L
-                uiMode
+                val last = preferences[lastDataTimestamp] ?: 0L
+                last
+            }
+    }
 
+    suspend fun setRed(selectedRed: String) {
+        dataStore.edit { preferences ->
+            preferences[red] = selectedRed
+        }
+    }
+
+    fun getRed(): Flow<String> {
+        return dataStore.data
+            .catch { exception ->
+                if (exception is IOException) {
+                    emit(emptyPreferences())
+                } else {
+                    throw exception
+                }
+            }
+            .map { preferences ->
+                val red = preferences[red] ?: "noben"
+                red
+            }
+    }
+
+    suspend fun setSkofija(selectedSkofija: String) {
+        dataStore.edit { preferences ->
+            preferences[skofija] = selectedSkofija
+        }
+    }
+
+    fun getSkofija(): Flow<String> {
+        return dataStore.data
+            .catch { exception ->
+                if (exception is IOException) {
+                    emit(emptyPreferences())
+                } else {
+                    throw exception
+                }
+            }
+            .map { preferences ->
+                val skofija = preferences[skofija] ?: "slovenija"
+                skofija
             }
     }
 }

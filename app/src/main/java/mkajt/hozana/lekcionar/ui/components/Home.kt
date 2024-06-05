@@ -82,8 +82,6 @@ fun Home(viewModel: LekcionarViewModel, navController: NavController, actListene
     activityListener = actListener
     val snackbarHostState = remember {SnackbarHostState()}
     val dataState by viewModel.dataState.collectAsState()
-    createSelektor(viewModel)
-
 
     Scaffold(
         containerColor = AppTheme.colorScheme.background,
@@ -103,7 +101,7 @@ fun Home(viewModel: LekcionarViewModel, navController: NavController, actListene
 
                     // Settings
                     IconButton(onClick = {
-                        Toast.makeText(context, "Settings", Toast.LENGTH_SHORT).show()
+                        navController.navigate(Screen.SETTINGS.name)
                     }) {
                         Icon(
                             imageVector = Icons.Default.Settings,
@@ -119,7 +117,6 @@ fun Home(viewModel: LekcionarViewModel, navController: NavController, actListene
                         Icon(
                             imageVector = Icons.Default.Info,
                             contentDescription = "App info",
-                            //tint = White,
                             modifier = Modifier.size(25.dp)
                         )
                     }
@@ -127,8 +124,8 @@ fun Home(viewModel: LekcionarViewModel, navController: NavController, actListene
                 },
                 colors = TopAppBarDefaults.smallTopAppBarColors(
                     containerColor = AppTheme.colorScheme.primary,
-                    actionIconContentColor = AppTheme.colorScheme.background,
-                    titleContentColor = AppTheme.colorScheme.background
+                    actionIconContentColor = AppTheme.colorScheme.headerContent,
+                    titleContentColor = AppTheme.colorScheme.headerContent
                 )
             )
         },
@@ -216,8 +213,10 @@ fun ContentSectionHome(innerPadding: PaddingValues, viewModel: LekcionarViewMode
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(
-                        text = podatki!!.first().datum, Modifier.padding(top = 20.dp),
-                        style = AppTheme.typography.titleNormal
+                        text = podatki!!.first().datum,
+                        modifier = Modifier.padding(top = 20.dp),
+                        style = AppTheme.typography.titleNormal,
+                        color = AppTheme.colorScheme.secondary
                     )
                     if (podatki!!.size == 1) {
                         DisplayDataSingle(podatki = podatki!!.first(), viewModel = viewModel, snackbarHostState = snackbarHostState)
@@ -281,7 +280,8 @@ private fun DisplayDataSingle(podatki: PodatkiEntity, viewModel: LekcionarViewMo
                 modifier = Modifier
                     .padding(horizontal = 8.dp)
                     .fillMaxWidth(0.75f),
-                style = AppTheme.typography.bodyItalic
+                style = AppTheme.typography.bodyItalic,
+                color = AppTheme.colorScheme.secondary
             )
         }
     }
@@ -353,7 +353,8 @@ private fun DisplayDataMultiple(podatki: PodatkiEntity, viewModel: LekcionarView
                     modifier = Modifier
                         .padding(horizontal = 8.dp)
                         .fillMaxWidth(0.75f),
-                    style = AppTheme.typography.bodyItalic
+                    style = AppTheme.typography.bodyItalic,
+                    color = AppTheme.colorScheme.secondary
                 )
             }
         }
@@ -734,7 +735,7 @@ private fun Evangelij(podatki: PodatkiEntity) {
                             style = AppTheme.typography.body,
                             color = AppTheme.colorScheme.primary
                         )
-                        HtmlBodyItalic(text = addBreakAfterSourceOfAleluja(podatki.aleluja))
+                        HtmlBodyItalic(text = addBreakAndItalicAfterSourceOfAleluja(podatki.aleluja))
                     }
                     Row(
                         modifier = Modifier
@@ -819,18 +820,15 @@ private fun addItalicStyleToPsalm(text: String): String {
     modifiedText.append(text.substring(lastIndex))
     return modifiedText.toString()
 }
-private fun addBreakAfterSourceOfAleluja(text: String): String {
+
+private fun addBreakAndItalicAfterSourceOfAleluja(text: String): String {
     val substring = ')'.toString()
     val index = text.indexOf(substring)
     if (index != -1) {
         val modifiedText = StringBuilder(text)
-        modifiedText.insert(index + 1, "<br>")
+        modifiedText.insert(index + 1, "<br><i>")
+        modifiedText.append("</i>")
         return modifiedText.toString()
     }
     return text
-
-}
-private fun createSelektor(viewModel: LekcionarViewModel) {
-    viewModel.updateSelectedRed("kapucini")
-    viewModel.updateSelectedSkofija("slovenija")
 }

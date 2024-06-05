@@ -35,6 +35,12 @@ interface LekcionarDAO {
     @Query("SELECT timestamp FROM podatki ORDER BY timestamp DESC LIMIT 1")
     suspend fun getBiggestTimestamp(): Long
 
+    @Query("SELECT * FROM red")
+    suspend fun getRedList(): List<RedEntity>
+
+    @Query("SELECT * FROM skofija")
+    suspend fun getSkofijaList(): List<SkofijaEntity>
+
     @Query("DELETE FROM map")
     suspend fun deleteAllFromMap()
 

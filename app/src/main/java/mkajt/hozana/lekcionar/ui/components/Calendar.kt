@@ -81,6 +81,7 @@ import java.util.Locale
 fun Calendar(viewModel: LekcionarViewModel, navController: NavController, actListener: ActivityListener) {
 
     Scaffold(
+        containerColor = AppTheme.colorScheme.background,
         topBar = {
             TopAppBar(
                 title = {
@@ -98,9 +99,8 @@ fun Calendar(viewModel: LekcionarViewModel, navController: NavController, actLis
                 },
                 colors = TopAppBarDefaults.smallTopAppBarColors(
                     containerColor = AppTheme.colorScheme.primary,
-                    actionIconContentColor = AppTheme.colorScheme.background,
-                    titleContentColor = AppTheme.colorScheme.background,
-                    navigationIconContentColor = AppTheme.colorScheme.background
+                    titleContentColor = AppTheme.colorScheme.headerContent,
+                    navigationIconContentColor = AppTheme.colorScheme.headerContent
                 )
             )
         },
@@ -120,8 +120,6 @@ fun Calendar(viewModel: LekcionarViewModel, navController: NavController, actLis
 @Composable
 fun CalendarSection(viewModel: LekcionarViewModel, navController: NavController, activityListener: ActivityListener) {
     val currentDate by viewModel.selectedDate.collectAsState()
-    //val smallestTimestamp by viewModel.smallestTimestamp.collectAsState()
-    //val biggestTimestamp by viewModel.biggestTimestamp.collectAsState()
 
     val firstDataTimestamp by viewModel.firstDataTimestamp.collectAsState()
     val lastDataTimestamp by viewModel.lastDataTimestamp.collectAsState()
@@ -307,7 +305,8 @@ fun SimpleCalendarTitle(
             text = displayMonthNameLocale(currentMonth),
             fontSize = 22.sp,
             textAlign = TextAlign.Center,
-            style = AppTheme.typography.titleNormal
+            style = AppTheme.typography.titleNormal,
+            color = AppTheme.colorScheme.secondary
         )
         CalendarNavigationIcon(
             icon = Icons.Rounded.KeyboardArrowRight,

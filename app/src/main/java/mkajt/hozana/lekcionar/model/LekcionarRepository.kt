@@ -10,6 +10,8 @@ import mkajt.hozana.lekcionar.Constants
 import mkajt.hozana.lekcionar.model.apiService.RetrofitManager
 import mkajt.hozana.lekcionar.model.database.LekcionarDB
 import mkajt.hozana.lekcionar.model.database.PodatkiEntity
+import mkajt.hozana.lekcionar.model.database.RedEntity
+import mkajt.hozana.lekcionar.model.database.SkofijaEntity
 import mkajt.hozana.lekcionar.model.dto.LekcionarDTO
 import mkajt.hozana.lekcionar.model.dto.MapDTO
 import mkajt.hozana.lekcionar.model.dto.Mapper
@@ -30,10 +32,7 @@ class LekcionarRepository(
 
     private val lekcionarApi = RetrofitManager.lekcionarApi
 
-    //var redoviDTO: List<RedDTO>? = null
-    //var skofijeDTO: List<SkofijaDTO>? = null
-    //var mapDTO: List<MapDTO>? = null
-    //var podatkiDTO: List<PodatkiDTO>? = null
+
 
     private var context: Context? = null
 
@@ -104,6 +103,18 @@ class LekcionarRepository(
     suspend fun getBiggestTimestamp(): Long {
         return withContext(ioDispatcher) {
             lekcionarDB.lekcionarDao().getBiggestTimestamp()
+        }
+    }
+
+    suspend fun getRedList(): List<RedEntity> {
+        return withContext(ioDispatcher) {
+            lekcionarDB.lekcionarDao().getRedList()
+        }
+    }
+
+    suspend fun getSkofijaList(): List<SkofijaEntity> {
+        return withContext(ioDispatcher) {
+            lekcionarDB.lekcionarDao().getSkofijaList()
         }
     }
 

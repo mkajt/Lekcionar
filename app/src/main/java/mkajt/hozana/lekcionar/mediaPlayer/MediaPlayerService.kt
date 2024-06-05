@@ -142,8 +142,6 @@ class MediaPlayerService: Service() {
                 if (getTime(mediaPlayerState.currentPosition) == getTime(mediaPlayerState.duration) && mediaPlayerState.duration != 0) {
                     stop()
                 }
-                // log if media player on notification stop and then onResume() playInit() starts to flicker
-                Log.d(TAG, "Current: " + getTime(mediaPlayerState.currentPosition) + " Duration: " + getTime(mediaPlayerState.duration))
                 if (notificationManager.activeNotifications.any{it.id == NOTIFICATION_ID}) {
                     foreground()
                 }
@@ -205,8 +203,6 @@ class MediaPlayerService: Service() {
             mediaPlayerState.isPlaying = false
             mediaPlayerState.isStopped = true
             mediaPlayerState.currentPosition = 0
-            //mediaPlayerState.duration = 0
-            //mediaPlayerState.title = ""
             viewModel.updateMediaPlayerState(mediaPlayerState)
 
             mediaPlayer?.stop()
@@ -246,7 +242,6 @@ class MediaPlayerService: Service() {
     }
 
     fun exit() {
-        Log.d(TAG, "exit()")
         if (started && mediaPlayer != null) {
             mediaPlayer?.stop()
             mediaPlayer?.release()
@@ -272,9 +267,6 @@ class MediaPlayerService: Service() {
     }
 
     private fun createNotification(): Notification {
-        val actionIntentStop = Intent(this, MediaPlayerService::class.java)
-        actionIntentStop.action = ACTION_STOP
-        val actionPendingIntentStop = PendingIntent.getService(this, 0, actionIntentStop, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
 
         val actionIntentStartPause = Intent(this, MediaPlayerService::class.java)
         lateinit var actionPendingIntentStartPause: PendingIntent
@@ -308,8 +300,6 @@ class MediaPlayerService: Service() {
                 .setShowActionsInCompactView(0)
             )*/
             .addAction(playPauseIcon, if (mediaPlayer?.isPlaying!! && !paused) "Pause" else "Play", actionPendingIntentStartPause)
-            //.addAction(R.drawable.exit, "Exit", actionPendingIntentExit)
-            //.addAction(R.drawable.stop, "Stop", actionPendingIntentStop)
 
         val resultIntent = Intent(this, MainActivity::class.java)
         val resultPendingIntent = PendingIntent.getActivity(this, 0, resultIntent,
