@@ -62,7 +62,7 @@ fun DisplayStatus(state: String, modifier: Modifier, retry: () -> Unit) {
                         contentColor = AppTheme.colorScheme.background,
                     ),
                     shape = AppTheme.shape.button,
-                    border = BorderStroke(1.5.dp, AppTheme.colorScheme.primary)
+                    border = BorderStroke(2.dp, AppTheme.colorScheme.primary)
                 ) {
                     Text(text = "Poskusi znova", style = AppTheme.typography.labelLarge, textAlign = TextAlign.Center)
                 }

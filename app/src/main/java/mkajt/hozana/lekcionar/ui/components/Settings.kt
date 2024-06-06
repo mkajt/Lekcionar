@@ -1,6 +1,5 @@
 package mkajt.hozana.lekcionar.ui.components
 
-import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -43,12 +42,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import mkajt.hozana.lekcionar.ui.routes.Screen
 import mkajt.hozana.lekcionar.ui.theme.AppTheme
+import mkajt.hozana.lekcionar.util.timestampToDate
 import mkajt.hozana.lekcionar.viewModel.LekcionarViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -87,19 +86,17 @@ fun Settings(viewModel: LekcionarViewModel, navController: NavController) {
                     .fillMaxHeight()
                     .background(color = AppTheme.colorScheme.background)
             ) {
-                SettingsSection(viewModel = viewModel, navController = navController)
+                SettingsSection(viewModel = viewModel)
             }
         }
     )
 }
 
 @Composable
-fun SettingsSection(viewModel: LekcionarViewModel, navController: NavController) {
-    val updatedDataTimestamp by viewModel.updatedDataTimestamp.collectAsState()
-
+private fun SettingsSection(viewModel: LekcionarViewModel) {
     Column(
         modifier = Modifier
-            .padding(top = 30.dp)
+            .padding(top = 60.dp, bottom = 8.dp)
             .fillMaxSize(),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
@@ -108,12 +105,11 @@ fun SettingsSection(viewModel: LekcionarViewModel, navController: NavController)
         DropDownMenuRed(viewModel)
         SwitchTheme(viewModel)
     }
-
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DropDownMenuSkofija(viewModel: LekcionarViewModel) {
+private fun DropDownMenuSkofija(viewModel: LekcionarViewModel) {
     val selectedSkofija by viewModel.selectedSkofija.collectAsState()
     val skofijaList by viewModel.skofijaList.collectAsState()
     var expanded by remember { mutableStateOf(false) }
@@ -169,7 +165,10 @@ fun DropDownMenuSkofija(viewModel: LekcionarViewModel) {
                         modifier = Modifier
                             .fillMaxWidth()
                             .menuAnchor()
-                            .border(border = BorderStroke(1.5.dp, AppTheme.colorScheme.inactiveSliderTrack), shape = AppTheme.shape.button),
+                            .border(
+                                border = BorderStroke(2.dp, AppTheme.colorScheme.inactiveSliderTrack),
+                                shape = AppTheme.shape.button
+                            ),
                         colors = OutlinedTextFieldDefaults.colors(
                             focusedBorderColor = AppTheme.colorScheme.inactiveSliderTrack,
                             unfocusedBorderColor = AppTheme.colorScheme.inactiveSliderTrack,
@@ -188,7 +187,7 @@ fun DropDownMenuSkofija(viewModel: LekcionarViewModel) {
                             .background(AppTheme.colorScheme.background)
                             .requiredSizeIn(maxHeight = 250.dp)
                     ) {
-                        skofijaList?.forEachIndexed { count, item ->
+                        skofijaList?.forEach{ item ->
                             DropdownMenuItem(
                                 text = { Text(text = item.skofija, style = AppTheme.typography.labelNormal, color = AppTheme.colorScheme.secondary) },
                                 onClick = {
@@ -210,7 +209,7 @@ fun DropDownMenuSkofija(viewModel: LekcionarViewModel) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DropDownMenuRed(viewModel: LekcionarViewModel) {
+private fun DropDownMenuRed(viewModel: LekcionarViewModel) {
     val selectedRed by viewModel.selectedRed.collectAsState()
     val redList by viewModel.redList.collectAsState()
     var expanded by remember { mutableStateOf(false) }
@@ -218,7 +217,7 @@ fun DropDownMenuRed(viewModel: LekcionarViewModel) {
 
     Column(modifier = Modifier
         .fillMaxWidth()
-        .padding(top = 30.dp),
+        .padding(top = 60.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
 
@@ -267,7 +266,10 @@ fun DropDownMenuRed(viewModel: LekcionarViewModel) {
                         modifier = Modifier
                             .fillMaxWidth()
                             .menuAnchor()
-                            .border(BorderStroke(1.5.dp, AppTheme.colorScheme.inactiveSliderTrack), shape = AppTheme.shape.button),
+                            .border(
+                                border = BorderStroke(2.dp, AppTheme.colorScheme.inactiveSliderTrack),
+                                shape = AppTheme.shape.button
+                            ),
                         colors = OutlinedTextFieldDefaults.colors(
                             focusedBorderColor = AppTheme.colorScheme.inactiveSliderTrack,
                             unfocusedBorderColor = AppTheme.colorScheme.inactiveSliderTrack,
@@ -286,7 +288,7 @@ fun DropDownMenuRed(viewModel: LekcionarViewModel) {
                             .background(AppTheme.colorScheme.background)
                             .requiredSizeIn(maxHeight = 250.dp)
                     ) {
-                        redList?.forEachIndexed { count, item ->
+                        redList?.forEach{ item ->
                             DropdownMenuItem(
                                 text = { Text(text = item.red, style = AppTheme.typography.labelNormal, color = AppTheme.colorScheme.secondary) },
                                 onClick = {
@@ -307,11 +309,11 @@ fun DropDownMenuRed(viewModel: LekcionarViewModel) {
 }
 
 @Composable
-fun SwitchTheme(viewModel: LekcionarViewModel) {
+private fun SwitchTheme(viewModel: LekcionarViewModel) {
     val selectedTheme by viewModel.isDarkTheme.collectAsState()
     Column(modifier = Modifier
-            .fillMaxWidth()
-            .padding(top = 30.dp)
+        .fillMaxWidth()
+        .padding(top = 60.dp)
     ) {
         Row(modifier = Modifier
             .fillMaxWidth()
@@ -338,12 +340,12 @@ fun SwitchTheme(viewModel: LekcionarViewModel) {
                     viewModel.setIsDarkTheme(!selectedTheme)
                 },
                 colors = SwitchDefaults.colors(
-                    checkedThumbColor = AppTheme.colorScheme.primary,
-                    checkedBorderColor = AppTheme.colorScheme.activeSliderTrack,
-                    checkedTrackColor = AppTheme.colorScheme.inactiveSliderTrack,
-                    uncheckedThumbColor = AppTheme.colorScheme.primary,
+                    checkedThumbColor = AppTheme.colorScheme.background,
+                    checkedBorderColor = AppTheme.colorScheme.inactiveSliderTrack,
+                    checkedTrackColor = AppTheme.colorScheme.primary,
+                    uncheckedThumbColor = AppTheme.colorScheme.background,
                     uncheckedBorderColor = AppTheme.colorScheme.inactiveSliderTrack,
-                    uncheckedTrackColor = AppTheme.colorScheme.background
+                    uncheckedTrackColor = AppTheme.colorScheme.primary
                 )
             )
         }

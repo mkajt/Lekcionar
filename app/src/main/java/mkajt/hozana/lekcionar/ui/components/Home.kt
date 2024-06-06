@@ -2,7 +2,6 @@ package mkajt.hozana.lekcionar.ui.components
 
 import android.util.Log
 import android.widget.TextView
-import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -78,7 +77,6 @@ var activityListener: ActivityListener? = null
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun Home(viewModel: LekcionarViewModel, navController: NavController, actListener: ActivityListener) {
-    val context = LocalContext.current.applicationContext
     activityListener = actListener
     val snackbarHostState = remember {SnackbarHostState()}
     val dataState by viewModel.dataState.collectAsState()
@@ -112,7 +110,7 @@ fun Home(viewModel: LekcionarViewModel, navController: NavController, actListene
 
                     // App info
                     IconButton(onClick = {
-                        Toast.makeText(context, "App info", Toast.LENGTH_SHORT).show()
+                        navController.navigate(Screen.APPINFO.name)
                     }) {
                         Icon(
                             imageVector = Icons.Default.Info,
@@ -190,8 +188,7 @@ fun Home(viewModel: LekcionarViewModel, navController: NavController, actListene
 }
 
 @Composable
-fun ContentSectionHome(innerPadding: PaddingValues, viewModel: LekcionarViewModel, snackbarHostState: SnackbarHostState) {
-
+private fun ContentSectionHome(innerPadding: PaddingValues, viewModel: LekcionarViewModel, snackbarHostState: SnackbarHostState) {
     val dataState by viewModel.dataState.collectAsState()
     val podatki by viewModel.podatki.collectAsState()
 
@@ -262,7 +259,7 @@ private fun DisplayDataSingle(podatki: PodatkiEntity, viewModel: LekcionarViewMo
         ),
         enabled = false,
         shape = AppTheme.shape.button,
-        border = BorderStroke(1.5.dp, AppTheme.colorScheme.activeSliderTrack)
+        border = BorderStroke(2.dp, AppTheme.colorScheme.activeSliderTrack)
     ) {
         Text(text = podatki.opis_dolgi, style = AppTheme.typography.labelLarge, color = AppTheme.colorScheme.primary, textAlign = TextAlign.Center)
     }
@@ -333,7 +330,7 @@ private fun DisplayDataMultiple(podatki: PodatkiEntity, viewModel: LekcionarView
                 contentColor = if (isButtonClicked) AppTheme.colorScheme.primary else AppTheme.colorScheme.background,
             ),
         shape = AppTheme.shape.button,
-        border = if (isButtonClicked) BorderStroke(1.5.dp, AppTheme.colorScheme.activeSliderTrack) else BorderStroke(1.5.dp, AppTheme.colorScheme.primary)
+        border = if (isButtonClicked) BorderStroke(2.dp, AppTheme.colorScheme.activeSliderTrack) else BorderStroke(1.5.dp, AppTheme.colorScheme.primary)
     ) {
         Text(text = podatki.opis_dolgi, style = AppTheme.typography.labelLarge, textAlign = TextAlign.Center)
     }

@@ -1,5 +1,9 @@
 package mkajt.hozana.lekcionar.util
 
+import android.annotation.SuppressLint
+import java.text.SimpleDateFormat
+import java.util.Date
+
 fun millisecondsToTimeString(milliseconds: Int): String {
     var result = ""
     var secondsString = ""
@@ -16,4 +20,15 @@ fun millisecondsToTimeString(milliseconds: Int): String {
     }
     result = "$result$minutes:$secondsString"
     return result
+}
+
+@SuppressLint("SimpleDateFormat")
+fun timestampToDate(timestamp: Long): String {
+    return try {
+        val dateFormat = SimpleDateFormat("dd. MM. yyyy HH:mm")
+        val dateTime = Date(timestamp * 1000)
+        dateFormat.format(dateTime)
+    } catch (e: Exception) {
+        "Neznan datum"
+    }
 }

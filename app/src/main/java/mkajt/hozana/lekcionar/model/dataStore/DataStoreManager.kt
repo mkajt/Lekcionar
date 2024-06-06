@@ -68,8 +68,8 @@ class DataStoreManager(context: Context) {
                 }
             }
             .map { preferences ->
-                val uiMode = preferences[updatedDataTimestamp] ?: 0L
-                uiMode
+                val timestamp = preferences[updatedDataTimestamp] ?: 0L
+                timestamp
 
             }
     }

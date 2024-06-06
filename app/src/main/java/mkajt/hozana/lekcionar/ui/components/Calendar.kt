@@ -35,7 +35,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -118,7 +117,7 @@ fun Calendar(viewModel: LekcionarViewModel, navController: NavController, actLis
 }
 
 @Composable
-fun CalendarSection(viewModel: LekcionarViewModel, navController: NavController, activityListener: ActivityListener) {
+private fun CalendarSection(viewModel: LekcionarViewModel, navController: NavController, activityListener: ActivityListener) {
     val currentDate by viewModel.selectedDate.collectAsState()
 
     val firstDataTimestamp by viewModel.firstDataTimestamp.collectAsState()
@@ -127,7 +126,6 @@ fun CalendarSection(viewModel: LekcionarViewModel, navController: NavController,
     val currentMonth = remember { YearMonth.parse(currentDate, viewModel.dateFormatter) }
     val startMonth = remember { YearMonth.from(timestampToLocalDate(firstDataTimestamp)) }
     val endMonth = remember { YearMonth.from(timestampToLocalDate(lastDataTimestamp)) }
-    val selections = remember { mutableStateListOf<CalendarDay>() }
     val daysOfWeek = remember { daysOfWeek(firstDayOfWeek = DayOfWeek.MONDAY) }
 
     var calendarSelectedDate by remember { mutableStateOf(currentDate) }
@@ -166,7 +164,6 @@ fun CalendarSection(viewModel: LekcionarViewModel, navController: NavController,
             state = state,
             dayContent = { day ->
                 Day(day,
-                    isSelected = selections.contains(day),
                     viewModel = viewModel,
                     calendarSelectedDate = calendarSelectedDate
                 ) { newSelectedDate ->
@@ -199,7 +196,7 @@ fun CalendarSection(viewModel: LekcionarViewModel, navController: NavController,
                     contentColor = AppTheme.colorScheme.primary,
                 ),
                 shape = AppTheme.shape.button,
-                border = BorderStroke(1.5.dp, AppTheme.colorScheme.activeSliderTrack)
+                border = BorderStroke(2.dp, AppTheme.colorScheme.activeSliderTrack)
             ) {
                 Text(text = "Izberi datum", style = AppTheme.typography.labelLarge)
             }
@@ -220,11 +217,10 @@ private fun timestampToLocalDate(seconds: Long): LocalDate {
 }
 
 @Composable
-fun MonthHeader(daysOfWeek: List<DayOfWeek>) {
+private fun MonthHeader(daysOfWeek: List<DayOfWeek>) {
     Row(
         modifier = Modifier
-            .fillMaxWidth()
-            .testTag("MonthHeader"),
+            .fillMaxWidth(),
     ) {
         for (dayOfWeek in daysOfWeek) {
             Text(
@@ -232,19 +228,19 @@ fun MonthHeader(daysOfWeek: List<DayOfWeek>) {
                 textAlign = TextAlign.Center,
                 fontSize = 15.sp,
                 text = displayWeekNameLocale(dayOfWeek),
-                style = AppTheme.typography.titleSmall
+                style = AppTheme.typography.titleSmall,
+                color = AppTheme.colorScheme.activeSliderTrack
             )
         }
     }
 }
 
 @Composable
-fun Day(day: CalendarDay, isSelected: Boolean, calendarSelectedDate: String, viewModel: LekcionarViewModel, onSelectedDateChange: (String) -> Unit) {
+private fun Day(day: CalendarDay, calendarSelectedDate: String, viewModel: LekcionarViewModel, onSelectedDateChange: (String) -> Unit) {
     val interactionSource = remember { MutableInteractionSource() }
     Box(
         modifier = Modifier
-            .aspectRatio(1f) // This is important for square-sizing!
-            .testTag("MonthDay")
+            .aspectRatio(1f)
             .padding(6.dp)
             .clip(CircleShape)
             .background(
@@ -253,10 +249,8 @@ fun Day(day: CalendarDay, isSelected: Boolean, calendarSelectedDate: String, vie
                         .equals(calendarSelectedDate)
                 ) AppTheme.colorScheme.primary else Color.Transparent
             )
-            // Disable clicks on inDates/outDates
             .clickable(
                 enabled = day.position == DayPosition.MonthDate,
-                //showRipple = !isSelected,
                 indication = rememberRipple(
                     color = AppTheme.colorScheme.background,
                     bounded = false
@@ -267,7 +261,6 @@ fun Day(day: CalendarDay, isSelected: Boolean, calendarSelectedDate: String, vie
         contentAlignment = Alignment.Center,
     ) {
         val textColor = when (day.position) {
-            // Color.Unspecified will use the default text color from the current theme
             DayPosition.MonthDate -> if (viewModel.dateFormatter.format(day.date).equals(calendarSelectedDate)) AppTheme.colorScheme.background else AppTheme.colorScheme.secondary
             DayPosition.InDate -> AppTheme.colorScheme.inactiveSliderTrack
             DayPosition.OutDate -> AppTheme.colorScheme.inactiveSliderTrack
@@ -283,7 +276,7 @@ fun Day(day: CalendarDay, isSelected: Boolean, calendarSelectedDate: String, vie
 }
 
 @Composable
-fun SimpleCalendarTitle(
+private fun SimpleCalendarTitle(
     modifier: Modifier,
     currentMonth: YearMonth,
     goToPrevious: () -> Unit,
@@ -341,7 +334,7 @@ private fun CalendarNavigationIcon(
 
 
 @Composable
-fun rememberFirstMostVisibleMonth(
+private fun rememberFirstMostVisibleMonth(
     state: CalendarState,
     viewportPercent: Float = 50f,
 ): CalendarMonth {
