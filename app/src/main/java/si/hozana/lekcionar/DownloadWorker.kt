@@ -73,7 +73,7 @@ class DownloadWorker(context : Context, params : WorkerParameters) : CoroutineWo
                     }
                 }
             }
-            dataStore.setTestUpdateTimestamp(System.currentTimeMillis())
+            //dataStore.setTestUpdateTimestamp(System.currentTimeMillis())
         } catch (e: HttpException) {
             Log.e(LekcionarRepository.TAG, "Failed to fetch data from API: ${e.message()}")
             return Result.failure()

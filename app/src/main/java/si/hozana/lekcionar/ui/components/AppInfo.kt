@@ -80,7 +80,7 @@ fun AppInfo(viewModel: LekcionarViewModel, navController: NavController) {
 @Composable
 private fun AppInfoSection(viewModel: LekcionarViewModel) {
     val updateDataTimestamp by viewModel.updatedDataTimestamp.collectAsState()
-    val testUpdate by viewModel.testUpdate.collectAsState()
+    //val testUpdate by viewModel.testUpdate.collectAsState()
     Column(
         modifier = Modifier
             .padding(top = 60.dp, start = 30.dp, end = 30.dp)
@@ -109,7 +109,7 @@ private fun AppInfoSection(viewModel: LekcionarViewModel) {
                     modifier = Modifier
                         .padding(bottom = 60.dp)
                 )
-                Text(text = "Test update:",
+                /*Text(text = "Test update:",
                     style = AppTheme.typography.labelLarge,
                     color = AppTheme.colorScheme.headerContent,
                     textAlign = TextAlign.Center,
@@ -122,7 +122,7 @@ private fun AppInfoSection(viewModel: LekcionarViewModel) {
                     textAlign = TextAlign.Center,
                     modifier = Modifier
                         .padding(bottom = 60.dp)
-                )
+                )*/
 
             }
         }

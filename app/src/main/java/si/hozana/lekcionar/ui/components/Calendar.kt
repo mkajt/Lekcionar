@@ -1,5 +1,6 @@
 package si.hozana.lekcionar.ui.components
 
+import android.util.Log
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -34,10 +35,13 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
@@ -63,6 +67,7 @@ import com.kizitonwose.calendar.core.nextMonth
 import com.kizitonwose.calendar.core.previousMonth
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.launch
+import okhttp3.internal.notify
 import si.hozana.lekcionar.ActivityListener
 import si.hozana.lekcionar.ui.routes.Screen
 import si.hozana.lekcionar.ui.theme.AppTheme
@@ -123,82 +128,107 @@ private fun CalendarSection(viewModel: LekcionarViewModel, navController: NavCon
     val firstDataTimestamp by viewModel.firstDataTimestamp.collectAsState()
     val lastDataTimestamp by viewModel.lastDataTimestamp.collectAsState()
 
+    Log.d("Calendar", "FirstDataTimestamp: $firstDataTimestamp")
+    Log.d("Calendar", "LastDataTimestamp: $lastDataTimestamp")
+
     val currentMonth = remember { YearMonth.parse(currentDate, viewModel.dateFormatter) }
-    val startMonth = remember { YearMonth.from(timestampToLocalDate(firstDataTimestamp)) }
-    val endMonth = remember { YearMonth.from(timestampToLocalDate(lastDataTimestamp)) }
     val daysOfWeek = remember { daysOfWeek(firstDayOfWeek = DayOfWeek.MONDAY) }
 
     var calendarSelectedDate by remember { mutableStateOf(currentDate) }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(top = 20.dp),
-    ) {
-        val state = rememberCalendarState(
-            startMonth = startMonth,
-            endMonth = endMonth,
-            firstVisibleMonth = currentMonth,
-            firstDayOfWeek = daysOfWeek.first(),
-        )
-        val coroutineScope = rememberCoroutineScope()
-        val visibleMonth = rememberFirstMostVisibleMonth(state, viewportPercent = 90f)
+    if (firstDataTimestamp != 0L && lastDataTimestamp != 0L) {
 
-        SimpleCalendarTitle(
-            modifier = Modifier.padding(vertical = 10.dp, horizontal = 8.dp),
-            currentMonth = visibleMonth.yearMonth,
-            goToPrevious = {
-                coroutineScope.launch {
-                    state.animateScrollToMonth(state.firstVisibleMonth.yearMonth.previousMonth)
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(top = 20.dp),
+        ) {
+            val state = rememberCalendarState(
+                startMonth = YearMonth.from(timestampToLocalDate(firstDataTimestamp)),
+                endMonth = YearMonth.from(timestampToLocalDate(lastDataTimestamp)),
+                firstVisibleMonth = currentMonth,
+                firstDayOfWeek = daysOfWeek.first()
+            )
+            val coroutineScope = rememberCoroutineScope()
+            val visibleMonth = rememberFirstMostVisibleMonth(state, viewportPercent = 90f)
+
+            SimpleCalendarTitle(
+                modifier = Modifier.padding(vertical = 10.dp, horizontal = 8.dp),
+                currentMonth = visibleMonth.yearMonth,
+                goToPrevious = {
+                    coroutineScope.launch {
+                        state.animateScrollToMonth(state.firstVisibleMonth.yearMonth.previousMonth)
+                    }
+                },
+                goToNext = {
+                    coroutineScope.launch {
+                        state.animateScrollToMonth(state.firstVisibleMonth.yearMonth.nextMonth)
+                    }
                 }
-            },
-            goToNext = {
-                coroutineScope.launch {
-                    state.animateScrollToMonth(state.firstVisibleMonth.yearMonth.nextMonth)
+            )
+
+            HorizontalCalendar(
+                modifier = Modifier.padding(top = 30.dp),
+                state = state,
+                dayContent = { day ->
+                    Day(day,
+                        viewModel = viewModel,
+                        calendarSelectedDate = calendarSelectedDate
+                    ) { newSelectedDate ->
+                        calendarSelectedDate = newSelectedDate
+                    }
+                },
+                monthHeader = {
+                    MonthHeader(daysOfWeek = daysOfWeek)
+                },
+            )
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 30.dp),
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                OutlinedButton(
+                    onClick = {
+                        if (calendarSelectedDate != currentDate) {
+                            activityListener.stopClick()
+                        }
+                        navController.navigate(Screen.HOME.name)
+                        viewModel.updateSelectedDate(LocalDate.parse(calendarSelectedDate, viewModel.dateFormatter))
+                    },
+                    modifier = Modifier.padding(bottom = 30.dp),
+                    colors = ButtonDefaults.outlinedButtonColors(
+                        containerColor = AppTheme.colorScheme.background,
+                        contentColor = AppTheme.colorScheme.primary,
+                    ),
+                    shape = AppTheme.shape.button,
+                    border = BorderStroke(2.dp, AppTheme.colorScheme.activeSliderTrack)
+                ) {
+                    Text(text = "Izberi datum", style = AppTheme.typography.labelLarge)
                 }
             }
-        )
+        }
+    } else {
 
-        HorizontalCalendar(
-            modifier = Modifier.padding(top = 30.dp),
-            state = state,
-            dayContent = { day ->
-                Day(day,
-                    viewModel = viewModel,
-                    calendarSelectedDate = calendarSelectedDate
-                ) { newSelectedDate ->
-                    calendarSelectedDate = newSelectedDate
-                }
-            },
-            monthHeader = {
-                MonthHeader(daysOfWeek = daysOfWeek)
-            },
-        )
-
-        Row(
-            modifier = Modifier
+        Column(modifier = Modifier
+            .fillMaxSize(),
+            verticalArrangement = Arrangement.SpaceBetween,
+            horizontalAlignment = Alignment.CenterHorizontally) {
+            Row(modifier = Modifier
                 .fillMaxWidth()
-                .padding(top = 30.dp),
-            horizontalArrangement = Arrangement.Center,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            OutlinedButton(
-                onClick = {
-                    if (calendarSelectedDate != currentDate) {
-                        activityListener.stopClick()
-                    }
-                    navController.navigate(Screen.HOME.name)
-                    viewModel.updateSelectedDate(LocalDate.parse(calendarSelectedDate, viewModel.dateFormatter))
-                },
-                modifier = Modifier.padding(bottom = 30.dp),
-                colors = ButtonDefaults.outlinedButtonColors(
-                    containerColor = AppTheme.colorScheme.background,
-                    contentColor = AppTheme.colorScheme.primary,
-                ),
-                shape = AppTheme.shape.button,
-                border = BorderStroke(2.dp, AppTheme.colorScheme.activeSliderTrack)
+                .padding(top = 60.dp, start = 16.dp, end = 16.dp),
+                horizontalArrangement = Arrangement.Center
             ) {
-                Text(text = "Izberi datum", style = AppTheme.typography.labelLarge)
+                Text(
+                    text = "Ni ustreznih podatkov za prikaz koledarja.",
+                    style = AppTheme.typography.labelLarge,
+                    color = AppTheme.colorScheme.secondary,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                )
             }
         }
     }

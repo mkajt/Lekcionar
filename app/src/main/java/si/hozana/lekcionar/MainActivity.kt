@@ -31,8 +31,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.core.app.ActivityCompat
-import androidx.work.ExistingPeriodicWorkPolicy
-import androidx.work.WorkManager
 
 class MainActivity : ComponentActivity(), ActivityListener {
 
