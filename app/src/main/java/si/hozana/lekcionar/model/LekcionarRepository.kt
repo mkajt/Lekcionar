@@ -94,15 +94,15 @@ class LekcionarRepository(
         }
     }
 
-    suspend fun getSmallestTimestamp(): Long {
+    suspend fun getFirstDataTimestamp(): Long {
         return withContext(ioDispatcher) {
-            lekcionarDB.lekcionarDao().getSmallestTimestamp()
+            lekcionarDB.lekcionarDao().getFirstDataTimestamp()
         }
     }
 
-    suspend fun getBiggestTimestamp(): Long {
+    suspend fun getLastDataTimestamp(): Long {
         return withContext(ioDispatcher) {
-            lekcionarDB.lekcionarDao().getBiggestTimestamp()
+            lekcionarDB.lekcionarDao().getLastDataTimestamp()
         }
     }
 

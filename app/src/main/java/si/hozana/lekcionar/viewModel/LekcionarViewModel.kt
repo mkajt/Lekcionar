@@ -50,7 +50,7 @@ class LekcionarViewModel(
     val lastDataTimestamp: StateFlow<Long>
     val selectedRed: StateFlow<String>
     val selectedSkofija: StateFlow<String>
-    //val testUpdate: StateFlow<Long> //TODO delete before release
+    val testUpdate: StateFlow<Long> //TODO delete before release
 
     private val _redList = MutableStateFlow<List<RedEntity>?>(null)
     val redList = _redList.asStateFlow()
@@ -67,12 +67,10 @@ class LekcionarViewModel(
         isDarkTheme = dataStore.getTheme().stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), runBlocking { dataStore.getTheme().first() })
         updatedDataTimestamp = dataStore.getUpdatedDataTimestamp().stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), runBlocking { dataStore.getUpdatedDataTimestamp().first() })
         firstDataTimestamp = dataStore.getFirstDataTimestamp().stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), runBlocking { dataStore.getFirstDataTimestamp().first() })
-        //firstDataTimestamp = dataStore.getFirstDataTimestamp().stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000))
         lastDataTimestamp = dataStore.getLastDataTimestamp().stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), runBlocking { dataStore.getLastDataTimestamp().first() })
-        //lastDataTimestamp = dataStore.getLastDataTimestamp().stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), runBlocking { dataStore.getLastDataTimestamp().first() })
         selectedRed = dataStore.getRed().stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), runBlocking { dataStore.getRed().first() })
         selectedSkofija = dataStore.getSkofija().stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), runBlocking { dataStore.getSkofija().first() })
-        //testUpdate = dataStore.getTestUpdateTimestamp().stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), runBlocking { dataStore.getTestUpdateTimestamp().first() })
+        testUpdate = dataStore.getTestUpdateTimestamp().stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), runBlocking { dataStore.getTestUpdateTimestamp().first() })
     }
 
     fun getIsDarkTheme(): Boolean {
@@ -119,17 +117,18 @@ class LekcionarViewModel(
         }
     }
 
-    /*fun getTestUpdate(): Long {
+    fun getTestUpdate(): Long {
         return testUpdate.value
-    }*/
-
+    }
 
     private fun updateSelektor() {
         _selektor.update { "${_selectedDate.value}-${selectedSkofija.value}-${selectedRed.value}" }
         getPodatkiBySelektor()
+        Log.d("LVM", "Selected selektor: " + _selektor.value)
     }
 
     fun updateSelectedDate(date: LocalDate) {
+
         if (dateFormatter.format(date) != _selectedDate.value) {
             _selectedDate.update { dateFormatter.format(date) }
             updateSelektor()
@@ -162,8 +161,8 @@ class LekcionarViewModel(
                         }
                         dataStore.setUpdatedDataTimestamp(updatedTimestamp)
                         _dataState.update { LekcionarViewState.Loaded }
-                        val smallestTimestamp = lekcionarRepository.getSmallestTimestamp()
-                        val biggestTimestamp = lekcionarRepository.getBiggestTimestamp()
+                        val smallestTimestamp = lekcionarRepository.getFirstDataTimestamp()
+                        val biggestTimestamp = lekcionarRepository.getLastDataTimestamp()
                         dataStore.setFirstDataTimestamp(smallestTimestamp)
                         dataStore.setLastDataTimestamp(biggestTimestamp)
                         Log.d("LVM", "SmallestTimestamp: $smallestTimestamp")

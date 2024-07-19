@@ -30,10 +30,10 @@ interface LekcionarDAO {
     suspend fun countPodatki(): Int
 
     @Query("SELECT timestamp FROM podatki ORDER BY timestamp ASC LIMIT 1")
-    suspend fun getSmallestTimestamp(): Long
+    suspend fun getFirstDataTimestamp(): Long
 
     @Query("SELECT timestamp FROM podatki ORDER BY timestamp DESC LIMIT 1")
-    suspend fun getBiggestTimestamp(): Long
+    suspend fun getLastDataTimestamp(): Long
 
     @Query("SELECT * FROM red")
     suspend fun getRedList(): List<RedEntity>

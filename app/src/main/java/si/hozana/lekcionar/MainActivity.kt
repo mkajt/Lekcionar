@@ -31,6 +31,8 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.core.app.ActivityCompat
+import androidx.work.ExistingPeriodicWorkPolicy
+import androidx.work.WorkManager
 
 class MainActivity : ComponentActivity(), ActivityListener {
 
@@ -63,11 +65,11 @@ class MainActivity : ComponentActivity(), ActivityListener {
         lekcionarViewModel = LekcionarViewModel(application, lekcionarRepository)
         lekcionarViewModel.checkDbAndFetchDataFromApi()
 
-        /*WorkManager.getInstance(this).enqueueUniquePeriodicWork(
+        WorkManager.getInstance(this).enqueueUniquePeriodicWork(
             "updateData",
             ExistingPeriodicWorkPolicy.KEEP,
             DownloadWorker.createWorkRequest()
-        )*/
+        )
 
         setContent {
             val selectedTheme by lekcionarViewModel.isDarkTheme.collectAsState()
@@ -106,7 +108,7 @@ class MainActivity : ComponentActivity(), ActivityListener {
     override fun onStart() {
         super.onStart()
 
-        Log.d(TAG, "Starting and binding service");
+        Log.d(TAG, "Starting and binding service")
 
         val i = Intent(applicationContext, MediaPlayerService::class.java)
         /*if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -116,7 +118,7 @@ class MainActivity : ComponentActivity(), ActivityListener {
         }*/
 
         startService(i)
-        bindService(i, mConnection, 0);
+        bindService(i, mConnection, 0)
     }
 
     override fun onResume() {
@@ -183,8 +185,10 @@ class MainActivity : ComponentActivity(), ActivityListener {
     }
 
     override fun onDestroy() {
-        //mediaPlayerService?.background()
-        //mediaPlayerService?.exit()
+        if (serviceBound) {
+            unbindService(mConnection)
+            serviceBound = false
+        }
         super.onDestroy()
     }
 
@@ -214,7 +218,7 @@ class MainActivity : ComponentActivity(), ActivityListener {
             Log.d(TAG, "Started playing")
             mediaPlayerService?.playInit(Uri.parse(uri), opis)
         } else {
-            Log.d(TAG, "Binding service");
+            Log.d(TAG, "Binding service")
 
             val i = Intent(this, MediaPlayerService::class.java)
             i.action = MediaPlayerService.ACTION_START
@@ -223,7 +227,7 @@ class MainActivity : ComponentActivity(), ActivityListener {
 
             startService(i)
 
-            bindService(i, mConnection, 0);
+            bindService(i, mConnection, 0)
         }
     }
 

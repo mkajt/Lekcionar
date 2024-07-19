@@ -8,6 +8,7 @@ import android.app.Service
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.media.MediaPlayer
 import android.net.Uri
 import android.os.Binder
@@ -287,15 +288,23 @@ class MediaPlayerService: Service() {
         val builder = NotificationCompat.Builder(this, channelID)
             .setContentTitle(mediaPlayerState.title)
             .setContentText(getConcatTime(mediaPlayerState.currentPosition, mediaPlayerState.duration))
-            .setSmallIcon(R.mipmap.ic_launcher)
+            .setSmallIcon(R.mipmap.ic_lekcionar_logo_inverted_small)
+            //.setLargeIcon(
+            //    BitmapFactory.decodeResource(context!!.resources,
+            //    R.mipmap.ic_lekcionar_logo_inverted))
             .setChannelId(channelID)
             //.setColor(ContextCompat.getColor(context!!,R.color.grey_active_track))
             //.setPriority(NotificationCompat.PRIORITY_MIN)
-            /*.setStyle(androidx.media.app.NotificationCompat.MediaStyle()
+            .setStyle(androidx.media.app.NotificationCompat.MediaStyle()
                 .setShowActionsInCompactView(0)
-            )*/
+            )
+            //.addAction(0, "", null) //dummy action to balance extended layout
+            //.addAction(0, "", null) //dummy action to balance extended layout
+            //.addAction(0, "", null) //dummy action to balance extended layout
             .addAction(playPauseIcon, if (mediaPlayer?.isPlaying!! && !paused) "Pause" else "Play", actionPendingIntentStartPause)
 
+
+        //builder.contentView.setImageViewResource(android.R.id.icon, R.drawable.lekcionar_logo_inverted)
         val resultIntent = Intent(this, MainActivity::class.java)
         val resultPendingIntent = PendingIntent.getActivity(this, 0, resultIntent,
             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)

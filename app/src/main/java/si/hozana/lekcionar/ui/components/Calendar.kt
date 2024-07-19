@@ -9,18 +9,23 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.rounded.KeyboardArrowLeft
 import androidx.compose.material.icons.rounded.KeyboardArrowRight
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Today
 import androidx.compose.material.icons.rounded.ArrowBack
 import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.material3.ButtonDefaults
@@ -35,13 +40,10 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
@@ -67,7 +69,6 @@ import com.kizitonwose.calendar.core.nextMonth
 import com.kizitonwose.calendar.core.previousMonth
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.launch
-import okhttp3.internal.notify
 import si.hozana.lekcionar.ActivityListener
 import si.hozana.lekcionar.ui.routes.Screen
 import si.hozana.lekcionar.ui.theme.AppTheme
@@ -82,7 +83,10 @@ import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun Calendar(viewModel: LekcionarViewModel, navController: NavController, actListener: ActivityListener) {
+fun Calendar(viewModel: LekcionarViewModel, navController: NavController, activityListener: ActivityListener) {
+
+    val currentDate by viewModel.selectedDate.collectAsState()
+    val todaysDate: String = viewModel.dateFormatter.format(LocalDate.now())
 
     Scaffold(
         containerColor = AppTheme.colorScheme.background,
@@ -101,10 +105,37 @@ fun Calendar(viewModel: LekcionarViewModel, navController: NavController, actLis
                         )
                     }
                 },
+                actions = {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(50))
+                            .clickable(
+                                onClick = {
+                                    if (todaysDate != currentDate) {
+                                        activityListener.stopClick()
+                                    }
+                                    navController.navigate(Screen.HOME.name)
+                                    viewModel.updateSelectedDate(LocalDate.parse(todaysDate, viewModel.dateFormatter))
+                                }
+                            )
+                            .padding(horizontal = 16.dp, vertical = 8.dp)
+
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Today,
+                            contentDescription = "Today's date",
+                            modifier = Modifier.size(25.dp)
+                        )
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text(text = "Danes", style = AppTheme.typography.titleNormal, color = AppTheme.colorScheme.headerContent)
+                    }
+                },
                 colors = TopAppBarDefaults.smallTopAppBarColors(
                     containerColor = AppTheme.colorScheme.primary,
                     titleContentColor = AppTheme.colorScheme.headerContent,
-                    navigationIconContentColor = AppTheme.colorScheme.headerContent
+                    navigationIconContentColor = AppTheme.colorScheme.headerContent,
+                    actionIconContentColor = AppTheme.colorScheme.headerContent
                 )
             )
         },
@@ -115,7 +146,7 @@ fun Calendar(viewModel: LekcionarViewModel, navController: NavController, actLis
                     .fillMaxHeight()
                     .padding(innerPadding)
             ) {
-                CalendarSection(viewModel = viewModel, navController = navController, activityListener = actListener)
+                CalendarSection(viewModel = viewModel, navController = navController, activityListener = activityListener)
             }
         }
     )

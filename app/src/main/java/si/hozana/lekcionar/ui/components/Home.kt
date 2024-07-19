@@ -4,7 +4,7 @@ import android.util.Log
 import android.widget.TextView
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
@@ -54,9 +54,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFontFamilyResolver
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -248,6 +251,15 @@ private fun DisplayDataSingle(podatki: PodatkiEntity, viewModel: LekcionarViewMo
     val screenWidthDp = LocalConfiguration.current.screenWidthDp
     val maxButtonWidth = (screenWidthDp * 0.85).dp
 
+    val clipboardManager = LocalClipboardManager.current
+    val onCopyText = remember { mutableStateOf("") }
+
+    LaunchedEffect(podatki) {
+        onCopyText.value = "${HtmlCompat.fromHtml(podatki.vrstica, HtmlCompat.FROM_HTML_MODE_LEGACY)}"
+    }
+
+    Log.d("Home","Podatki: " + podatki)
+
     OutlinedButton(
         onClick = {},
         modifier = Modifier
@@ -268,7 +280,14 @@ private fun DisplayDataSingle(podatki: PodatkiEntity, viewModel: LekcionarViewMo
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(top = 10.dp),
+                .padding(top = 10.dp)
+                .pointerInput(Unit) {
+                    detectTapGestures(
+                        onLongPress = {
+                            clipboardManager.setText(AnnotatedString(onCopyText.value))
+                        }
+                    )
+                },
             horizontalArrangement = Arrangement.Center
         ) {
             Text(
@@ -313,9 +332,17 @@ private fun DisplayDataSingle(podatki: PodatkiEntity, viewModel: LekcionarViewMo
 private fun DisplayDataMultiple(podatki: PodatkiEntity, viewModel: LekcionarViewModel, snackbarHostState: SnackbarHostState) {
     var isButtonClicked by rememberSaveable { mutableStateOf(false) }
 
+
     val context = LocalContext.current.applicationContext
     val screenWidthDp = LocalConfiguration.current.screenWidthDp
     val maxButtonWidth = (screenWidthDp * 0.85).dp
+
+    val clipboardManager = LocalClipboardManager.current
+    val onCopyText = remember { mutableStateOf("") }
+
+    LaunchedEffect(podatki) {
+        onCopyText.value = "${HtmlCompat.fromHtml(podatki.vrstica, HtmlCompat.FROM_HTML_MODE_LEGACY)}"
+    }
 
     OutlinedButton(
         onClick = {
@@ -341,7 +368,14 @@ private fun DisplayDataMultiple(podatki: PodatkiEntity, viewModel: LekcionarView
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = 10.dp),
+                    .padding(top = 10.dp)
+                    .pointerInput(Unit) {
+                        detectTapGestures(
+                            onLongPress = {
+                                clipboardManager.setText(AnnotatedString(onCopyText.value))
+                            }
+                        )
+                    },
                 horizontalArrangement = Arrangement.Center
             ) {
                 Text(
@@ -386,12 +420,18 @@ private fun DisplayDataMultiple(podatki: PodatkiEntity, viewModel: LekcionarView
 @Composable
 private fun Berila(podatki: PodatkiEntity) {
     Column{
-        if (podatki.berilo1 != "") {
+        if (podatki.berilo1 != "" && podatki.berilo2 == "") {
+            Berilo(podatki = podatki, type = "Berilo")
+            Spacer(modifier = Modifier
+                .fillMaxWidth()
+                .height(16.dp))
+        } else if (podatki.berilo1 != "" ) {
             Berilo(podatki = podatki, type = "1. berilo")
             Spacer(modifier = Modifier
                 .fillMaxWidth()
                 .height(16.dp))
         }
+
         if (podatki.psalm != "") {
             Psalm(podatki = podatki)
             Spacer(modifier = Modifier
@@ -405,6 +445,7 @@ private fun Berila(podatki: PodatkiEntity) {
                 .fillMaxWidth()
                 .height(16.dp))
         }
+
         if (podatki.evangelij != "") {
             Evangelij(podatki = podatki)
             Spacer(modifier = Modifier
@@ -419,19 +460,32 @@ private fun Berilo(podatki: PodatkiEntity, type: String) {
     var open by remember { mutableStateOf(false) }
     val borderColor = AppTheme.colorScheme.inactiveSliderTrack
 
+    val clipboardManager = LocalClipboardManager.current
+    val onCopyText = remember { mutableStateOf("") }
+
     LaunchedEffect(podatki) {
         open = false
+        onCopyText.value = if (type == "1. berilo" || type == "Berilo") {
+            "${podatki.berilo1}\n${HtmlCompat.fromHtml(podatki.berilo1_vsebina, HtmlCompat.FROM_HTML_MODE_LEGACY)}"
+        } else {
+            "${podatki.berilo2}\n${HtmlCompat.fromHtml(podatki.berilo2_vsebina, HtmlCompat.FROM_HTML_MODE_LEGACY)}"
+        }
     }
 
     Column (
         modifier = Modifier
             .fillMaxWidth()
             .height(IntrinsicSize.Min)
-            .clickable(
-                onClick = {
-                    open = !open
-                }
-            )
+            .pointerInput(Unit) {
+                detectTapGestures(
+                    onTap = {
+                        open = !open
+                    },
+                    onLongPress = {
+                        clipboardManager.setText(AnnotatedString(onCopyText.value))
+                    }
+                )
+            }
             .drawBehind {
                 val borderSize = 1.dp
 
@@ -470,7 +524,7 @@ private fun Berilo(podatki: PodatkiEntity, type: String) {
                 color = AppTheme.colorScheme.primary,
                 textAlign = TextAlign.Start
             )
-            if (type == "1. berilo") {
+            if (type == "1. berilo" || type == "Berilo") {
                 Text(
                     text = podatki.berilo1,
                     style = AppTheme.typography.labelLarge,
@@ -511,7 +565,7 @@ private fun Berilo(podatki: PodatkiEntity, type: String) {
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.Start
             ) {
-                if (type == "1. berilo") {
+                if (type == "1. berilo" || type == "Berilo") {
                     HtmlBody(text = podatki.berilo1_vsebina)
                 } else {
                     HtmlBody(text = podatki.berilo2_vsebina)
@@ -526,19 +580,28 @@ private fun Psalm(podatki: PodatkiEntity) {
     var open by remember { mutableStateOf(false) }
     val borderColor = AppTheme.colorScheme.inactiveSliderTrack
 
+    val clipboardManager = LocalClipboardManager.current
+    val onCopyText = remember { mutableStateOf("") }
+
     LaunchedEffect(podatki) {
         open = false
+        onCopyText.value = "${podatki.psalm}\nOdpev: ${podatki.odpev}\n\n${HtmlCompat.fromHtml(addItalicStyleToPsalm(podatki.psalm_vsebina), HtmlCompat.FROM_HTML_MODE_LEGACY)}"
     }
 
     Column (
         modifier = Modifier
             .fillMaxWidth()
             .height(IntrinsicSize.Min)
-            .clickable(
-                onClick = {
-                    open = !open
-                }
-            )
+            .pointerInput(Unit) {
+                detectTapGestures(
+                    onTap = {
+                        open = !open
+                    },
+                    onLongPress = {
+                        clipboardManager.setText(AnnotatedString(onCopyText.value))
+                    }
+                )
+            }
             .drawBehind {
                 val borderSize = 1.dp
 
@@ -641,19 +704,28 @@ private fun Evangelij(podatki: PodatkiEntity) {
     var open by remember { mutableStateOf(false) }
     val borderColor = AppTheme.colorScheme.inactiveSliderTrack
 
+    val clipboardManager = LocalClipboardManager.current
+    val onCopyText = remember { mutableStateOf("") }
+
     LaunchedEffect(podatki) {
         open = false
+        onCopyText.value = "${podatki.evangelij}\n${HtmlCompat.fromHtml(podatki.evangelij_vsebina, HtmlCompat.FROM_HTML_MODE_LEGACY)}"
     }
 
     Column (
         modifier = Modifier
             .fillMaxWidth()
             .height(IntrinsicSize.Min)
-            .clickable(
-                onClick = {
-                    open = !open
-                }
-            )
+            .pointerInput(Unit) {
+                detectTapGestures(
+                    onTap = {
+                        open = !open
+                    },
+                    onLongPress = {
+                        clipboardManager.setText(AnnotatedString(onCopyText.value))
+                    }
+                )
+            }
             .drawBehind {
                 val borderSize = 1.dp
 
@@ -829,3 +901,7 @@ private fun addBreakAndItalicAfterSourceOfAleluja(text: String): String {
     }
     return text
 }
+
+/*private fun prepareTextToCopy(podatki: PodatkiEntity, type: String): String {
+
+}*/

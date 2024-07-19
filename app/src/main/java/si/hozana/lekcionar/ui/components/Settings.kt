@@ -41,6 +41,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -165,7 +166,10 @@ private fun DropDownMenuSkofija(viewModel: LekcionarViewModel) {
                             .fillMaxWidth()
                             .menuAnchor()
                             .border(
-                                border = BorderStroke(2.dp, AppTheme.colorScheme.inactiveSliderTrack),
+                                border = BorderStroke(
+                                    2.dp,
+                                    AppTheme.colorScheme.inactiveSliderTrack
+                                ),
                                 shape = AppTheme.shape.button
                             ),
                         colors = OutlinedTextFieldDefaults.colors(
@@ -266,7 +270,10 @@ private fun DropDownMenuRed(viewModel: LekcionarViewModel) {
                             .fillMaxWidth()
                             .menuAnchor()
                             .border(
-                                border = BorderStroke(2.dp, AppTheme.colorScheme.inactiveSliderTrack),
+                                border = BorderStroke(
+                                    2.dp,
+                                    AppTheme.colorScheme.inactiveSliderTrack
+                                ),
                                 shape = AppTheme.shape.button
                             ),
                         colors = OutlinedTextFieldDefaults.colors(
@@ -332,6 +339,15 @@ private fun SwitchTheme(viewModel: LekcionarViewModel) {
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Center
         ) {
+            Text(text = "svetla",
+                style = AppTheme.typography.body,
+                color = AppTheme.colorScheme.secondary,
+                textAlign = TextAlign.End,
+                modifier = Modifier
+                    .padding(end = 30.dp)
+                    .alpha(if (!selectedTheme) 1f else 0f)
+
+            )
             Switch(modifier = Modifier
                     .scale(1.5f),
                 checked = selectedTheme,
@@ -346,6 +362,14 @@ private fun SwitchTheme(viewModel: LekcionarViewModel) {
                     uncheckedBorderColor = AppTheme.colorScheme.inactiveSliderTrack,
                     uncheckedTrackColor = AppTheme.colorScheme.primary
                 )
+            )
+            Text(text = "temna",
+                style = AppTheme.typography.body,
+                color = AppTheme.colorScheme.secondary,
+                textAlign = TextAlign.Start,
+                modifier = Modifier
+                    .padding(start = 30.dp)
+                    .alpha(if (selectedTheme) 1f else 0f)
             )
         }
     }

@@ -24,6 +24,10 @@ fun millisecondsToTimeString(milliseconds: Int): String {
 
 @SuppressLint("SimpleDateFormat")
 fun timestampToDate(timestamp: Long): String {
+    if (timestamp == 0L) {
+        return "Ni podatka"
+    }
+
     return try {
         val dateFormat = SimpleDateFormat("dd. MM. yyyy HH:mm")
         val dateTime = Date(timestamp * 1000)

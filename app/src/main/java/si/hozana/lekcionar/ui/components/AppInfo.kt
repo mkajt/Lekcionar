@@ -1,6 +1,9 @@
 package si.hozana.lekcionar.ui.components
 
+import android.content.Intent
+import android.net.Uri
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -24,7 +27,9 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import si.hozana.lekcionar.ui.routes.Screen
@@ -79,8 +84,9 @@ fun AppInfo(viewModel: LekcionarViewModel, navController: NavController) {
 
 @Composable
 private fun AppInfoSection(viewModel: LekcionarViewModel) {
+    val context = LocalContext.current
     val updateDataTimestamp by viewModel.updatedDataTimestamp.collectAsState()
-    //val testUpdate by viewModel.testUpdate.collectAsState()
+    val testUpdate by viewModel.testUpdate.collectAsState()
     Column(
         modifier = Modifier
             .padding(top = 60.dp, start = 30.dp, end = 30.dp)
@@ -109,7 +115,7 @@ private fun AppInfoSection(viewModel: LekcionarViewModel) {
                     modifier = Modifier
                         .padding(bottom = 60.dp)
                 )
-                /*Text(text = "Test update:",
+                Text(text = "Test update:",
                     style = AppTheme.typography.labelLarge,
                     color = AppTheme.colorScheme.headerContent,
                     textAlign = TextAlign.Center,
@@ -122,7 +128,7 @@ private fun AppInfoSection(viewModel: LekcionarViewModel) {
                     textAlign = TextAlign.Center,
                     modifier = Modifier
                         .padding(bottom = 60.dp)
-                )*/
+                )
 
             }
         }
@@ -144,11 +150,19 @@ private fun AppInfoSection(viewModel: LekcionarViewModel) {
                         .padding(bottom = 10.dp)
                 )
                 Text(text = "info@hozana.si",
-                    style = AppTheme.typography.labelLarge,
+                    style = AppTheme.typography.labelLarge.merge(textDecoration = TextDecoration.Underline),
                     color = AppTheme.colorScheme.headerContent,
                     textAlign = TextAlign.Center,
                     modifier = Modifier
                         .padding(bottom = 60.dp)
+                        .clickable {
+                            val intent = Intent(Intent.ACTION_SENDTO).apply {
+                                data = Uri.parse("mailto:info@hozana.si")
+                            }
+                            if (intent.resolveActivity(context.packageManager) != null) {
+                                context.startActivity(intent)
+                            }
+                        }
                 )
                 Text(text = "Vir podatkov:",
                     style = AppTheme.typography.labelLarge,
@@ -157,7 +171,7 @@ private fun AppInfoSection(viewModel: LekcionarViewModel) {
                     modifier = Modifier
                         .padding(bottom = 10.dp)
                 )
-                Text(text = "br. Matej Nastran OFMCap, hozana.si",
+                Text(text = "br. Matej Nastran OFMCap",
                     style = AppTheme.typography.labelLarge,
                     color = AppTheme.colorScheme.headerContent,
                     textAlign = TextAlign.Center
@@ -179,7 +193,7 @@ private fun AppInfoSection(viewModel: LekcionarViewModel) {
 
         Row(modifier = Modifier
             .fillMaxWidth()
-            .padding(top = 60.dp, bottom = 8.dp),
+            .padding(top = 60.dp, bottom = 10.dp),
             horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.CenterVertically
         ) {

@@ -23,7 +23,7 @@ fun AppNavigation(viewModel: LekcionarViewModel, activityListener: ActivityListe
     val navController = rememberNavController()
     NavHost(navController = navController, startDestination = Screen.HOME.name) {
         composable(Screen.HOME.name) { Home(viewModel = viewModel, navController = navController, actListener = activityListener )}
-        composable(Screen.CALLENDAR.name) { Calendar(viewModel = viewModel, navController = navController, actListener = activityListener)}
+        composable(Screen.CALLENDAR.name) { Calendar(viewModel = viewModel, navController = navController, activityListener = activityListener)}
         composable(Screen.SETTINGS.name) { Settings(viewModel = viewModel, navController = navController)}
         composable(Screen.APPINFO.name) { AppInfo(viewModel = viewModel, navController = navController)}
     }

@@ -26,7 +26,7 @@ class DataStoreManager(context: Context) {
         val isDarkTheme = booleanPreferencesKey("IS_DARK_THEME")
         val red = stringPreferencesKey("RED")
         val skofija = stringPreferencesKey("SKOFIJA")
-        //val testUpdate = longPreferencesKey("TEST_UPDATE") //TODO delete before release
+        val testUpdate = longPreferencesKey("TEST_UPDATE") //TODO delete before release
     }
 
     private val dataStore = context.dataStore
@@ -71,7 +71,6 @@ class DataStoreManager(context: Context) {
             .map { preferences ->
                 val timestamp = preferences[updatedDataTimestamp] ?: 0L
                 timestamp
-
             }
     }
 
@@ -93,7 +92,6 @@ class DataStoreManager(context: Context) {
             .map { preferences ->
                 val first = preferences[firstDataTimestamp] ?: 0L
                 first
-
             }
     }
 
@@ -160,7 +158,7 @@ class DataStoreManager(context: Context) {
             }
     }
 
-    /*suspend fun setTestUpdateTimestamp(timestamp: Long) {
+    suspend fun setTestUpdateTimestamp(timestamp: Long) {
         dataStore.edit { preferences ->
             preferences[testUpdate] = timestamp
         }
@@ -178,7 +176,6 @@ class DataStoreManager(context: Context) {
             .map { preferences ->
                 val timestamp = preferences[testUpdate] ?: 0L
                 timestamp
-
             }
-    }*/
+    }
 }
