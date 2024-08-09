@@ -40,18 +40,15 @@ class DownloadWorker(context : Context, params : WorkerParameters) : CoroutineWo
 
     override suspend fun doWork(): Result {
         try {
-            Log.d(TAG, "doWork()")
             val dataStoreUpdateTimestamp = dataStore.getUpdatedDataTimestamp().first()
-            Log.d(TAG, "dataStore: $dataStoreUpdateTimestamp")
             val response: Response<Void> = withContext(Dispatchers.IO) {
                 lekcionarApi?.getHeadLekcionarData(Constants.BASE, Constants.KEY)!!
             }
             val header: Headers = response.headers()
             val updatedTimestamp = if (header["timestamp"] != null) header["timestamp"]!!.toLong() else 0L
-            Log.d(TAG, "update: $updatedTimestamp")
+
             if (updatedTimestamp > dataStoreUpdateTimestamp) {
 
-                Log.d(TAG, "updatedTimestamp is bigger -> download")
                 val response2: Response<LekcionarDTO> = withContext(Dispatchers.IO) {
                     lekcionarApi?.getLekcionarData(Constants.BASE, Constants.KEY)!!
                 }
@@ -59,16 +56,10 @@ class DownloadWorker(context : Context, params : WorkerParameters) : CoroutineWo
                     val lekcionarDTO: LekcionarDTO? = response2.body()
                     if (lekcionarDTO != null) {
 
-                        val count1 = lekcionarDB.lekcionarDao().countPodatki()
-                        Log.d(TAG, "count db: $count1")
-
                         lekcionarDB.lekcionarDao().deleteAllFromMap()
                         lekcionarDB.lekcionarDao().deleteAllFromPodatki()
                         lekcionarDB.lekcionarDao().deleteAllFromRed()
                         lekcionarDB.lekcionarDao().deleteAllFromSkofija()
-
-                        val count2 = lekcionarDB.lekcionarDao().countPodatki()
-                        Log.d(TAG, "count db: $count2")
 
                         val mapEntities = Mapper.mapMapDtoToEntity(lekcionarDTO.map)
                         val podatkiEntities = Mapper.mapPodatkiDtoToEntity(lekcionarDTO.data)
@@ -79,13 +70,9 @@ class DownloadWorker(context : Context, params : WorkerParameters) : CoroutineWo
                         lekcionarDB.lekcionarDao().insertRed(redEntities)
                         lekcionarDB.lekcionarDao().insertSkofija(skofijaEntities)
 
-                        val count3 = lekcionarDB.lekcionarDao().countPodatki()
-                        Log.d(TAG, "count db: $count3")
 
                         val firstDataTimestamp = lekcionarDB.lekcionarDao().getFirstDataTimestamp()
                         val lastDataTimestamp = lekcionarDB.lekcionarDao().getLastDataTimestamp()
-                        Log.d(TAG, "firstDataTimestamp: $firstDataTimestamp")
-                        Log.d(TAG, "lastDataTimestamp: $lastDataTimestamp")
                         dataStore.setUpdatedDataTimestamp(updatedTimestamp)
                         dataStore.setFirstDataTimestamp(firstDataTimestamp)
                         dataStore.setLastDataTimestamp(lastDataTimestamp)
@@ -94,7 +81,6 @@ class DownloadWorker(context : Context, params : WorkerParameters) : CoroutineWo
             }
             val current = System.currentTimeMillis()
             dataStore.setTestUpdateTimestamp(current)
-            Log.d(TAG, "testUpdateTimestamp: $current")
         } catch (e: HttpException) {
             Log.e(LekcionarRepository.TAG, "Failed to fetch data from API: ${e.message()}")
             return Result.failure()

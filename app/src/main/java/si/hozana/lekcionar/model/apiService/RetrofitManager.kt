@@ -5,14 +5,12 @@ import kotlinx.serialization.json.Json
 import si.hozana.lekcionar.Constants
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
-import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 
 private var json = Json {
     isLenient = true
     ignoreUnknownKeys = true
 }
-
 
 object RetrofitManager {
     var retrofitService: Retrofit? = null
@@ -21,11 +19,7 @@ object RetrofitManager {
     init {
         val contentType = "application/json".toMediaType()
 
-        val loggingInterceptor = HttpLoggingInterceptor().apply {
-            this.level = HttpLoggingInterceptor.Level.BODY
-        }
         val client = OkHttpClient.Builder()
-            //.addInterceptor(loggingInterceptor)
             .build()
 
         retrofitService = Retrofit.Builder()

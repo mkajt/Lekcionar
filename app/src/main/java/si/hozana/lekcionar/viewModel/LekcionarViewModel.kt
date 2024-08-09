@@ -165,8 +165,6 @@ class LekcionarViewModel(
                         val biggestTimestamp = lekcionarRepository.getLastDataTimestamp()
                         dataStore.setFirstDataTimestamp(smallestTimestamp)
                         dataStore.setLastDataTimestamp(biggestTimestamp)
-                        Log.d("LVM", "SmallestTimestamp: $smallestTimestamp")
-                        Log.d("LVM", "BiggestTimestamp: $biggestTimestamp")
                     }
                 }
                 _dataState.update { LekcionarViewState.AlreadyInDb }

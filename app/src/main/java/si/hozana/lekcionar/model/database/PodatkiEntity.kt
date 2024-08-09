@@ -10,7 +10,7 @@ data class PodatkiEntity(
     val id: String,
 
     val opis_dolgi: String,
-    val timestamp: Long, //check myb just Long
+    val timestamp: Long,
     val datum: String,
     val mp3: String,
 

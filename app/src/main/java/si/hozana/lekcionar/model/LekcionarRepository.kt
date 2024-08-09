@@ -31,9 +31,6 @@ class LekcionarRepository(
     }
 
     private val lekcionarApi = RetrofitManager.lekcionarApi
-
-
-
     private var context: Context? = null
 
     init {
@@ -145,30 +142,5 @@ class LekcionarRepository(
     private suspend fun insertSkofijaToDB(skofijaDTO: List<SkofijaDTO>) {
         val skofijaEntities = Mapper.mapSkofijaDtoToEntity(skofijaDTO)
         lekcionarDB.lekcionarDao().insertSkofija(skofijaEntities)
-    }
-
-    private suspend fun deleteDataFromDB() {
-        withContext(ioDispatcher) {
-            deleteMap()
-            deletePodatki()
-            deleteRed()
-            deleteSkofija()
-        }
-    }
-
-    private suspend fun deleteMap() {
-        lekcionarDB.lekcionarDao().deleteAllFromMap()
-    }
-
-    private suspend fun deletePodatki() {
-        lekcionarDB.lekcionarDao().deleteAllFromPodatki()
-    }
-
-    private suspend fun deleteRed() {
-        lekcionarDB.lekcionarDao().deleteAllFromRed()
-    }
-
-    private suspend fun deleteSkofija() {
-        lekcionarDB.lekcionarDao().deleteAllFromSkofija()
     }
 }

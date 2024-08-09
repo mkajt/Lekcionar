@@ -1,7 +1,6 @@
 package si.hozana.lekcionar.model.dataStore
 
 import android.content.Context
-import android.util.Log
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
@@ -41,7 +40,6 @@ class DataStoreManager(context: Context) {
         return dataStore.data
             .catch { exception ->
                 if (exception is IOException) {
-                    Log.d("DataStore", exception.message.toString())
                     emit(emptyPreferences())
                 } else {
                     throw exception
