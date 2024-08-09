@@ -176,11 +176,13 @@ class MainActivity : ComponentActivity(), ActivityListener {
         if (serviceBound) {
             if (mediaPlayerService?.mediaPlayerState!!.isPlaying) {
                 mediaPlayerService?.foreground()
-                unbindService(mConnection)
-                serviceBound = false
+                //unbindService(mConnection)
+                //serviceBound = false
             } else {
                 mediaPlayerService?.exit()
             }
+            unbindService(mConnection)
+            serviceBound = false
         }
     }
 
@@ -226,7 +228,6 @@ class MainActivity : ComponentActivity(), ActivityListener {
             i.putExtra("opis", opis)
 
             startService(i)
-
             bindService(i, mConnection, 0)
         }
     }
@@ -286,7 +287,7 @@ interface ActivityListener {
     fun stopClick()
     fun pauseClick()
     fun seekClick(position: Float)
-    fun exitClick()
+    fun exitClick() //TODO mybe delete
     fun getActivity(): Activity
     fun requestNotificationPermission()
 }

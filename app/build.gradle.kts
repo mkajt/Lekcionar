@@ -69,7 +69,7 @@ dependencies {
     implementation ("androidx.navigation:navigation-compose:2.7.7")
     implementation ("androidx.work:work-runtime-ktx:2.9.0")
 
-    //TODO delete that it is for a notification:
+    // Media notification
     implementation ("androidx.media:media:1.7.0")
 
     testImplementation("junit:junit:4.13.2")

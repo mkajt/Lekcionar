@@ -34,7 +34,7 @@ class DownloadWorker(context : Context, params : WorkerParameters) : CoroutineWo
                 .setRequiredNetworkType(NetworkType.CONNECTED)
                 .setRequiresBatteryNotLow(true)
                 .build())
-            .setInitialDelay(1, TimeUnit.HOURS)
+            .setInitialDelay(1, TimeUnit.DAYS)
             .build()
     }
 
