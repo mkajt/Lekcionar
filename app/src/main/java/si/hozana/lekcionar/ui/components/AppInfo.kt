@@ -89,7 +89,7 @@ private fun AppInfoSection(viewModel: LekcionarViewModel) {
     val testUpdate by viewModel.testUpdate.collectAsState()
     Column(
         modifier = Modifier
-            .padding(top = 60.dp, start = 30.dp, end = 30.dp)
+            .padding(top = 40.dp, bottom = 40.dp, start = 30.dp, end = 30.dp)
             .fillMaxSize(),
         verticalArrangement = Arrangement.SpaceBetween
     ) {

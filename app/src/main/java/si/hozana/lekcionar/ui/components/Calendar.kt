@@ -44,6 +44,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
@@ -116,7 +117,12 @@ fun Calendar(viewModel: LekcionarViewModel, navController: NavController, activi
                                         activityListener.stopClick()
                                     }
                                     navController.navigate(Screen.HOME.name)
-                                    viewModel.updateSelectedDate(LocalDate.parse(todaysDate, viewModel.dateFormatter))
+                                    viewModel.updateSelectedDate(
+                                        LocalDate.parse(
+                                            todaysDate,
+                                            viewModel.dateFormatter
+                                        )
+                                    )
                                 }
                             )
                             .padding(horizontal = 16.dp, vertical = 8.dp)
@@ -165,7 +171,7 @@ private fun CalendarSection(viewModel: LekcionarViewModel, navController: NavCon
     val currentMonth = remember { YearMonth.parse(currentDate, viewModel.dateFormatter) }
     val daysOfWeek = remember { daysOfWeek(firstDayOfWeek = DayOfWeek.MONDAY) }
 
-    var calendarSelectedDate by remember { mutableStateOf(currentDate) }
+    var calendarSelectedDate by rememberSaveable { mutableStateOf(currentDate) }
 
     if (firstDataTimestamp != 0L && lastDataTimestamp != 0L) {
 

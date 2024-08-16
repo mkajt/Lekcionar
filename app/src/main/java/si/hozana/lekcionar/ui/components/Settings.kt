@@ -38,6 +38,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -96,7 +97,7 @@ fun Settings(viewModel: LekcionarViewModel, navController: NavController) {
 private fun SettingsSection(viewModel: LekcionarViewModel) {
     Column(
         modifier = Modifier
-            .padding(top = 60.dp, bottom = 8.dp)
+            .padding(top = 40.dp, bottom = 40.dp)
             .fillMaxSize(),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
@@ -112,8 +113,8 @@ private fun SettingsSection(viewModel: LekcionarViewModel) {
 private fun DropDownMenuSkofija(viewModel: LekcionarViewModel) {
     val selectedSkofija by viewModel.selectedSkofija.collectAsState()
     val skofijaList by viewModel.skofijaList.collectAsState()
-    var expanded by remember { mutableStateOf(false) }
-    var selectedText by remember { mutableStateOf(selectedSkofija) }
+    var expanded by rememberSaveable { mutableStateOf(false) }
+    var selectedText by rememberSaveable { mutableStateOf(selectedSkofija) }
 
     Column(modifier = Modifier
             .fillMaxWidth(),
@@ -215,12 +216,12 @@ private fun DropDownMenuSkofija(viewModel: LekcionarViewModel) {
 private fun DropDownMenuRed(viewModel: LekcionarViewModel) {
     val selectedRed by viewModel.selectedRed.collectAsState()
     val redList by viewModel.redList.collectAsState()
-    var expanded by remember { mutableStateOf(false) }
-    var selectedText by remember { mutableStateOf(selectedRed) }
+    var expanded by rememberSaveable { mutableStateOf(false) }
+    var selectedText by rememberSaveable { mutableStateOf(selectedRed) }
 
     Column(modifier = Modifier
         .fillMaxWidth()
-        .padding(top = 60.dp),
+        .padding(top = 40.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
 
@@ -319,7 +320,7 @@ private fun SwitchTheme(viewModel: LekcionarViewModel) {
     val selectedTheme by viewModel.isDarkTheme.collectAsState()
     Column(modifier = Modifier
         .fillMaxWidth()
-        .padding(top = 60.dp)
+        .padding(top = 40.dp)
     ) {
         Row(modifier = Modifier
             .fillMaxWidth()

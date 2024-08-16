@@ -701,7 +701,7 @@ private fun Psalm(podatki: PodatkiEntity) {
 
 @Composable
 private fun Evangelij(podatki: PodatkiEntity) {
-    var open by remember { mutableStateOf(false) }
+    var open by rememberSaveable { mutableStateOf(false) }
     val borderColor = AppTheme.colorScheme.inactiveSliderTrack
 
     val clipboardManager = LocalClipboardManager.current
