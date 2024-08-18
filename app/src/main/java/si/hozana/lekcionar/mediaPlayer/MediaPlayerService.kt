@@ -8,7 +8,6 @@ import android.app.Service
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.media.MediaPlayer
 import android.net.Uri
 import android.os.Binder
@@ -49,7 +48,6 @@ class MediaPlayerService: Service() {
 
     private var serviceBinder: Binder = RunServiceBinder()
 
-    private var mainActivity: MainActivity = MainActivity()
     var context: Context? = null
 
     var mediaPlayer: MediaPlayer? = null
@@ -57,14 +55,13 @@ class MediaPlayerService: Service() {
 
     private val handler = Handler(Looper.getMainLooper())
 
-
     //if start or pause button was clicked
     var started: Boolean = false
     var paused: Boolean = false
 
     // notification manager
     private var notificationManagerCompat: NotificationManagerCompat? = null
-    private lateinit var mediaSessionCompat: MediaSessionCompat
+    //private lateinit var mediaSessionCompat: MediaSessionCompat
     private lateinit var notificationManager: NotificationManager
 
     fun injectViewModel(lekcionarViewModel: LekcionarViewModel) {
@@ -82,8 +79,7 @@ class MediaPlayerService: Service() {
         mediaPlayer = MediaPlayer()
 
         notificationManagerCompat = NotificationManagerCompat.from(this)
-        mediaSessionCompat = MediaSessionCompat(context as MediaPlayerService, TAG!!)
-        // create notification channel
+        //mediaSessionCompat = MediaSessionCompat(context as MediaPlayerService, TAG!!)
         createNotificationChannel()
 
     }

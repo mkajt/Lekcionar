@@ -176,8 +176,6 @@ class MainActivity : ComponentActivity(), ActivityListener {
         if (serviceBound) {
             if (mediaPlayerService?.mediaPlayerState!!.isPlaying) {
                 mediaPlayerService?.foreground()
-                //unbindService(mConnection)
-                //serviceBound = false
             } else {
                 mediaPlayerService?.exit()
             }

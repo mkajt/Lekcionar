@@ -70,7 +70,6 @@ class DownloadWorker(context : Context, params : WorkerParameters) : CoroutineWo
                         lekcionarDB.lekcionarDao().insertRed(redEntities)
                         lekcionarDB.lekcionarDao().insertSkofija(skofijaEntities)
 
-
                         val firstDataTimestamp = lekcionarDB.lekcionarDao().getFirstDataTimestamp()
                         val lastDataTimestamp = lekcionarDB.lekcionarDao().getLastDataTimestamp()
                         dataStore.setUpdatedDataTimestamp(updatedTimestamp)
@@ -82,10 +81,10 @@ class DownloadWorker(context : Context, params : WorkerParameters) : CoroutineWo
             val current = System.currentTimeMillis()
             dataStore.setTestUpdateTimestamp(current)
         } catch (e: HttpException) {
-            Log.e(LekcionarRepository.TAG, "Failed to fetch data from API: ${e.message()}")
+            Log.e(TAG, "Failed to fetch data from API: ${e.message()}")
             return Result.failure()
         } catch (e: Exception) {
-            Log.e(LekcionarRepository.TAG, "An error occurred: ${e.message}")
+            Log.e(TAG, "An error occurred: ${e.message}")
             return Result.failure()
         }
         return Result.success()

@@ -171,6 +171,7 @@ class LekcionarViewModel(
                 val red = lekcionarRepository.getRedList()
                 _redList.update { red }
                 val skofija = lekcionarRepository.getSkofijaList()
+                Log.d("LVM", "Selected date: ${selectedDate.value}" )
                 _skofijaList.update { skofija }
                 updateSelektor()
                 getPodatkiBySelektor()

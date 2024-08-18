@@ -258,8 +258,6 @@ private fun DisplayDataSingle(podatki: PodatkiEntity, viewModel: LekcionarViewMo
         onCopyText.value = "${HtmlCompat.fromHtml(podatki.vrstica, HtmlCompat.FROM_HTML_MODE_LEGACY)}"
     }
 
-    Log.d("Home","Podatki: " + podatki)
-
     OutlinedButton(
         onClick = {},
         modifier = Modifier
@@ -325,13 +323,11 @@ private fun DisplayDataSingle(podatki: PodatkiEntity, viewModel: LekcionarViewMo
     ) {
         Berila(podatki = podatki)
     }
-
 }
 
 @Composable
 private fun DisplayDataMultiple(podatki: PodatkiEntity, viewModel: LekcionarViewModel, snackbarHostState: SnackbarHostState) {
     var isButtonClicked by rememberSaveable { mutableStateOf(false) }
-
 
     val context = LocalContext.current.applicationContext
     val screenWidthDp = LocalConfiguration.current.screenWidthDp
@@ -701,7 +697,7 @@ private fun Psalm(podatki: PodatkiEntity) {
 
 @Composable
 private fun Evangelij(podatki: PodatkiEntity) {
-    var open by rememberSaveable { mutableStateOf(false) }
+    var open by remember { mutableStateOf(false) }
     val borderColor = AppTheme.colorScheme.inactiveSliderTrack
 
     val clipboardManager = LocalClipboardManager.current
@@ -901,7 +897,3 @@ private fun addBreakAndItalicAfterSourceOfAleluja(text: String): String {
     }
     return text
 }
-
-/*private fun prepareTextToCopy(podatki: PodatkiEntity, type: String): String {
-
-}*/
