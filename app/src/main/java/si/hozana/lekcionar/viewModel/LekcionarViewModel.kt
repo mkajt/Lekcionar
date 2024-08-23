@@ -26,14 +26,13 @@ import java.time.format.DateTimeFormatter
 
 class LekcionarViewModel(
     application: Application?,
-    private val lekcionarRepository: LekcionarRepository
-) :
-    AndroidViewModel(application!!) {
+    private val lekcionarRepository: LekcionarRepository,
+) : AndroidViewModel(application!!) {
 
-     private val _dataState = MutableStateFlow<LekcionarViewState>(LekcionarViewState.Start)
+    private val _dataState = MutableStateFlow<LekcionarViewState>(LekcionarViewState.Start)
     val dataState: StateFlow<LekcionarViewState> = _dataState.asStateFlow()
 
-    val dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+    val dateFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
     private val _selektor = MutableStateFlow("")
 
     private val _selectedDate = MutableStateFlow(dateFormatter.format(LocalDate.now()))
@@ -124,11 +123,9 @@ class LekcionarViewModel(
     private fun updateSelektor() {
         _selektor.update { "${_selectedDate.value}-${selectedSkofija.value}-${selectedRed.value}" }
         getPodatkiBySelektor()
-        Log.d("LVM", "Selected selektor: " + _selektor.value)
     }
 
     fun updateSelectedDate(date: LocalDate) {
-
         if (dateFormatter.format(date) != _selectedDate.value) {
             _selectedDate.update { dateFormatter.format(date) }
             updateSelektor()

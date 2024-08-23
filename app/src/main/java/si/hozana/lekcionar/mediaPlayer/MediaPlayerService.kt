@@ -302,6 +302,7 @@ class MediaPlayerService: Service() {
 
         //builder.contentView.setImageViewResource(android.R.id.icon, R.drawable.lekcionar_logo_inverted)
         val resultIntent = Intent(this, MainActivity::class.java)
+        resultIntent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
         val resultPendingIntent = PendingIntent.getActivity(this, 0, resultIntent,
             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
 

@@ -25,14 +25,17 @@ import android.app.AlertDialog
 import android.net.Uri
 import android.os.Build
 import android.provider.Settings
+import androidx.activity.viewModels
 import androidx.annotation.RequiresApi
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.core.app.ActivityCompat
+import androidx.lifecycle.SavedStateHandle
 import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.WorkManager
+import si.hozana.lekcionar.viewModel.LekcionarViewModelFactory
 
 class MainActivity : ComponentActivity(), ActivityListener {
 
@@ -40,10 +43,17 @@ class MainActivity : ComponentActivity(), ActivityListener {
         val TAG = MainActivity::class.simpleName
     }
 
-    private lateinit var lekcionarViewModel: LekcionarViewModel
     private lateinit var lekcionarRepository: LekcionarRepository
     private lateinit var lekcionarDB: LekcionarDB
     private lateinit var context: Context
+
+    private val lekcionarViewModel: LekcionarViewModel by viewModels {
+        LekcionarViewModelFactory(
+            application = application,
+            lekcionarRepository = lekcionarRepository,
+            owner = this
+        )
+    }
 
     private val REQUEST_PERMISSION_POST_NOTIFICATIONS = 1
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
@@ -62,7 +72,6 @@ class MainActivity : ComponentActivity(), ActivityListener {
 
         lekcionarDB = LekcionarDB.getInstance(context)
         lekcionarRepository = LekcionarRepository(context, lekcionarDB, Dispatchers.IO)
-        lekcionarViewModel = LekcionarViewModel(application, lekcionarRepository)
         lekcionarViewModel.checkDbAndFetchDataFromApi()
 
         WorkManager.getInstance(this).enqueueUniquePeriodicWork(
