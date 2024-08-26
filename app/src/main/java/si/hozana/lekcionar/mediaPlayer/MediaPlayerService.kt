@@ -7,7 +7,6 @@ import android.app.PendingIntent
 import android.app.Service
 import android.content.Context
 import android.content.Intent
-import android.graphics.Bitmap
 import android.media.MediaPlayer
 import android.net.Uri
 import android.os.Binder
@@ -15,12 +14,9 @@ import android.os.Build
 import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
-import android.support.v4.media.session.MediaSessionCompat
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
-import androidx.core.content.ContextCompat
-import androidx.core.graphics.drawable.toBitmap
 import si.hozana.lekcionar.MainActivity
 import si.hozana.lekcionar.R
 import si.hozana.lekcionar.viewModel.LekcionarViewModel
@@ -61,7 +57,6 @@ class MediaPlayerService: Service() {
 
     // notification manager
     private var notificationManagerCompat: NotificationManagerCompat? = null
-    //private lateinit var mediaSessionCompat: MediaSessionCompat
     private lateinit var notificationManager: NotificationManager
 
     fun injectViewModel(lekcionarViewModel: LekcionarViewModel) {
@@ -79,13 +74,10 @@ class MediaPlayerService: Service() {
         mediaPlayer = MediaPlayer()
 
         notificationManagerCompat = NotificationManagerCompat.from(this)
-        //mediaSessionCompat = MediaSessionCompat(context as MediaPlayerService, TAG!!)
         createNotificationChannel()
-
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        //startForeground(NOTIFICATION_ID, createNotification())
         //null validation for error: Caused by: java.lang.NullPointerException: Parameter specified as non-null is null: method .onStartCommand, parameter intent
         if (intent != null) {
             when (intent.action) {
@@ -202,7 +194,6 @@ class MediaPlayerService: Service() {
             started = false
             paused = false
 
-            //handler.removeCallbacksAndMessages(null)
             if (notificationManager.activeNotifications.any{it.id == NOTIFICATION_ID}) {
                 foreground()
             }
@@ -285,22 +276,13 @@ class MediaPlayerService: Service() {
             .setContentTitle(mediaPlayerState.title)
             .setContentText(getConcatTime(mediaPlayerState.currentPosition, mediaPlayerState.duration))
             .setSmallIcon(R.mipmap.ic_lekcionar_logo_inverted_small)
-            //.setLargeIcon(
-            //    BitmapFactory.decodeResource(context!!.resources,
-            //    R.mipmap.ic_lekcionar_logo_inverted))
             .setChannelId(channelID)
-            //.setColor(ContextCompat.getColor(context!!,R.color.grey_active_track))
-            //.setPriority(NotificationCompat.PRIORITY_MIN)
             .setStyle(androidx.media.app.NotificationCompat.MediaStyle()
                 .setShowActionsInCompactView(0)
             )
-            //.addAction(0, "", null) //dummy action to balance extended layout
-            //.addAction(0, "", null) //dummy action to balance extended layout
-            //.addAction(0, "", null) //dummy action to balance extended layout
             .addAction(playPauseIcon, if (mediaPlayer?.isPlaying!! && !paused) "Pause" else "Play", actionPendingIntentStartPause)
 
 
-        //builder.contentView.setImageViewResource(android.R.id.icon, R.drawable.lekcionar_logo_inverted)
         val resultIntent = Intent(this, MainActivity::class.java)
         resultIntent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
         val resultPendingIntent = PendingIntent.getActivity(this, 0, resultIntent,
@@ -316,7 +298,6 @@ class MediaPlayerService: Service() {
     }
 
     fun background() {
-        //notificationManager.cancel(NOTIFICATION_ID)
         stopForeground(STOP_FOREGROUND_REMOVE)
     }
 
@@ -333,16 +314,6 @@ class MediaPlayerService: Service() {
             return "$minutes:0$seconds"
         }
         return "$minutes:$seconds"
-    }
-
-    private fun getBitmapFromVector(context: Context, vectorDrawableId: Int): Bitmap {
-        val vectorDrawable = ContextCompat.getDrawable(context, vectorDrawableId)
-        /*return Bitmap.createBitmap(
-            vectorDrawable!!.intrinsicWidth,
-            vectorDrawable.intrinsicHeight,
-            Bitmap.Config.ARGB_8888
-        )*/
-        return vectorDrawable!!.toBitmap()
     }
 
 }
