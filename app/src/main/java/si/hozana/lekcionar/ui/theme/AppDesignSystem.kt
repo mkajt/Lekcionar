@@ -29,7 +29,6 @@ data class AppTypography(
 )
 
 data class AppShape(
-    val container: Shape,
     val button: Shape
 )
 
@@ -67,7 +66,6 @@ val LocalAppTyphography = staticCompositionLocalOf {
 
 val LocalAppShape = staticCompositionLocalOf {
     AppShape(
-        container = RectangleShape,
         button = RectangleShape
     )
 }

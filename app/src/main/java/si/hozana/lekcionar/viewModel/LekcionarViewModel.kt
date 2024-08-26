@@ -59,7 +59,6 @@ class LekcionarViewModel(
     private var _mediaPlayerState = MutableStateFlow(MediaPlayerState())
     val mediaPlayerState = _mediaPlayerState.asStateFlow()
 
-
     init {
         val context: Context = getApplication<Application>().applicationContext
         dataStore = DataStoreManager(context)
@@ -116,7 +115,7 @@ class LekcionarViewModel(
         }
     }
 
-    fun getTestUpdate(): Long {
+    fun getTestUpdate(): Long { //TODO delete
         return testUpdate.value
     }
 
@@ -165,14 +164,15 @@ class LekcionarViewModel(
                     }
                 }
                 _dataState.update { LekcionarViewState.AlreadyInDb }
+
                 val red = lekcionarRepository.getRedList()
                 _redList.update { red }
+
                 val skofija = lekcionarRepository.getSkofijaList()
-                Log.d("LVM", "Selected date: ${selectedDate.value}" )
                 _skofijaList.update { skofija }
+
                 updateSelektor()
                 getPodatkiBySelektor()
-
             } catch (e: Exception) {
                 _dataState.update { LekcionarViewState.Error(e.message ?: "Unknown error") }
             }

@@ -228,7 +228,6 @@ class MediaPlayerService: Service() {
         if (started && mediaPlayer != null) {
             mediaPlayer?.stop()
             mediaPlayer?.release()
-            Log.d(TAG, "Media player stopped and released")
         }
         started = false
         paused = false

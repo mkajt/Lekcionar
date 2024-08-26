@@ -120,11 +120,6 @@ class MainActivity : ComponentActivity(), ActivityListener {
         Log.d(TAG, "Starting and binding service")
 
         val i = Intent(applicationContext, MediaPlayerService::class.java)
-        /*if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            startForegroundService(i)
-        } else {
-            startService(i)
-        }*/
 
         startService(i)
         bindService(i, mConnection, 0)
@@ -224,7 +219,6 @@ class MainActivity : ComponentActivity(), ActivityListener {
 
     override fun playClick(uri: String, opis: String) {
         if (serviceBound) {
-            Log.d(TAG, "Started playing")
             mediaPlayerService?.playInit(Uri.parse(uri), opis)
         } else {
             Log.d(TAG, "Binding service")
@@ -241,14 +235,12 @@ class MainActivity : ComponentActivity(), ActivityListener {
 
     override fun stopClick() {
         if (serviceBound) {
-            Log.d(TAG, "Stopped playing")
             mediaPlayerService?.stop()
         }
     }
 
     override fun pauseClick() {
         if (serviceBound) {
-            Log.d(TAG, "Paused playing")
             mediaPlayerService?.pause()
         }
     }
@@ -257,31 +249,6 @@ class MainActivity : ComponentActivity(), ActivityListener {
         if (serviceBound) {
             mediaPlayerService?.seek(position)
         }
-    }
-
-    override fun exitClick() {
-        Log.d(TAG, "exitClick()")
-
-        //if (mediaPlayerService != null) {
-            if (serviceBound) {
-                Log.d(TAG, "exitClick() service bound")
-                mediaPlayerService?.background()
-                mediaPlayerService?.exit()
-                //stopService(Intent(this, MediaPlayerService::class.java))
-                unbindService(mConnection)
-                serviceBound = false
-                //mediaPlayerService?.stopSelf()
-
-            } /*else {
-                Log.d(TAG, "exitClick() service unbound")
-                mediaPlayerService?.exit()
-                mediaPlayerService?.stopSelf()
-                finishAndRemoveTask()
-                exitProcess(0)
-            }*/
-        //}
-        //finishAndRemoveTask()
-        //exitProcess(0)
     }
 
     override fun getActivity(): Activity {
@@ -294,7 +261,6 @@ interface ActivityListener {
     fun stopClick()
     fun pauseClick()
     fun seekClick(position: Float)
-    fun exitClick() //TODO mybe delete
     fun getActivity(): Activity
     fun requestNotificationPermission()
 }

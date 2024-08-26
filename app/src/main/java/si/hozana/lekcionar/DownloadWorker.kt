@@ -13,7 +13,6 @@ import kotlinx.coroutines.withContext
 import okhttp3.Headers
 import retrofit2.HttpException
 import retrofit2.Response
-import si.hozana.lekcionar.model.LekcionarRepository
 import si.hozana.lekcionar.model.apiService.RetrofitManager
 import si.hozana.lekcionar.model.dataStore.DataStoreManager
 import si.hozana.lekcionar.model.database.LekcionarDB
@@ -79,7 +78,7 @@ class DownloadWorker(context : Context, params : WorkerParameters) : CoroutineWo
                 }
             }
             val current = System.currentTimeMillis()
-            dataStore.setTestUpdateTimestamp(current)
+            dataStore.setTestUpdateTimestamp(current) //TODO delete
         } catch (e: HttpException) {
             Log.e(TAG, "Failed to fetch data from API: ${e.message()}")
             return Result.failure()

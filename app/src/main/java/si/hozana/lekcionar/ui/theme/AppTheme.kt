@@ -76,7 +76,6 @@ private val typography = AppTypography(
 )
 
 private val shape = AppShape(
-    container = RoundedCornerShape(12.dp),
     button = RoundedCornerShape(50)
 )
 

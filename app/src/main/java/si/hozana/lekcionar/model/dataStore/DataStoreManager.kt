@@ -156,13 +156,13 @@ class DataStoreManager(context: Context) {
             }
     }
 
-    suspend fun setTestUpdateTimestamp(timestamp: Long) {
+    suspend fun setTestUpdateTimestamp(timestamp: Long) { //TODO delete
         dataStore.edit { preferences ->
             preferences[testUpdate] = timestamp
         }
     }
 
-    fun getTestUpdateTimestamp(): Flow<Long> {
+    fun getTestUpdateTimestamp(): Flow<Long> {  //TODO delete
         return dataStore.data
             .catch { exception ->
                 if (exception is IOException) {

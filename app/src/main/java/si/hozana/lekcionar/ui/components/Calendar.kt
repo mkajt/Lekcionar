@@ -165,9 +165,6 @@ private fun CalendarSection(viewModel: LekcionarViewModel, navController: NavCon
     val firstDataTimestamp by viewModel.firstDataTimestamp.collectAsState()
     val lastDataTimestamp by viewModel.lastDataTimestamp.collectAsState()
 
-    Log.d("Calendar", "FirstDataTimestamp: $firstDataTimestamp")
-    Log.d("Calendar", "LastDataTimestamp: $lastDataTimestamp")
-
     val currentMonth = remember { YearMonth.parse(currentDate, viewModel.dateFormatter) }
     val daysOfWeek = remember { daysOfWeek(firstDayOfWeek = DayOfWeek.MONDAY) }
 
