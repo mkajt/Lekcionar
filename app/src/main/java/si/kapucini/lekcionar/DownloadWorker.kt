@@ -77,8 +77,7 @@ class DownloadWorker(context : Context, params : WorkerParameters) : CoroutineWo
                     }
                 }
             }
-            val current = System.currentTimeMillis()
-            dataStore.setTestUpdateTimestamp(current) //TODO delete
+            //dataStore.setTestUpdateTimestamp(System.currentTimeMillis())
         } catch (e: HttpException) {
             Log.e(TAG, "Failed to fetch data from API: ${e.message()}")
             return Result.failure()

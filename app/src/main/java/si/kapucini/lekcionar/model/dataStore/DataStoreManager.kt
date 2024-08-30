@@ -25,7 +25,7 @@ class DataStoreManager(context: Context) {
         val isDarkTheme = booleanPreferencesKey("IS_DARK_THEME")
         val red = stringPreferencesKey("RED")
         val skofija = stringPreferencesKey("SKOFIJA")
-        val testUpdate = longPreferencesKey("TEST_UPDATE") //TODO delete before release
+        //val testUpdate = longPreferencesKey("TEST_UPDATE") //for test purposes
     }
 
     private val dataStore = context.dataStore
@@ -156,13 +156,13 @@ class DataStoreManager(context: Context) {
             }
     }
 
-    suspend fun setTestUpdateTimestamp(timestamp: Long) { //TODO delete
+    /*suspend fun setTestUpdateTimestamp(timestamp: Long) {
         dataStore.edit { preferences ->
             preferences[testUpdate] = timestamp
         }
     }
 
-    fun getTestUpdateTimestamp(): Flow<Long> {  //TODO delete
+    fun getTestUpdateTimestamp(): Flow<Long> {
         return dataStore.data
             .catch { exception ->
                 if (exception is IOException) {
@@ -175,5 +175,5 @@ class DataStoreManager(context: Context) {
                 val timestamp = preferences[testUpdate] ?: 0L
                 timestamp
             }
-    }
+    }*/
 }

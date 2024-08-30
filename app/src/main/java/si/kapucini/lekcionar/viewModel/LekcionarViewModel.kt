@@ -49,7 +49,7 @@ class LekcionarViewModel(
     val lastDataTimestamp: StateFlow<Long>
     val selectedRed: StateFlow<String>
     val selectedSkofija: StateFlow<String>
-    val testUpdate: StateFlow<Long> //TODO delete before release
+    //val testUpdate: StateFlow<Long> //just for test purposes
 
     private val _redList = MutableStateFlow<List<RedEntity>?>(null)
     val redList = _redList.asStateFlow()
@@ -68,7 +68,7 @@ class LekcionarViewModel(
         lastDataTimestamp = dataStore.getLastDataTimestamp().stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), runBlocking { dataStore.getLastDataTimestamp().first() })
         selectedRed = dataStore.getRed().stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), runBlocking { dataStore.getRed().first() })
         selectedSkofija = dataStore.getSkofija().stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), runBlocking { dataStore.getSkofija().first() })
-        testUpdate = dataStore.getTestUpdateTimestamp().stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), runBlocking { dataStore.getTestUpdateTimestamp().first() })
+        //testUpdate = dataStore.getTestUpdateTimestamp().stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), runBlocking { dataStore.getTestUpdateTimestamp().first() })
     }
 
     fun getIsDarkTheme(): Boolean {
@@ -115,9 +115,9 @@ class LekcionarViewModel(
         }
     }
 
-    fun getTestUpdate(): Long { //TODO delete
+    /*fun getTestUpdate(): Long {
         return testUpdate.value
-    }
+    }*/
 
     private fun updateSelektor() {
         _selektor.update { "${_selectedDate.value}-${selectedSkofija.value}-${selectedRed.value}" }

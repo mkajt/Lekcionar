@@ -86,7 +86,7 @@ fun AppInfo(viewModel: LekcionarViewModel, navController: NavController) {
 private fun AppInfoSection(viewModel: LekcionarViewModel) {
     val context = LocalContext.current
     val updateDataTimestamp by viewModel.updatedDataTimestamp.collectAsState()
-    val testUpdate by viewModel.testUpdate.collectAsState()
+    //val testUpdate by viewModel.testUpdate.collectAsState()
     Column(
         modifier = Modifier
             .padding(top = 40.dp, bottom = 40.dp, start = 30.dp, end = 30.dp)
@@ -111,11 +111,9 @@ private fun AppInfoSection(viewModel: LekcionarViewModel) {
                 Text(text = timestampToDate(updateDataTimestamp),
                     style = AppTheme.typography.labelLarge,
                     color = AppTheme.colorScheme.headerContent,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier
-                        .padding(bottom = 60.dp)
+                    textAlign = TextAlign.Center
                 )
-                Text(text = "Test update:",
+                /*Text(text = "Test update:",
                     style = AppTheme.typography.labelLarge,
                     color = AppTheme.colorScheme.headerContent,
                     textAlign = TextAlign.Center,
@@ -128,14 +126,13 @@ private fun AppInfoSection(viewModel: LekcionarViewModel) {
                     textAlign = TextAlign.Center,
                     modifier = Modifier
                         .padding(bottom = 60.dp)
-                )
-
+                )*/
             }
         }
 
         Row(modifier = Modifier
             .fillMaxWidth()
-            .padding(top = 60.dp, bottom = 10.dp),
+            .padding(top = 60.dp),
             horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -193,7 +190,7 @@ private fun AppInfoSection(viewModel: LekcionarViewModel) {
 
         Row(modifier = Modifier
             .fillMaxWidth()
-            .padding(top = 60.dp, bottom = 10.dp),
+            .padding(top = 60.dp),
             horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.CenterVertically
         ) {

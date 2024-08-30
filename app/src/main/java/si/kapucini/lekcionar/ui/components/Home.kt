@@ -337,6 +337,7 @@ private fun DisplayDataMultiple(podatki: PodatkiEntity, viewModel: LekcionarView
     val onCopyText = remember { mutableStateOf("") }
 
     LaunchedEffect(podatki) {
+        isButtonClicked = false
         onCopyText.value = "${HtmlCompat.fromHtml(podatki.vrstica, HtmlCompat.FROM_HTML_MODE_LEGACY)}"
     }
 
