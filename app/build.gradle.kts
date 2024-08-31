@@ -6,11 +6,11 @@ plugins {
 }
 
 android {
-    namespace = "si.kapucini.lekcionar"
+    namespace = "si.hozana.lekcionar"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "si.kapucini.lekcionar"
+        applicationId = "si.hozana.lekcionar"
         minSdk = 24
         targetSdk = 34
         versionCode = 3
