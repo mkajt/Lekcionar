@@ -258,7 +258,7 @@ private fun DropDownMenuRed(viewModel: LekcionarViewModel) {
                     OutlinedTextField(
                         textStyle = AppTheme.typography.body.merge(textAlign = TextAlign.Center, color = AppTheme.colorScheme.secondary),
                         shape = AppTheme.shape.button,
-                        value = redList?.find { item -> item.id == selectedText }?.red ?: "Brez izbire reda",
+                        value = redList?.find { item -> item.id == selectedText }?.red ?: "brez izbire reda",
                         onValueChange = {},
                         readOnly = true,
                         singleLine = true,

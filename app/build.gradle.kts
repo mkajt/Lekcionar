@@ -11,7 +11,7 @@ android {
 
     defaultConfig {
         applicationId = "si.hozana.lekcionar"
-        minSdk = 24
+        minSdk = 25
         targetSdk = 34
         versionCode = 4
         versionName = "3.0.1"

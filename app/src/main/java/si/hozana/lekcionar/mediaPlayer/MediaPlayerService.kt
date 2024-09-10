@@ -56,7 +56,7 @@ class MediaPlayerService: Service() {
     var paused: Boolean = false
 
     // notification manager
-    private var notificationManagerCompat: NotificationManagerCompat? = null
+    private lateinit var notificationManagerCompat: NotificationManagerCompat
     private lateinit var notificationManager: NotificationManager
 
     fun injectViewModel(lekcionarViewModel: LekcionarViewModel) {
@@ -121,7 +121,7 @@ class MediaPlayerService: Service() {
     private var mediaRunnable = object : Runnable {
         override fun run() {
             try {
-                mediaPlayerState.currentPosition = mediaPlayer?.currentPosition!!
+                mediaPlayerState.currentPosition = mediaPlayer?.currentPosition ?: 0
                 viewModel.updateMediaPlayerState(mediaPlayerState)
                 if (getTime(mediaPlayerState.currentPosition) == getTime(mediaPlayerState.duration) && mediaPlayerState.duration != 0) {
                     stop()
@@ -150,7 +150,7 @@ class MediaPlayerService: Service() {
         if (!started || !paused) {
             mediaPlayer?.reset()
             mediaPlayer?.apply {
-                context?.let { mediaPlayerState.uri?.let { it1 -> setDataSource(it, it1) } }
+                context?.let { mediaPlayerState.uri?.let { it1 -> setDataSource(it1.toString()) } }
                 setOnErrorListener { mediaPlayer, what, extra ->
                     Log.e("MediaPlayer", "Error occurred while preparing media source: $what; extra: $extra")
                     false
@@ -168,7 +168,7 @@ class MediaPlayerService: Service() {
     private fun play() {
         mediaPlayerState.isPlaying = true
         mediaPlayerState.isStopped = false
-        mediaPlayerState.duration = mediaPlayer?.duration!!
+        mediaPlayerState.duration = mediaPlayer?.duration ?: 0
         mediaPlayer?.seekTo(mediaPlayerState.currentPosition)
         mediaPlayer?.start()
 
@@ -227,6 +227,7 @@ class MediaPlayerService: Service() {
     fun exit() {
         if (started && mediaPlayer != null) {
             mediaPlayer?.stop()
+            mediaPlayer?.reset()
             mediaPlayer?.release()
         }
         started = false
@@ -238,12 +239,13 @@ class MediaPlayerService: Service() {
 
     // create a notification channel for the foreground service
     private fun createNotificationChannel() {
+        notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
+
         if (Build.VERSION.SDK_INT > 26) {
             val channel = NotificationChannel(channelID, "Foreground channel", NotificationManager.IMPORTANCE_LOW)
             channel.description = "Notifications about mediaPlayerService"
             channel.enableLights(false)
             channel.enableVibration(false)
-            notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
             notificationManager.createNotificationChannel(channel)
         }
     }
@@ -251,13 +253,14 @@ class MediaPlayerService: Service() {
     private fun createNotification(): Notification {
 
         val actionIntentStartPause = Intent(this, MediaPlayerService::class.java)
-        lateinit var actionPendingIntentStartPause: PendingIntent
+        val actionPendingIntentStartPause: PendingIntent
 
         val actionIntentExit = Intent(this, MediaPlayerService::class.java)
         actionIntentExit.action = ACTION_EXIT
         val actionPendingIntentExit = PendingIntent.getService(this, 0, actionIntentExit, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
 
-        if (mediaPlayer?.isPlaying!! && !paused) {
+        val isPlaying = mediaPlayer?.isPlaying ?: false
+        if (isPlaying && !paused) {
             //mediaPlayer is playing
             actionIntentStartPause.action = ACTION_PAUSE
             actionPendingIntentStartPause = PendingIntent.getService(this, 0, actionIntentStartPause, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
@@ -269,7 +272,7 @@ class MediaPlayerService: Service() {
             actionPendingIntentStartPause = PendingIntent.getService(this, 0, actionIntentStartPause, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
         }
 
-        val playPauseIcon = if (mediaPlayer?.isPlaying!! && !paused) R.drawable.pause else R.drawable.play
+        val playPauseIcon = if (isPlaying && !paused) R.drawable.pause else R.drawable.play
 
         val builder = NotificationCompat.Builder(this, channelID)
             .setContentTitle(mediaPlayerState.title)
@@ -279,7 +282,7 @@ class MediaPlayerService: Service() {
             .setStyle(androidx.media.app.NotificationCompat.MediaStyle()
                 .setShowActionsInCompactView(0)
             )
-            .addAction(playPauseIcon, if (mediaPlayer?.isPlaying!! && !paused) "Pause" else "Play", actionPendingIntentStartPause)
+            .addAction(playPauseIcon, if (isPlaying && !paused) "Pause" else "Play", actionPendingIntentStartPause)
 
 
         val resultIntent = Intent(this, MainActivity::class.java)

@@ -2,6 +2,7 @@ package si.hozana.lekcionar.ui.components
 
 import android.content.Intent
 import android.net.Uri
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -89,7 +90,7 @@ private fun AppInfoSection(viewModel: LekcionarViewModel) {
     //val testUpdate by viewModel.testUpdate.collectAsState()
     Column(
         modifier = Modifier
-            .padding(top = 40.dp, bottom = 40.dp, start = 30.dp, end = 30.dp)
+            .padding(top = 20.dp, bottom = 20.dp, start = 30.dp, end = 30.dp)
             .fillMaxSize(),
         verticalArrangement = Arrangement.SpaceBetween
     ) {
@@ -132,7 +133,7 @@ private fun AppInfoSection(viewModel: LekcionarViewModel) {
 
         Row(modifier = Modifier
             .fillMaxWidth()
-            .padding(top = 60.dp),
+            .padding(top = 40.dp),
             horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -151,13 +152,37 @@ private fun AppInfoSection(viewModel: LekcionarViewModel) {
                     color = AppTheme.colorScheme.headerContent,
                     textAlign = TextAlign.Center,
                     modifier = Modifier
-                        .padding(bottom = 60.dp)
+                        .padding(bottom = 40.dp)
                         .clickable {
                             val intent = Intent(Intent.ACTION_SENDTO).apply {
                                 data = Uri.parse("mailto:info@hozana.si")
                             }
                             if (intent.resolveActivity(context.packageManager) != null) {
                                 context.startActivity(intent)
+                            }
+                        }
+                )
+                Text(text = "Podpri naše delo:",
+                    style = AppTheme.typography.labelLarge,
+                    color = AppTheme.colorScheme.headerContent,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier
+                        .padding(bottom = 10.dp)
+                )
+                Text(text = "povezava za donacijo",
+                    style = AppTheme.typography.labelLarge.merge(textDecoration = TextDecoration.Underline),
+                    color = AppTheme.colorScheme.headerContent,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier
+                        .padding(bottom = 40.dp)
+                        .clickable {
+                            val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://hozana.si/donacije.php?ref=lekcionar")).apply {
+                                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                            }
+                            if (intent.resolveActivity(context.packageManager) != null) {
+                                context.startActivity(intent)
+                            } else {
+                                Log.e("URL_OPEN_ERROR", "No application can handle this URL.")
                             }
                         }
                 )
@@ -168,7 +193,12 @@ private fun AppInfoSection(viewModel: LekcionarViewModel) {
                     modifier = Modifier
                         .padding(bottom = 10.dp)
                 )
-                Text(text = "br. Matej Nastran OFMCap",
+                Text(text = "br. Matej Nastran OFMCap,",
+                    style = AppTheme.typography.labelLarge,
+                    color = AppTheme.colorScheme.headerContent,
+                    textAlign = TextAlign.Center
+                )
+                Text(text = "hozana.si",
                     style = AppTheme.typography.labelLarge,
                     color = AppTheme.colorScheme.headerContent,
                     textAlign = TextAlign.Center
@@ -190,7 +220,7 @@ private fun AppInfoSection(viewModel: LekcionarViewModel) {
 
         Row(modifier = Modifier
             .fillMaxWidth()
-            .padding(top = 60.dp),
+            .padding(top = 40.dp),
             horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -212,5 +242,4 @@ private fun AppInfoSection(viewModel: LekcionarViewModel) {
             }
         }
     }
-
 }
