@@ -188,7 +188,7 @@ private fun DropDownMenuSkofija(viewModel: LekcionarViewModel) {
                         scrollState = rememberScrollState(),
                         modifier = Modifier
                             .background(AppTheme.colorScheme.background)
-                            .requiredSizeIn(maxHeight = 250.dp)
+                            .requiredSizeIn(maxHeight = 235.dp)
                     ) {
                         skofijaList?.forEach{ item ->
                             DropdownMenuItem(
@@ -292,7 +292,7 @@ private fun DropDownMenuRed(viewModel: LekcionarViewModel) {
                         scrollState = rememberScrollState(),
                         modifier = Modifier
                             .background(AppTheme.colorScheme.background)
-                            .requiredSizeIn(maxHeight = 250.dp)
+                            .requiredSizeIn(maxHeight = 235.dp)
                     ) {
                         redList?.forEach{ item ->
                             DropdownMenuItem(

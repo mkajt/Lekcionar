@@ -162,21 +162,21 @@ private fun AppInfoSection(viewModel: LekcionarViewModel) {
                             }
                         }
                 )
-                Text(text = "Podpri naše delo:",
+                Text(text = "Več o našem delu na:",
                     style = AppTheme.typography.labelLarge,
                     color = AppTheme.colorScheme.headerContent,
                     textAlign = TextAlign.Center,
                     modifier = Modifier
                         .padding(bottom = 10.dp)
                 )
-                Text(text = "povezava za donacijo",
+                Text(text = "hozana.si",
                     style = AppTheme.typography.labelLarge.merge(textDecoration = TextDecoration.Underline),
                     color = AppTheme.colorScheme.headerContent,
                     textAlign = TextAlign.Center,
                     modifier = Modifier
                         .padding(bottom = 40.dp)
                         .clickable {
-                            val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://hozana.si/donacije.php?ref=lekcionar")).apply {
+                            val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://hozana.si")).apply {
                                 addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                             }
                             if (intent.resolveActivity(context.packageManager) != null) {
@@ -208,7 +208,7 @@ private fun AppInfoSection(viewModel: LekcionarViewModel) {
                     color = AppTheme.colorScheme.headerContent,
                     textAlign = TextAlign.Center,
                     modifier = Modifier
-                        .padding(top = 20.dp, bottom = 10.dp)
+                        .padding(top = 40.dp, bottom = 10.dp)
                 )
                 Text(text = "Maja Kajtna",
                     style = AppTheme.typography.labelLarge,

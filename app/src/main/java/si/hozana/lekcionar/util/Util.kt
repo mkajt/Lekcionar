@@ -29,7 +29,7 @@ fun timestampToDate(timestamp: Long): String {
     }
 
     return try {
-        val dateFormat = SimpleDateFormat("dd. MM. yyyy HH:mm")
+        val dateFormat = SimpleDateFormat("d. M. yyyy H:mm")
         val dateTime = Date(timestamp * 1000)
         dateFormat.format(dateTime)
     } catch (e: Exception) {
