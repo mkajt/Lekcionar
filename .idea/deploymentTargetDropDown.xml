@@ -7,18 +7,18 @@
       </entry>
       <entry key="app">
         <State>
-          <runningDeviceTargetSelectedWithDropDown>
+          <targetSelectedWithDropDown>
             <Target>
-              <type value="RUNNING_DEVICE_TARGET" />
+              <type value="QUICK_BOOT_TARGET" />
               <deviceKey>
                 <Key>
-                  <type value="SERIAL_NUMBER" />
-                  <value value="PLEGAR17B1501921" />
+                  <type value="VIRTUAL_DEVICE_PATH" />
+                  <value value="C:\Users\Uporabnik\AppData\Local\Android\Sdk\.android\avd\Pixel_Tablet_API_25.avd" />
                 </Key>
               </deviceKey>
             </Target>
-          </runningDeviceTargetSelectedWithDropDown>
-          <timeTargetWasSelectedWithDropDown value="2024-08-31T17:25:26.444856700Z" />
+          </targetSelectedWithDropDown>
+          <timeTargetWasSelectedWithDropDown value="2024-09-11T15:07:05.723294400Z" />
         </State>
       </entry>
       <entry key="useAppContext()">
