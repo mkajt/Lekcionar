@@ -19,7 +19,9 @@ private val lightColorScheme = AppColorScheme(
     background = White,
     activeSliderTrack = GreyActiveTrack,
     inactiveSliderTrack = GreyInactiveTrack,
-    headerContent = White
+    headerContent = White,
+    headerBerila = LekcionarRed,
+    headerOdpev = LekcionarRed
 )
 
 private val darkColorScheme = AppColorScheme(
@@ -28,7 +30,9 @@ private val darkColorScheme = AppColorScheme(
     background = Grey,
     activeSliderTrack = GreyInactiveTrack,
     inactiveSliderTrack = GreyActiveTrack,
-    headerContent = White
+    headerContent = White,
+    headerBerila = White,
+    headerOdpev = GreyInactiveTrack
 )
 
 private val shape = AppShape(

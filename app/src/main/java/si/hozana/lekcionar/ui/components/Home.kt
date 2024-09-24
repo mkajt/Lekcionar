@@ -358,7 +358,7 @@ private fun DisplayDataMultiple(podatki: PodatkiEntity, viewModel: LekcionarView
             contentColor = AppTheme.colorScheme.secondary,
         ),
         shape = AppTheme.shape.button,
-        border = if (isButtonClicked) BorderStroke(2.dp, AppTheme.colorScheme.inactiveSliderTrack) else BorderStroke(1.5.dp, AppTheme.colorScheme.primary)
+        border = if (isButtonClicked) BorderStroke(2.dp, AppTheme.colorScheme.inactiveSliderTrack) else BorderStroke(1.7.dp, AppTheme.colorScheme.primary)
     ) {
         Text(text = podatki.opis_dolgi, style = AppTheme.typography.labelLarge, textAlign = TextAlign.Center)
     }
@@ -522,7 +522,7 @@ private fun Berilo(podatki: PodatkiEntity, type: String) {
             Text(
                 text = "$type: ",
                 style = AppTheme.typography.labelLarge,
-                color = AppTheme.colorScheme.primary,
+                color = AppTheme.colorScheme.headerBerila,
                 textAlign = TextAlign.Start
             )
             if (type == "1. berilo" || type == "Berilo") {
@@ -637,7 +637,7 @@ private fun Psalm(podatki: PodatkiEntity) {
             Text(
                 text =  "Psalm: ",
                 style = AppTheme.typography.labelLarge,
-                color = AppTheme.colorScheme.primary,
+                color = AppTheme.colorScheme.headerBerila,
                 textAlign = TextAlign.Start
             )
 
@@ -679,7 +679,7 @@ private fun Psalm(podatki: PodatkiEntity) {
                     Text(
                         text = "Odpev: ",
                         style = AppTheme.typography.body,
-                        color = AppTheme.colorScheme.primary
+                        color = AppTheme.colorScheme.headerOdpev
                     )
                     Text(
                         text = podatki.odpev,
@@ -761,7 +761,7 @@ private fun Evangelij(podatki: PodatkiEntity) {
             Text(
                 text =  "Evangelij: ",
                 style = AppTheme.typography.labelLarge,
-                color = AppTheme.colorScheme.primary,
+                color = AppTheme.colorScheme.headerBerila,
                 textAlign = TextAlign.Start
             )
             Text(
@@ -803,7 +803,7 @@ private fun Evangelij(podatki: PodatkiEntity) {
                         Text(
                             text = "Aleluja: ",
                             style = AppTheme.typography.body,
-                            color = AppTheme.colorScheme.primary
+                            color = AppTheme.colorScheme.headerOdpev
                         )
                         HtmlBodyItalic(text = addBreakAndItalicAfterSourceOfAleluja(podatki.aleluja))
                     }

@@ -13,7 +13,9 @@ data class AppColorScheme(
     val secondary: Color,
     val activeSliderTrack: Color,
     val inactiveSliderTrack: Color,
-    val headerContent: Color
+    val headerContent: Color,
+    val headerBerila: Color,
+    val headerOdpev: Color
 )
 
 data class AppTypography(
@@ -46,7 +48,9 @@ val LocalAppColorSheme = staticCompositionLocalOf {
         secondary = Color.Unspecified,
         activeSliderTrack = Color.Unspecified,
         inactiveSliderTrack = Color.Unspecified,
-        headerContent = Color.Unspecified
+        headerContent = Color.Unspecified,
+        headerBerila = Color.Unspecified,
+        headerOdpev = Color.Unspecified
     )
 }
 

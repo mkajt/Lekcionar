@@ -234,10 +234,10 @@ private fun CalendarSection(viewModel: LekcionarViewModel, navController: NavCon
                     modifier = Modifier.padding(bottom = 30.dp),
                     colors = ButtonDefaults.outlinedButtonColors(
                         containerColor = AppTheme.colorScheme.background,
-                        contentColor = AppTheme.colorScheme.primary,
+                        contentColor = AppTheme.colorScheme.secondary,
                     ),
                     shape = AppTheme.shape.button,
-                    border = BorderStroke(2.dp, AppTheme.colorScheme.activeSliderTrack)
+                    border = BorderStroke(1.7.dp, AppTheme.colorScheme.primary)
                 ) {
                     Text(text = "Izberi datum", style = AppTheme.typography.labelLarge)
                 }
