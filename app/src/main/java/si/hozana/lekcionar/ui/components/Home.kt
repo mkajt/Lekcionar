@@ -345,24 +345,6 @@ private fun DisplayDataMultiple(podatki: PodatkiEntity, viewModel: LekcionarView
         onCopyText.value = "${HtmlCompat.fromHtml(podatki.vrstica, HtmlCompat.FROM_HTML_MODE_LEGACY)}"
     }
 
-    /*OutlinedButton(
-        onClick = {
-            isButtonClicked = !isButtonClicked
-        },
-        modifier = Modifier
-            .padding(top = 10.dp)
-            .width(IntrinsicSize.Max)
-            .widthIn(max = maxButtonWidth),
-        colors = ButtonDefaults.outlinedButtonColors(
-                containerColor = if (isButtonClicked) AppTheme.colorScheme.background else AppTheme.colorScheme.primary,
-                contentColor = if (isButtonClicked) AppTheme.colorScheme.primary else AppTheme.colorScheme.background,
-            ),
-        shape = AppTheme.shape.button,
-        border = if (isButtonClicked) BorderStroke(2.dp, AppTheme.colorScheme.activeSliderTrack) else BorderStroke(1.5.dp, AppTheme.colorScheme.primary)
-    ) {
-        Text(text = podatki.opis_dolgi, style = AppTheme.typography.labelLarge, textAlign = TextAlign.Center)
-    }*/
-
     OutlinedButton(
         onClick = {
             isButtonClicked = !isButtonClicked
@@ -372,8 +354,8 @@ private fun DisplayDataMultiple(podatki: PodatkiEntity, viewModel: LekcionarView
             .width(IntrinsicSize.Max)
             .widthIn(max = maxButtonWidth),
         colors = ButtonDefaults.outlinedButtonColors(
-            containerColor = if (isButtonClicked) AppTheme.colorScheme.background else AppTheme.colorScheme.background,
-            contentColor = if (isButtonClicked) AppTheme.colorScheme.secondary else AppTheme.colorScheme.secondary,
+            containerColor =  AppTheme.colorScheme.background,
+            contentColor = AppTheme.colorScheme.secondary,
         ),
         shape = AppTheme.shape.button,
         border = if (isButtonClicked) BorderStroke(2.dp, AppTheme.colorScheme.inactiveSliderTrack) else BorderStroke(1.5.dp, AppTheme.colorScheme.primary)
