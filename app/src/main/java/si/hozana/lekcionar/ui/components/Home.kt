@@ -72,6 +72,9 @@ import si.hozana.lekcionar.ui.routes.Screen
 import si.hozana.lekcionar.ui.theme.AppTheme
 import si.hozana.lekcionar.viewModel.LekcionarViewModel
 import si.hozana.lekcionar.viewModel.LekcionarViewState
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+import java.util.Locale
 import java.util.regex.Matcher
 import java.util.regex.Pattern
 
@@ -194,6 +197,7 @@ fun Home(viewModel: LekcionarViewModel, navController: NavController, actListene
 private fun ContentSectionHome(innerPadding: PaddingValues, viewModel: LekcionarViewModel, snackbarHostState: SnackbarHostState) {
     val dataState by viewModel.dataState.collectAsState()
     val podatki by viewModel.podatki.collectAsState()
+    val selectedDate by viewModel.selectedDate.collectAsState()
 
     val errorMessage = when (dataState) {
         is LekcionarViewState.Error -> (dataState as LekcionarViewState.Error).errorMessage
@@ -213,7 +217,7 @@ private fun ContentSectionHome(innerPadding: PaddingValues, viewModel: Lekcionar
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(
-                        text = podatki!!.first().datum,
+                        text = convertDateToLocalDate(selectedDate),
                         modifier = Modifier.padding(top = 20.dp),
                         style = AppTheme.typography.titleNormal,
                         color = AppTheme.colorScheme.secondary
@@ -269,9 +273,9 @@ private fun DisplayDataSingle(podatki: PodatkiEntity, viewModel: LekcionarViewMo
         ),
         enabled = false,
         shape = AppTheme.shape.button,
-        border = BorderStroke(2.dp, AppTheme.colorScheme.activeSliderTrack)
+        border = BorderStroke(2.dp, AppTheme.colorScheme.inactiveSliderTrack)
     ) {
-        Text(text = podatki.opis_dolgi, style = AppTheme.typography.labelLarge, color = AppTheme.colorScheme.primary, textAlign = TextAlign.Center)
+        Text(text = podatki.opis_dolgi, style = AppTheme.typography.labelLarge, color = AppTheme.colorScheme.secondary, textAlign = TextAlign.Center)
     }
 
     if (podatki.vrstica.isNotEmpty()) {
@@ -341,7 +345,7 @@ private fun DisplayDataMultiple(podatki: PodatkiEntity, viewModel: LekcionarView
         onCopyText.value = "${HtmlCompat.fromHtml(podatki.vrstica, HtmlCompat.FROM_HTML_MODE_LEGACY)}"
     }
 
-    OutlinedButton(
+    /*OutlinedButton(
         onClick = {
             isButtonClicked = !isButtonClicked
         },
@@ -355,6 +359,24 @@ private fun DisplayDataMultiple(podatki: PodatkiEntity, viewModel: LekcionarView
             ),
         shape = AppTheme.shape.button,
         border = if (isButtonClicked) BorderStroke(2.dp, AppTheme.colorScheme.activeSliderTrack) else BorderStroke(1.5.dp, AppTheme.colorScheme.primary)
+    ) {
+        Text(text = podatki.opis_dolgi, style = AppTheme.typography.labelLarge, textAlign = TextAlign.Center)
+    }*/
+
+    OutlinedButton(
+        onClick = {
+            isButtonClicked = !isButtonClicked
+        },
+        modifier = Modifier
+            .padding(top = 10.dp)
+            .width(IntrinsicSize.Max)
+            .widthIn(max = maxButtonWidth),
+        colors = ButtonDefaults.outlinedButtonColors(
+            containerColor = if (isButtonClicked) AppTheme.colorScheme.background else AppTheme.colorScheme.background,
+            contentColor = if (isButtonClicked) AppTheme.colorScheme.secondary else AppTheme.colorScheme.secondary,
+        ),
+        shape = AppTheme.shape.button,
+        border = if (isButtonClicked) BorderStroke(2.dp, AppTheme.colorScheme.inactiveSliderTrack) else BorderStroke(1.5.dp, AppTheme.colorScheme.primary)
     ) {
         Text(text = podatki.opis_dolgi, style = AppTheme.typography.labelLarge, textAlign = TextAlign.Center)
     }
@@ -863,6 +885,14 @@ private fun HtmlBodyItalic(text: String) {
             typeface = typefaceBody
         }
     })
+}
+
+private fun convertDateToLocalDate(date: String): String {
+    val dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+    val parsedDate = LocalDate.parse(date, dateFormatter)
+    val outputFormatter = DateTimeFormatter.ofPattern("EEEE, d. MMMM yyyy", Locale("sl"))
+    val localDate = parsedDate.format(outputFormatter)
+    return localDate.replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale("sl")) else it.toString() }
 }
 
 private fun addItalicStyleToPsalm(text: String): String {
