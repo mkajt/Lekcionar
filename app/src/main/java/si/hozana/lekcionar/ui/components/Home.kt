@@ -566,10 +566,16 @@ private fun Berilo(podatki: PodatkiEntity, type: String) {
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.Start
             ) {
-                if (type == "1. berilo" || type == "Berilo") {
-                    HtmlBody(text = podatki.berilo1_vsebina)
-                } else {
-                    HtmlBody(text = podatki.berilo2_vsebina)
+                Column {
+                    if (type == "1. berilo" || type == "Berilo") {
+                        Text(text = trimNapoved(podatki.berilo1_napoved), style = AppTheme.typography.body, color = AppTheme.colorScheme.secondary)
+                        Spacer(modifier = Modifier.height(10.dp))
+                        HtmlBody(text = podatki.berilo1_vsebina)
+                    } else {
+                        Text(text = trimNapoved(podatki.berilo2_napoved), style = AppTheme.typography.body, color = AppTheme.colorScheme.secondary)
+                        Spacer(modifier = Modifier.height(10.dp))
+                        HtmlBody(text = podatki.berilo2_vsebina)
+                    }
                 }
             }
         }
@@ -812,10 +818,20 @@ private fun Evangelij(podatki: PodatkiEntity) {
                             .padding(top = 20.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        HtmlBody(text = podatki.evangelij_vsebina)
+                        Column {
+                            if (podatki.evangelij_napoved != "") {
+                                Text(text = trimNapoved(podatki.evangelij_napoved), style = AppTheme.typography.body, color = AppTheme.colorScheme.secondary)
+                                Spacer(modifier = Modifier.height(10.dp))
+                            }
+                            HtmlBody(text = podatki.evangelij_vsebina)
+                        }
                     }
                 } else {
-                    HtmlBody(text = podatki.evangelij_vsebina)
+                    Column {
+                        Text(text = trimNapoved(podatki.evangelij_napoved), style = AppTheme.typography.body, color = AppTheme.colorScheme.secondary)
+                        Spacer(modifier = Modifier.height(10.dp))
+                        HtmlBody(text = podatki.evangelij_vsebina)
+                    }
                 }
 
             }
@@ -875,6 +891,15 @@ private fun convertDateToLocalDate(date: String): String {
     val outputFormatter = DateTimeFormatter.ofPattern("EEEE, d. MMMM yyyy", Locale("sl"))
     val localDate = parsedDate.format(outputFormatter)
     return localDate.replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale("sl")) else it.toString() }
+}
+
+private fun trimNapoved(inputText: String): String {
+    val index = inputText.indexOf('(')
+    return if (index != -1) {
+        inputText.substring(0, index).trim()
+    } else {
+        inputText.trim()
+    }
 }
 
 private fun addItalicStyleToPsalm(text: String): String {

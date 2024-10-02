@@ -14,6 +14,7 @@ data class PodatkiEntity(
     val datum: String,
     val mp3: String,
 
+    val berilo1_napoved: String,
     val berilo1: String,
     val berilo1_naslov: String,
     val berilo1_vsebina: String,
@@ -22,10 +23,12 @@ data class PodatkiEntity(
     val psalm: String,
     val psalm_vsebina: String,
 
+    val berilo2_napoved: String,
     val berilo2: String,
     val berilo2_naslov: String,
     val berilo2_vsebina: String,
 
+    val evangelij_napoved: String,
     val aleluja: String,
     val evangelij: String,
     val evangelij_naslov: String,
