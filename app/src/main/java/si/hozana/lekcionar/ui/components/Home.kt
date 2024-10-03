@@ -927,11 +927,13 @@ private fun addItalicStyleToPsalm(text: String): String {
 private fun addBreakAndItalicAfterSourceOfAleluja(text: String): String {
     val substring = ')'.toString()
     val index = text.indexOf(substring)
+    val modifiedText = StringBuilder(text)
     if (index != -1) {
-        val modifiedText = StringBuilder(text)
         modifiedText.insert(index + 1, "<br><i>")
         modifiedText.append("</i>")
-        return modifiedText.toString()
+    } else {
+        modifiedText.insert(0, "<i>")
+        modifiedText.append("</i>")
     }
-    return text
+    return modifiedText.toString()
 }

@@ -2,6 +2,7 @@ plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     id("com.google.devtools.ksp")
+    id("com.huawei.agconnect")
     kotlin("plugin.serialization")
 }
 
@@ -106,5 +107,9 @@ dependencies {
     // Calendar: https://github.com/kizitonwose/Calendar?tab=readme-ov-file
     coreLibraryDesugaring ("com.android.tools:desugar_jdk_libs:2.0.4")
     implementation("com.kizitonwose.calendar:compose:2.5.0")
+
+    //App Gallery
+    implementation("com.huawei.agconnect:agconnect-core:1.9.1.301")
+
 
 }
