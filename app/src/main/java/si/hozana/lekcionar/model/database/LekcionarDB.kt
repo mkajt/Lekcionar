@@ -6,7 +6,7 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 
 @Database(entities = [PodatkiEntity::class, MapEntity::class, RedEntity::class, SkofijaEntity::class],
-    version = 1, exportSchema = false)
+    version = 2, exportSchema = false)
 abstract class LekcionarDB : RoomDatabase() {
 
     abstract fun lekcionarDao(): LekcionarDAO
