@@ -14,8 +14,8 @@ android {
         applicationId = "si.hozana.lekcionar"
         minSdk = 25
         targetSdk = 34
-        versionCode = 7
-        versionName = "3.0.4"
+        versionCode = 8
+        versionName = "3.0.5"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
