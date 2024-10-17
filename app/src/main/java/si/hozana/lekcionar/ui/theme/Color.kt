@@ -2,7 +2,7 @@ package si.hozana.lekcionar.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-val Black = Color(0xFF000000)
+val Black = Color(0xFF202222)
 val White = Color(0xFFFAF9F9)
 val LekcionarRed = Color(0xFFB71C1C)
 val Grey = Color(0xFF312E2E)
